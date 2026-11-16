@@ -164,11 +164,14 @@ export function LocationSection({ datos = DATOS_LIBRERIA_MOTIVOS }: LocationSect
               className="w-full h-full min-h-[260px] sm:min-h-[320px] lg:min-h-[360px] object-cover"
             />
 
-            {/* Badge sutil flotante sobre el mapa */}
-            <div className="absolute top-3 left-3 pointer-events-none">
+            {/* Badge sutil flotante sobre el mapa confirmando la ubicación exacta */}
+            <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2 pointer-events-none">
               <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold bg-white/95 backdrop-blur-md text-slate-800 shadow-sm border border-slate-200/80">
                 <span className="w-2 h-2 rounded-full bg-blue-900" />
-                {datos.nombre} • Guaymallén
+                {datos.nombre} • Juan Carlos Lucero M-D-C44
+              </span>
+              <span className="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-semibold bg-blue-50/90 text-blue-900 border border-blue-200/80 backdrop-blur-md">
+                Barrio Parque Urquiza
               </span>
             </div>
           </div>

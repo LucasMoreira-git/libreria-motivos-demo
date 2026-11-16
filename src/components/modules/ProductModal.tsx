@@ -105,7 +105,7 @@ export function ProductModal({ producto, onCerrar }: ProductModalProps) {
               </span>
             )}
             {producto.badge === 'OFERTA' && (
-              <span className="bg-rose-600 text-white text-xs font-black uppercase px-2.5 py-1 rounded-full shadow-xs">
+              <span className="bg-[#d97786] text-white text-xs font-black uppercase px-2.5 py-1 rounded-full shadow-xs">
                 OFERTA
               </span>
             )}
@@ -162,8 +162,8 @@ export function ProductModal({ producto, onCerrar }: ProductModalProps) {
             </div>
 
             {/* Aclaración de Precio contado / transferencia */}
-            <div className="p-2.5 rounded-xl bg-pink-50/70 border border-pink-100 text-[11px] sm:text-xs text-pink-950 flex items-start gap-2">
-              <span className="font-bold text-rose-700 shrink-0">ℹ️ Aclaración:</span>
+            <div className="p-2.5 rounded-xl bg-[#fbf0f2] border border-[#eed0d5] text-[11px] sm:text-xs text-[#6e2e38] flex items-start gap-2">
+              <span className="font-bold text-[#b34f60] shrink-0">ℹ️ Aclaración:</span>
               <span className="leading-relaxed">
                 <strong>«Precio contado/transf.»</strong>: valor especial abonando en efectivo, tarjeta de débito o transferencia bancaria directa en nuestro local de Guaymallén.
               </span>
@@ -177,7 +177,7 @@ export function ProductModal({ producto, onCerrar }: ProductModalProps) {
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`Consultar disponibilidad de ${producto.nombre}`}
-              className="w-full inline-flex items-center justify-center py-3.5 px-4 rounded-2xl bg-[#fcecef] hover:bg-[#f9dbe1] text-[#6e2e38] font-extrabold text-sm sm:text-base border border-pink-200/90 shadow-sm hover:shadow-md active:scale-95 transition-all duration-200 min-h-[48px] cursor-pointer select-none"
+              className="w-full inline-flex items-center justify-center py-3.5 px-4 rounded-2xl bg-[#fbf0f2] hover:bg-[#f5dde2] text-[#6e2e38] font-extrabold text-sm sm:text-base border border-[#eed0d5] shadow-sm hover:shadow-md active:scale-95 transition-all duration-200 min-h-[48px] cursor-pointer select-none"
             >
               <span>Consultar producto</span>
             </a>

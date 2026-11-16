@@ -26,7 +26,7 @@ export function ProductCard({ producto, onVerDetalle }: ProductCardProps) {
   const precioFormateado = producto.precio.toLocaleString('es-AR');
 
   return (
-    <Card className="group flex flex-col justify-between overflow-hidden rounded-2xl bg-white border border-slate-200/90 hover:border-rose-300 shadow-2xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ease-out h-full">
+    <Card className="group flex flex-col justify-between overflow-hidden rounded-2xl bg-white border border-slate-200/90 hover:border-[#eed0d5] shadow-2xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ease-out h-full">
       {/* Zona Superior Clickeable para abrir el Modal de Detalle */}
       <div 
         onClick={() => onVerDetalle && onVerDetalle(producto)}
@@ -59,7 +59,7 @@ export function ProductCard({ producto, onVerDetalle }: ProductCardProps) {
 
           {/* Badges absolutos superpuestos (OFERTA / NOVEDAD) en la esquina superior derecha */}
           {producto.badge === 'OFERTA' && (
-            <span className="absolute top-2.5 right-2.5 z-10 bg-rose-600 text-white text-[10px] sm:text-xs font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-md animate-in fade-in">
+            <span className="absolute top-2.5 right-2.5 z-10 bg-[#d97786] text-white text-[10px] sm:text-xs font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-md animate-in fade-in">
               OFERTA
             </span>
           )}
@@ -80,7 +80,7 @@ export function ProductCard({ producto, onVerDetalle }: ProductCardProps) {
 
         {/* Textos del Producto: Nombre y Detalle */}
         <div className="p-3 sm:p-4 space-y-1.5 flex-1">
-          <h3 className="font-heading font-bold text-slate-900 text-xs sm:text-sm leading-snug line-clamp-2 group-hover:text-rose-600 transition-colors">
+          <h3 className="font-heading font-bold text-slate-900 text-xs sm:text-sm leading-snug line-clamp-2 group-hover:text-[#b34f60] transition-colors">
             {producto.nombre}
           </h3>
 
@@ -92,38 +92,42 @@ export function ProductCard({ producto, onVerDetalle }: ProductCardProps) {
 
       {/* Contenedor Inferior: Precio + Aclaración y Botón de Consulta */}
       <div className="p-3 sm:p-4 pt-0 sm:pt-0 mt-auto">
-        <div className="pt-2.5 border-t border-slate-100 flex flex-col gap-2.5">
+        <div className="pt-3 border-t border-slate-100 flex flex-col gap-2">
           
-          {/* Bloque de Precio con Aclaración Contextual */}
-          <div className="flex flex-col">
-            <div className="flex items-baseline justify-between gap-1.5">
-              <span className="font-heading text-base sm:text-lg lg:text-xl font-black text-slate-900 tracking-tight">
-                $ {precioFormateado}
-              </span>
-              {producto.precioAnterior && (
-                <span className="text-[11px] sm:text-xs text-slate-400 line-through">
-                  ${producto.precioAnterior.toLocaleString('es-AR')}
+          {/* Fila de Precio y Botón CTA (Inspirado en la referencia visual) */}
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex flex-col min-w-0">
+              <div className="flex items-baseline gap-1.5">
+                <span className="font-heading text-base sm:text-lg lg:text-xl font-black text-slate-900 tracking-tight">
+                  $ {precioFormateado}
                 </span>
-              )}
+                {producto.precioAnterior && (
+                  <span className="text-[10px] sm:text-xs text-slate-400 line-through">
+                    ${producto.precioAnterior.toLocaleString('es-AR')}
+                  </span>
+                )}
+              </div>
+              <span className="text-[10px] sm:text-[11px] font-bold text-[#8b4f58] tracking-tight">
+                Precio contado/transf.
+              </span>
             </div>
 
-            {/* Aclaración de qué significa Precio contado/transf. */}
-            <div className="mt-1 flex items-start gap-1 text-[10px] sm:text-[11px] text-slate-500 leading-tight">
-              <span className="font-semibold text-slate-700 shrink-0">Precio contado/transf.:</span>
-              <span>Abonando en efectivo, débito o transferencia bancaria en el local.</span>
-            </div>
+            {/* Botón CTA sin icono de WhatsApp, texto estricto 'Consultar producto' y fondo rosado suave natural */}
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Consultar disponibilidad de ${producto.nombre}`}
+              className="inline-flex items-center justify-center py-2 px-3 sm:px-3.5 rounded-xl border border-[#eed0d5] bg-[#fbf0f2] hover:bg-[#f5dde2] text-[#6e2e38] font-bold text-[11px] sm:text-xs shadow-2xs hover:shadow-xs hover:scale-[1.02] active:scale-95 transition-all duration-200 ease-out min-h-[40px] touch-manipulation relative z-10 cursor-pointer select-none shrink-0"
+            >
+              <span>Consultar producto</span>
+            </a>
           </div>
 
-          {/* Botón CTA sin icono de WhatsApp, texto estricto 'Consultar producto' y fondo rosado suave natural */}
-          <a
-            href={whatsappUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={`Consultar disponibilidad de ${producto.nombre}`}
-            className="w-full inline-flex items-center justify-center py-2.5 px-3 rounded-xl border border-pink-200/90 bg-[#fcecef] hover:bg-[#f9dbe1] text-[#6e2e38] font-bold text-xs sm:text-sm shadow-2xs hover:shadow-xs hover:scale-[1.01] active:scale-95 transition-all duration-200 ease-out min-h-[44px] touch-manipulation relative z-10 cursor-pointer select-none"
-          >
-            <span>Consultar producto</span>
-          </a>
+          {/* Aclaración de qué significa Precio contado/transf. */}
+          <div className="p-1.5 px-2 rounded-lg bg-slate-50 border border-slate-100/80 text-[10px] text-slate-500 leading-tight">
+            <span>Abonando en efectivo, débito o transferencia bancaria en el local.</span>
+          </div>
 
         </div>
       </div>

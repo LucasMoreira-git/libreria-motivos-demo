@@ -16,7 +16,7 @@ export default function Home() {
   const whatsappUrl = getGeneralWhatsAppLink(DATOS_LIBRERIA_MOTIVOS.telefonoWhatsApp);
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans antialiased text-slate-800 selection:bg-rose-100 selection:text-rose-900">
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans antialiased text-slate-800 selection:bg-purple-100 selection:text-purple-900">
       
       {/* 1. Header Principal (Mobile First + Estado en Vivo en Background + WhatsApp CTA) */}
       <Header />
@@ -33,11 +33,11 @@ export default function Home() {
         {/* 4. Banner de Propuesta de Valor y Atención de Barrio */}
         <section 
           aria-label="Valores del negocio"
-          className="my-8 sm:my-10 p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-slate-900 via-rose-950 to-slate-900 text-white shadow-md border border-rose-900/40 flex flex-col md:flex-row items-center justify-between gap-6"
+          className="my-8 sm:my-10 p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-slate-900 via-purple-950/70 to-slate-900 text-white shadow-md border border-purple-900/40 flex flex-col md:flex-row items-center justify-between gap-6"
         >
           <div className="space-y-2 text-center md:text-left">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-white/10 text-pink-200 border border-white/15">
-              <HeartHandshake className="w-3.5 h-3.5 text-pink-300" />
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-white/10 text-purple-200 border border-white/15">
+              <HeartHandshake className="w-3.5 h-3.5 text-purple-300" />
               Comercio Tradicional de Guaymallén
             </span>
             <h3 className="font-heading text-xl sm:text-2xl font-black text-white tracking-tight">
@@ -71,7 +71,7 @@ export default function Home() {
           className="my-8 grid grid-cols-1 sm:grid-cols-3 gap-4"
         >
           <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
+            <div className="w-11 h-11 rounded-2xl bg-purple-50 text-purple-900 border border-purple-200/60 flex items-center justify-center shrink-0">
               <ShieldCheck className="w-6 h-6" />
             </div>
             <div>

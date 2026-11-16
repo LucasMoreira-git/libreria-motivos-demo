@@ -107,32 +107,32 @@ export function Header() {
             </a>
           </div>
 
-          {/* 2. CENTRO: Enlaces de Navegación Rápida (Desktop / Tablet) */}
+          {/* 2. CENTRO: Enlaces de Navegación Rápida en Contenedor Morado Claro (Desktop / Tablet) */}
           <nav 
             aria-label="Navegación rápida de secciones"
-            className="hidden md:flex items-center gap-5 lg:gap-7"
+            className="hidden md:flex items-center gap-1 lg:gap-2 px-3 py-1.5 rounded-full bg-[#e2d5f3]/80 border border-purple-300/80 shadow-2xs backdrop-blur-xs"
           >
             <a 
               href="#catalogo" 
-              className="text-xs lg:text-sm font-semibold text-purple-900/90 hover:text-purple-950 transition-colors py-1 relative after:absolute after:bottom-0 after:left-0 after:w-0 hover:after:w-full after:h-0.5 after:bg-purple-700 after:transition-all after:duration-200"
+              className="px-3 py-1 rounded-full text-xs lg:text-sm font-bold text-purple-950 hover:bg-white/80 hover:text-purple-900 transition-all duration-200"
             >
               Catálogo
             </a>
             <a 
               href="#promociones" 
-              className="text-xs lg:text-sm font-semibold text-purple-900/90 hover:text-purple-950 transition-colors py-1 relative after:absolute after:bottom-0 after:left-0 after:w-0 hover:after:w-full after:h-0.5 after:bg-purple-700 after:transition-all after:duration-200"
+              className="px-3 py-1 rounded-full text-xs lg:text-sm font-bold text-purple-950 hover:bg-white/80 hover:text-purple-900 transition-all duration-200"
             >
               Promociones
             </a>
             <a 
               href="#horarios" 
-              className="text-xs lg:text-sm font-semibold text-purple-900/90 hover:text-purple-950 transition-colors py-1 relative after:absolute after:bottom-0 after:left-0 after:w-0 hover:after:w-full after:h-0.5 after:bg-purple-700 after:transition-all after:duration-200"
+              className="px-3 py-1 rounded-full text-xs lg:text-sm font-bold text-purple-950 hover:bg-white/80 hover:text-purple-900 transition-all duration-200"
             >
               Horarios
             </a>
             <a 
               href="#ubicacion" 
-              className="text-xs lg:text-sm font-semibold text-purple-900/90 hover:text-purple-950 transition-colors py-1 relative after:absolute after:bottom-0 after:left-0 after:w-0 hover:after:w-full after:h-0.5 after:bg-purple-700 after:transition-all after:duration-200"
+              className="px-3 py-1 rounded-full text-xs lg:text-sm font-bold text-purple-950 hover:bg-white/80 hover:text-purple-900 transition-all duration-200"
             >
               Ubicación
             </a>
@@ -185,7 +185,7 @@ export function Header() {
               <button
                 type="button"
                 onClick={() => setMostrarTooltipHorarios(!mostrarTooltipHorarios)}
-                className="group focus:outline-hidden rounded-full focus-visible:ring-2 focus-visible:ring-rose-500 active:scale-95 transition-all duration-200 touch-manipulation cursor-pointer select-none"
+                className="group focus:outline-hidden rounded-full focus-visible:ring-2 focus-visible:ring-purple-500 active:scale-95 transition-all duration-200 touch-manipulation cursor-pointer select-none"
                 aria-expanded={mostrarTooltipHorarios}
                 aria-haspopup="dialog"
                 aria-label={`Estado actual: ${estado.estadoTexto}. ${estado.mensajeDetalle}. Tocar para ver la grilla completa de horarios.`}
@@ -368,9 +368,9 @@ export function Header() {
                       <a
                         href="#promociones"
                         onClick={() => setMenuMovilAbierto(false)}
-                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-purple-950 hover:bg-rose-100/70 hover:text-rose-900 transition-colors touch-manipulation"
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-purple-950 hover:bg-purple-100/70 hover:text-purple-900 transition-colors touch-manipulation"
                       >
-                        <Tag className="w-4 h-4 text-rose-500" />
+                        <Tag className="w-4 h-4 text-purple-700" />
                         <span>Promociones Especiales</span>
                       </a>
 
