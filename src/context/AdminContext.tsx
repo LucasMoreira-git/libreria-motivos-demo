@@ -277,18 +277,56 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
   // ABM Categorías
   const crearCategoria = (data: Omit<CategoriaAdmin, 'idCategoria' | 'fechaHoraBajaCategoria'>) => {
+    const slug = data.slugCategoria || data.nombreCategoria.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
     const nueva: CategoriaAdmin = {
       ...data,
+      slugCategoria: slug,
       idCategoria: `cat-${Date.now()}`,
       fechaHoraBajaCategoria: null,
     };
     setCategorias((prev) => [...prev, nueva]);
+
+    if (backendEnLinea) {
+      fetch('http://localhost:8080/api/categorias', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          codTC: `CAT-${Date.now().toString().slice(-4)}`,
+          nombreTC: data.nombreCategoria,
+          slugCategoria: slug,
+          iconoCategoria: data.iconoCategoria || 'FolderTree',
+          descripcionTC: data.descripcionCategoria || '',
+          ordenCategoria: data.ordenCategoria || 1,
+        }),
+      })
+        .then(() => sincronizarConBackend())
+        .catch(() => {});
+    }
   };
 
   const editarCategoria = (categoria: CategoriaAdmin) => {
     setCategorias((prev) =>
       prev.map((c) => (c.idCategoria === categoria.idCategoria ? categoria : c))
     );
+
+    if (backendEnLinea) {
+      const numId = Number(categoria.idCategoria.replace(/\D/g, ''));
+      if (!isNaN(numId) && numId > 0) {
+        fetch(`http://localhost:8080/api/categorias/${numId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nombreTC: categoria.nombreCategoria,
+            slugCategoria: categoria.slugCategoria,
+            iconoCategoria: categoria.iconoCategoria,
+            descripcionTC: categoria.descripcionCategoria,
+            ordenCategoria: categoria.ordenCategoria,
+          }),
+        })
+          .then(() => sincronizarConBackend())
+          .catch(() => {});
+      }
+    }
   };
 
   const bajaLogicaCategoria = (idCategoria: string) => {
@@ -300,6 +338,17 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           : c
       )
     );
+
+    if (backendEnLinea) {
+      const numId = Number(idCategoria.replace(/\D/g, ''));
+      if (!isNaN(numId) && numId > 0) {
+        fetch(`http://localhost:8080/api/categorias/${numId}`, {
+          method: 'DELETE',
+        })
+          .then(() => sincronizarConBackend())
+          .catch(() => {});
+      }
+    }
   };
 
   const reactivarCategoria = (idCategoria: string) => {
@@ -310,6 +359,17 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           : c
       )
     );
+
+    if (backendEnLinea) {
+      const numId = Number(idCategoria.replace(/\D/g, ''));
+      if (!isNaN(numId) && numId > 0) {
+        fetch(`http://localhost:8080/api/categorias/${numId}/reactivar`, {
+          method: 'PATCH',
+        })
+          .then(() => sincronizarConBackend())
+          .catch(() => {});
+      }
+    }
   };
 
   // ABM Productos
@@ -328,7 +388,11 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     // Persistencia en backend si está activo
     if (backendEnLinea) {
       const tipoCatId = Number(data.categoriaId) || (cat ? Number(cat.idCategoria) : 1);
-      fetch('http://localhost:8080/api/productos', {
+      const urlPost = !isNaN(tipoCatId) && tipoCatId > 0 
+        ? `http://localhost:8080/api/productos?categoriaId=${tipoCatId}` 
+        : 'http://localhost:8080/api/productos';
+
+      fetch(urlPost, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -337,12 +401,13 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           precioProducto: data.precioProducto,
           detalleProducto: data.detalleProducto,
           fotoProducto: data.fotoProducto,
-          tipoCategoriaId: isNaN(tipoCatId) ? 1 : tipoCatId,
           destacadoProducto: data.destacadoProducto,
           enOfertaProducto: data.enOfertaProducto,
           badgeProducto: data.badgeProducto,
         }),
-      }).catch(() => {});
+      })
+        .then(() => sincronizarConBackend())
+        .catch(() => {});
     }
   };
 
@@ -364,7 +429,11 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       const numId = Number(producto.idProducto.replace(/\D/g, ''));
       if (!isNaN(numId) && numId > 0) {
         const tipoCatId = Number(producto.categoriaId) || (cat ? Number(cat.idCategoria) : 1);
-        fetch(`http://localhost:8080/api/productos/${numId}`, {
+        const urlPut = !isNaN(tipoCatId) && tipoCatId > 0 
+          ? `http://localhost:8080/api/productos/${numId}?categoriaId=${tipoCatId}` 
+          : `http://localhost:8080/api/productos/${numId}`;
+
+        fetch(urlPut, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -372,12 +441,13 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
             precioProducto: producto.precioProducto,
             detalleProducto: producto.detalleProducto,
             fotoProducto: producto.fotoProducto,
-            tipoCategoriaId: isNaN(tipoCatId) ? 1 : tipoCatId,
             destacadoProducto: producto.destacadoProducto,
             enOfertaProducto: producto.enOfertaProducto,
             badgeProducto: producto.badgeProducto,
           }),
-        }).catch(() => {});
+        })
+          .then(() => sincronizarConBackend())
+          .catch(() => {});
       }
     }
   };
@@ -397,7 +467,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       if (!isNaN(numId) && numId > 0) {
         fetch(`http://localhost:8080/api/productos/${numId}`, {
           method: 'DELETE',
-        }).catch(() => {});
+        })
+          .then(() => sincronizarConBackend())
+          .catch(() => {});
       }
     }
   };
@@ -416,7 +488,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       if (!isNaN(numId) && numId > 0) {
         fetch(`http://localhost:8080/api/productos/${numId}/reactivar`, {
           method: 'PATCH',
-        }).catch(() => {});
+        })
+          .then(() => sincronizarConBackend())
+          .catch(() => {});
       }
     }
   };
@@ -430,6 +504,24 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       fechaHoraBajaPromocion: null,
     };
     setPromociones((prev) => [nueva, ...prev]);
+
+    if (backendEnLinea) {
+      fetch('http://localhost:8080/api/promociones', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          codPromocion: `PROMO-${Date.now().toString().slice(-4)}`,
+          nombrePromocion: data.nombrePromocion,
+          detallePromocion: data.detallePromocion,
+          temporadaPromocion: data.temporadaPromocion || 'Especial Primavera 2026',
+          descuentoTexto: data.descuentoTextoPromocion,
+          condicionPromocion: data.condicionPromocion,
+          fotoCombo: data.fotoComboPromocion,
+        }),
+      })
+        .then(() => sincronizarConBackend())
+        .catch(() => {});
+    }
   };
 
   const editarPromocion = (promocion: PromocionAdmin) => {
@@ -443,6 +535,26 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           : pr
       )
     );
+
+    if (backendEnLinea) {
+      const numId = Number(promocion.idPromocion.replace(/\D/g, ''));
+      if (!isNaN(numId) && numId > 0) {
+        fetch(`http://localhost:8080/api/promociones/${numId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nombrePromocion: promocion.nombrePromocion,
+            detallePromocion: promocion.detallePromocion,
+            temporadaPromocion: promocion.temporadaPromocion,
+            descuentoTexto: promocion.descuentoTextoPromocion,
+            condicionPromocion: promocion.condicionPromocion,
+            fotoCombo: promocion.fotoComboPromocion,
+          }),
+        })
+          .then(() => sincronizarConBackend())
+          .catch(() => {});
+      }
+    }
   };
 
   const bajaLogicaPromocion = (idPromocion: string) => {
@@ -454,6 +566,17 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           : pr
       )
     );
+
+    if (backendEnLinea) {
+      const numId = Number(idPromocion.replace(/\D/g, ''));
+      if (!isNaN(numId) && numId > 0) {
+        fetch(`http://localhost:8080/api/promociones/${numId}`, {
+          method: 'DELETE',
+        })
+          .then(() => sincronizarConBackend())
+          .catch(() => {});
+      }
+    }
   };
 
   const reactivarPromocion = (idPromocion: string) => {
@@ -464,6 +587,17 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           : pr
       )
     );
+
+    if (backendEnLinea) {
+      const numId = Number(idPromocion.replace(/\D/g, ''));
+      if (!isNaN(numId) && numId > 0) {
+        fetch(`http://localhost:8080/api/promociones/${numId}/reactivar`, {
+          method: 'PATCH',
+        })
+          .then(() => sincronizarConBackend())
+          .catch(() => {});
+      }
+    }
   };
 
   // ABM Horarios
@@ -474,12 +608,51 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       fechaHoraBajaHA: null,
     };
     setHorarios((prev) => [...prev, nuevo]);
+
+    if (backendEnLinea) {
+      fetch('http://localhost:8080/api/horarios', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          codHA: `HA-${Date.now().toString().slice(-4)}`,
+          nombreTurnoHA: data.nombreTurnoHA,
+          diasTextoHA: data.diasTextoHA,
+          diasSemanaHA: data.diasTextoHA,
+          horaInicioHA: data.horaInicioHA || '09:00',
+          horaFinHA: data.horaFinHA || '13:00',
+          esCerradoHA: !!data.esCerradoHA,
+          detallesHA: data.diasTextoHA,
+        }),
+      })
+        .then(() => sincronizarConBackend())
+        .catch(() => {});
+    }
   };
 
   const editarHorario = (horario: HorarioAtencionAdmin) => {
     setHorarios((prev) =>
       prev.map((h) => (h.idHorarioAtencion === horario.idHorarioAtencion ? horario : h))
     );
+
+    if (backendEnLinea) {
+      const numId = Number(horario.idHorarioAtencion.replace(/\D/g, ''));
+      if (!isNaN(numId) && numId > 0) {
+        fetch(`http://localhost:8080/api/horarios/${numId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nombreTurnoHA: horario.nombreTurnoHA,
+            diasTextoHA: horario.diasTextoHA,
+            diasSemanaHA: horario.diasTextoHA,
+            horaInicioHA: horario.horaInicioHA,
+            horaFinHA: horario.horaFinHA,
+            esCerradoHA: !!horario.esCerradoHA,
+          }),
+        })
+          .then(() => sincronizarConBackend())
+          .catch(() => {});
+      }
+    }
   };
 
   const bajaLogicaHorario = (idHorarioAtencion: string) => {
@@ -491,6 +664,17 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           : h
       )
     );
+
+    if (backendEnLinea) {
+      const numId = Number(idHorarioAtencion.replace(/\D/g, ''));
+      if (!isNaN(numId) && numId > 0) {
+        fetch(`http://localhost:8080/api/horarios/${numId}`, {
+          method: 'DELETE',
+        })
+          .then(() => sincronizarConBackend())
+          .catch(() => {});
+      }
+    }
   };
 
   const reactivarHorario = (idHorarioAtencion: string) => {
@@ -501,6 +685,17 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           : h
       )
     );
+
+    if (backendEnLinea) {
+      const numId = Number(idHorarioAtencion.replace(/\D/g, ''));
+      if (!isNaN(numId) && numId > 0) {
+        fetch(`http://localhost:8080/api/horarios/${numId}/reactivar`, {
+          method: 'PATCH',
+        })
+          .then(() => sincronizarConBackend())
+          .catch(() => {});
+      }
+    }
   };
 
   const restablecerDatos = () => {

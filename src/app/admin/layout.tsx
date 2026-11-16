@@ -70,9 +70,5 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <AdminProvider>
-      <AdminLayoutContent>{children}</AdminLayoutContent>
-    </AdminProvider>
-  );
+  return <AdminLayoutContent>{children}</AdminLayoutContent>;
 }

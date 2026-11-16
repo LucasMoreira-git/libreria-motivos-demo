@@ -3,7 +3,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { gestorHorarios, DATOS_LIBRERIA_MOTIVOS, TURNOS_MOCK } from '@/lib/mock-data';
 import { EstadoAtencion } from '@/types/horario';
+import { HorarioAtencionAdmin } from '@/types/admin';
 import { Clock, MapPin, ExternalLink, Calendar, Phone, Sparkles } from 'lucide-react';
+
+interface ScheduleWidgetProps {
+  horarios?: HorarioAtencionAdmin[];
+}
 
 const ESTADO_FALLBACK: EstadoAtencion = {
   estaAbierto: true,
@@ -12,10 +17,13 @@ const ESTADO_FALLBACK: EstadoAtencion = {
   badgeVariant: 'success',
 };
 
-export function ScheduleWidget() {
+export function ScheduleWidget({ horarios }: ScheduleWidgetProps = {}) {
   const [estado, setEstado] = useState<EstadoAtencion>(ESTADO_FALLBACK);
   const [turnosVisibles, setTurnosVisibles] = useState<boolean>(false);
   const turnosRef = useRef<HTMLDivElement>(null);
+
+  // Turnos activos: filtramos bajas lógicas
+  const turnosActivos = horarios ? horarios.filter((h) => !h.fechaHoraBajaHA) : null;
 
   useEffect(() => {
     const actualizar = () => {
@@ -108,44 +116,71 @@ export function ScheduleWidget() {
             </h4>
 
             <div ref={turnosRef} className="space-y-2 text-xs sm:text-sm">
-              {/* Fila 1: Lunes a Viernes (Slide-up escalonado 1) */}
-              <div
-                className={`p-3 rounded-2xl bg-slate-50 border border-slate-100 flex justify-between items-start transition-all duration-400 ease-out delay-[100ms] ${
-                  turnosVisibles ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
-                }`}
-              >
-                <div>
-                  <span className="font-heading font-bold text-slate-900">Lunes a Viernes</span>
-                  <span className="block text-[11px] text-slate-500 mt-0.5">Turno mañana y turno tarde</span>
-                </div>
-                <div className="text-right font-medium text-slate-700">
-                  <p>09:30 a 13:30 hs</p>
-                  <p>17:00 a 20:30 hs</p>
-                </div>
-              </div>
+              {turnosActivos && turnosActivos.length > 0 ? (
+                turnosActivos.map((t, idx) => (
+                  <div
+                    key={t.idHorarioAtencion}
+                    className={`p-3 rounded-2xl ${
+                      t.esCerradoHA 
+                        ? 'bg-slate-50/50 border border-slate-100/60 text-slate-400' 
+                        : 'bg-slate-50 border border-slate-100'
+                    } flex justify-between items-center transition-all duration-400 ease-out`}
+                  >
+                    <div>
+                      <span className="font-heading font-bold text-slate-900">{t.diasTextoHA}</span>
+                      <span className="block text-[11px] text-slate-500 mt-0.5">{t.nombreTurnoHA}</span>
+                    </div>
+                    <div className="text-right font-medium text-slate-700">
+                      {t.esCerradoHA ? (
+                        <span className="text-xs italic text-slate-400">Cerrado</span>
+                      ) : (
+                        <span>{t.horaInicioHA?.slice(0, 5)} a {t.horaFinHA?.slice(0, 5)} hs</span>
+                      )}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <>
+                  {/* Fila 1: Lunes a Viernes (Slide-up escalonado 1) */}
+                  <div
+                    className={`p-3 rounded-2xl bg-slate-50 border border-slate-100 flex justify-between items-start transition-all duration-400 ease-out delay-[100ms] ${
+                      turnosVisibles ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
+                    }`}
+                  >
+                    <div>
+                      <span className="font-heading font-bold text-slate-900">Lunes a Viernes</span>
+                      <span className="block text-[11px] text-slate-500 mt-0.5">Turno mañana y turno tarde</span>
+                    </div>
+                    <div className="text-right font-medium text-slate-700">
+                      <p>09:30 a 13:30 hs</p>
+                      <p>17:00 a 20:30 hs</p>
+                    </div>
+                  </div>
 
-              {/* Fila 2: Sábados (Slide-up escalonado 2) */}
-              <div
-                className={`p-3 rounded-2xl bg-slate-50 border border-slate-100 flex justify-between items-center transition-all duration-400 ease-out delay-[220ms] ${
-                  turnosVisibles ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
-                }`}
-              >
-                <div>
-                  <span className="font-heading font-bold text-slate-900">Sábados</span>
-                  <span className="block text-[11px] text-slate-500 mt-0.5">Turno mañana</span>
-                </div>
-                <span className="font-medium text-slate-700">10:00 a 13:30 hs</span>
-              </div>
+                  {/* Fila 2: Sábados (Slide-up escalonado 2) */}
+                  <div
+                    className={`p-3 rounded-2xl bg-slate-50 border border-slate-100 flex justify-between items-center transition-all duration-400 ease-out delay-[220ms] ${
+                      turnosVisibles ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
+                    }`}
+                  >
+                    <div>
+                      <span className="font-heading font-bold text-slate-900">Sábados</span>
+                      <span className="block text-[11px] text-slate-500 mt-0.5">Turno mañana</span>
+                    </div>
+                    <span className="font-medium text-slate-700">10:00 a 13:30 hs</span>
+                  </div>
 
-              {/* Fila 3: Domingos y Feriados (Slide-up escalonado 3) */}
-              <div
-                className={`p-3 rounded-2xl bg-slate-50/50 border border-slate-100/60 flex justify-between items-center text-slate-400 transition-all duration-400 ease-out delay-[340ms] ${
-                  turnosVisibles ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
-                }`}
-              >
-                <span className="font-medium">Domingos y Feriados</span>
-                <span className="text-xs italic">Cerrado</span>
-              </div>
+                  {/* Fila 3: Domingos y Feriados (Slide-up escalonado 3) */}
+                  <div
+                    className={`p-3 rounded-2xl bg-slate-50/50 border border-slate-100/60 flex justify-between items-center text-slate-400 transition-all duration-400 ease-out delay-[340ms] ${
+                      turnosVisibles ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
+                    }`}
+                  >
+                    <span className="font-medium">Domingos y Feriados</span>
+                    <span className="text-xs italic">Cerrado</span>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 

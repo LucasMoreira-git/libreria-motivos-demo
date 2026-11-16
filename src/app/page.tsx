@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { PromoHero } from '@/components/modules/PromoHero';
@@ -10,10 +10,62 @@ import { LocationSection } from '@/components/modules/LocationSection';
 import { WhatsAppFloatingCTA } from '@/components/layout/WhatsAppFloatingCTA';
 import { DATOS_LIBRERIA_MOTIVOS } from '@/lib/mock-data';
 import { getGeneralWhatsAppLink } from '@/lib/whatsapp';
+import { useAdmin } from '@/context/AdminContext';
+import { Producto, TipoCategoria, Promocion } from '@/types/catalogo';
 import { MapPin, CreditCard, ShieldCheck, HeartHandshake, ArrowRight } from 'lucide-react';
 
 export default function Home() {
+  const { productos, categorias, promociones, horarios } = useAdmin();
   const whatsappUrl = getGeneralWhatsAppLink(DATOS_LIBRERIA_MOTIVOS.telefonoWhatsApp);
+
+  // Mapeo dinámico y reactivo del catálogo en vivo (excluyendo bajas lógicas)
+  const productosActivos: Producto[] = useMemo(() => {
+    return productos
+      .filter((p) => !p.fechaHoraBajaProducto)
+      .map((p) => ({
+        id: p.idProducto,
+        nombre: p.nombreProducto,
+        detalle: p.detalleProducto,
+        precio: p.precioProducto,
+        foto: p.fotoProducto,
+        categoriaId: p.categoriaId,
+        categoriaNombre: p.categoriaNombre,
+        destacado: p.destacadoProducto,
+        enOferta: p.enOfertaProducto,
+        badge: p.badgeProducto as any,
+      }));
+  }, [productos]);
+
+  const categoriasActivas: TipoCategoria[] = useMemo(() => {
+    return categorias
+      .filter((c) => !c.fechaHoraBajaCategoria)
+      .map((c) => ({
+        id: c.idCategoria,
+        nombre: c.nombreCategoria,
+        slug: c.slugCategoria,
+        iconoLucide: c.iconoCategoria,
+        descripcion: c.descripcionCategoria,
+        orden: c.ordenCategoria,
+      }));
+  }, [categorias]);
+
+  const promocionesActivas: Promocion[] = useMemo(() => {
+    return promociones
+      .filter((pr) => !pr.fechaHoraBajaPromocion)
+      .map((pr) => ({
+        id: pr.idPromocion,
+        nombre: pr.nombrePromocion,
+        detalle: pr.detallePromocion,
+        temporadaPromocion: pr.temporadaPromocion,
+        temporada: pr.temporadaPromocion,
+        fechaInicio: pr.fechaInicioPromocion,
+        fechaFin: pr.fechaFinPromocion,
+        descuentoTexto: pr.descuentoTextoPromocion,
+        condicion: pr.condicionPromocion,
+        badgeTexto: pr.badgeTextoPromocion,
+        fotoCombo: pr.fotoComboPromocion,
+      }));
+  }, [promociones]);
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans antialiased text-slate-800 selection:bg-purple-100 selection:text-purple-900">
@@ -24,11 +76,14 @@ export default function Home() {
       {/* Contenedor Principal de la Vitrina Web */}
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 sm:pb-8 relative z-0">
         
-        {/* 2. Hero de Promociones de Temporada ("Especial Primavera 2026") */}
-        <PromoHero />
+        {/* 2. Hero de Promociones de Temporada (Conectado a la BD / AdminContext) */}
+        <PromoHero promociones={promocionesActivas.length > 0 ? promocionesActivas : undefined} />
 
-        {/* 3. Catálogo Interactivo de Productos (Buscador + CategoryChips + Grilla + Modal) */}
-        <ProductGrid />
+        {/* 3. Catálogo Interactivo de Productos (Conectado en vivo a la BD / AdminContext) */}
+        <ProductGrid 
+          productosIniciales={productosActivos.length > 0 ? productosActivos : undefined} 
+          categorias={categoriasActivas.length > 0 ? categoriasActivas : undefined} 
+        />
 
         {/* 4. Banner de Propuesta de Valor y Atención de Barrio */}
         <section 
@@ -59,8 +114,8 @@ export default function Home() {
           </a>
         </section>
 
-        {/* 5. Información del Local: Horarios por Turnos Independientes */}
-        <ScheduleWidget />
+        {/* 5. Información del Local: Horarios por Turnos Independientes (Conectado en vivo) */}
+        <ScheduleWidget horarios={horarios} />
 
         {/* 6. Sección de Ubicación: ¿Dónde encontrarnos? (Layout 2 columnas, minimapa Google Maps, animación al scroll) */}
         <LocationSection />

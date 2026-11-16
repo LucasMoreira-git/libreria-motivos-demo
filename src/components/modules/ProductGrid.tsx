@@ -40,7 +40,8 @@ export function ProductGrid({
     return productosIniciales.filter((producto) => {
       const coincideCategoria =
         categoriaSeleccionadaId === 'todos' ||
-        producto.categoriaId === categoriaSeleccionadaId;
+        producto.categoriaId === categoriaSeleccionadaId ||
+        String(producto.categoriaId) === String(categoriaSeleccionadaId);
 
       const terminoLimpio = busqueda.trim().toLowerCase();
       const coincideBusqueda =
