@@ -4,14 +4,14 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useAdmin } from '@/context/AdminContext';
 import { 
-  ShieldCheck, 
   Lock, 
   User, 
   Store, 
   ArrowRight, 
   AlertCircle, 
   Sparkles,
-  KeyRound
+  Eye,
+  EyeOff
 } from 'lucide-react';
 
 interface AdminLoginFormProps {
@@ -22,11 +22,14 @@ export function AdminLoginForm({ onSuccess }: AdminLoginFormProps) {
   const { login } = useAdmin();
   const [username, setUsername] = useState('admin');
   const [password, setPassword] = useState('');
+  const [mostrarPassword, setMostrarPassword] = useState(false);
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (cargando) return;
+
     setError(null);
     setCargando(true);
 
@@ -35,58 +38,68 @@ export function AdminLoginForm({ onSuccess }: AdminLoginFormProps) {
       if (res.success) {
         if (onSuccess) onSuccess();
       } else {
-        setError(res.error || 'Credenciales no válidas.');
+        // Mensaje natural, claro y sin exponer detalles técnicos
+        setError('No pudimos validar tus credenciales. Revisá los datos e intentá nuevamente.');
       }
     } catch {
-      setError('Error al conectar con el servidor.');
+      setError('No pudimos validar tus credenciales. Revisá los datos e intentá nuevamente.');
     } finally {
       setCargando(false);
     }
   };
 
+  const handleInputChange = (setter: React.Dispatch<React.SetStateAction<string>>, value: string) => {
+    setter(value);
+    if (error) setError(null);
+  };
+
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-[#fef5f6] via-[#fbf0f2] to-[#ede4f6] text-slate-800 font-sans selection:bg-[#fbecee] selection:text-[#6e2e38]">
+    <div className="min-h-screen w-full flex items-center justify-center p-4 sm:p-6 bg-[#fafafb] bg-gradient-to-b from-[#ffffff] via-[#fefcfd] to-[#faf8fc] text-slate-800 font-sans selection:bg-[#fbecee] selection:text-[#6e2e38] relative overflow-hidden">
       
-      {/* Fondo decorativo con halos sutiles en tonos rosados y lilas */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-[#f4d0d6]/30 blur-3xl" />
-        <div className="absolute -bottom-24 -right-24 w-96 h-96 rounded-full bg-[#ded0f2]/40 blur-3xl" />
-      </div>
+      {/* Iluminación ambiental tenue detrás de la tarjeta (halo rosado/azulado muy suave) */}
+      <div 
+        aria-hidden="true" 
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[520px] h-[520px] rounded-full bg-gradient-to-tr from-[#f4d0d6]/20 via-[#ded0f2]/20 to-[#e0e7ff]/20 blur-3xl pointer-events-none" 
+      />
 
       <div className="relative z-10 w-full max-w-md">
         
         {/* Card Principal */}
-        <div className="bg-white/95 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-[#f2d3d8] shadow-xl shadow-purple-900/5">
+        <div className="bg-white/95 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xl shadow-purple-950/4">
           
-          {/* Header del Card */}
-          <div className="text-center space-y-3 mb-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-[#fef5f6] text-[#6e2e38] border border-[#f3cad2] shadow-2xs">
-              <Sparkles className="w-3.5 h-3.5 text-[#d97786]" />
+          {/* Header del Card con espaciado armonioso y jerarquía visual trabajada */}
+          <div className="text-center mb-6">
+            
+            {/* 1. Etiqueta «Acceso administrativo» */}
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold tracking-wide uppercase bg-[#fef5f6] text-[#6e2e38] border border-[#f3cad2] shadow-2xs mb-4">
+              <Sparkles className="w-3 h-3 text-[#d97786]" />
               <span>Acceso Administrativo</span>
             </div>
 
-            <div className="mx-auto w-14 h-14 rounded-2xl bg-gradient-to-br from-[#d97786] via-[#b978b5] to-[#7e4f9e] text-white flex items-center justify-center font-heading font-black text-2xl shadow-md border border-white/40">
+            {/* 2. Logo con sombra más discreta */}
+            <div className="mx-auto w-13 h-13 rounded-2xl bg-gradient-to-br from-[#d97786] via-[#b978b5] to-[#7e4f9e] text-white flex items-center justify-center font-heading font-black text-xl shadow-xs border border-white/80">
               M
             </div>
 
-            <div>
-              <h1 className="font-heading text-xl sm:text-2xl font-black text-purple-950 tracking-tight">
-                Librería Motivos
-              </h1>
-              <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                Panel de control para catálogo, promociones y horarios
-              </p>
-            </div>
+            {/* 3. Nombre de la librería con mayor respiro vertical */}
+            <h1 className="font-heading text-xl sm:text-2xl font-black text-purple-950 tracking-tight leading-snug mt-3.5">
+              Librería Motivos
+            </h1>
+
+            {/* 4. Subtítulo descriptivo y cercano */}
+            <p className="text-xs sm:text-sm text-slate-500 mt-1.5 leading-relaxed max-w-xs mx-auto">
+              Gestioná el catálogo, las promociones y la información del local
+            </p>
           </div>
 
-          {/* Alerta de Error */}
+          {/* Alerta de Error: solo visible tras intento fallido, con animación suave de entrada */}
           {error && (
-            <div className="mb-5 p-3.5 rounded-2xl bg-[#fef5f6] border border-[#f4d0d6] text-[#6e2e38] text-xs flex items-start gap-2.5 animate-in fade-in slide-in-from-top-1">
+            <div 
+              role="alert"
+              className="mb-5 p-3 rounded-2xl bg-[#fef5f6] border border-[#f4d0d6] text-[#6e2e38] text-xs flex items-start gap-2.5 animate-in fade-in zoom-in-95 duration-200"
+            >
               <AlertCircle className="w-4 h-4 shrink-0 text-[#d97786] mt-0.5" />
-              <div className="space-y-0.5">
-                <span className="font-bold">Error de Autenticación:</span>
-                <p className="leading-relaxed">{error}</p>
-              </div>
+              <p className="font-semibold leading-relaxed">{error}</p>
             </div>
           )}
 
@@ -108,7 +121,7 @@ export function AdminLoginForm({ onSuccess }: AdminLoginFormProps) {
                   type="text"
                   required
                   value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  onChange={(e) => handleInputChange(setUsername, e.target.value)}
                   placeholder="admin"
                   autoComplete="username"
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-hidden focus:border-[#d97786] focus:ring-2 focus:ring-[#d97786]/20 transition-all"
@@ -129,32 +142,39 @@ export function AdminLoginForm({ onSuccess }: AdminLoginFormProps) {
                 </div>
                 <input
                   id="password"
-                  type="password"
+                  type={mostrarPassword ? 'text' : 'password'}
                   required
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => handleInputChange(setPassword, e.target.value)}
                   placeholder="••••••••••••"
                   autoComplete="current-password"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-hidden focus:border-[#d97786] focus:ring-2 focus:ring-[#d97786]/20 transition-all"
+                  className="w-full pl-10 pr-11 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-hidden focus:border-[#d97786] focus:ring-2 focus:ring-[#d97786]/20 transition-all"
                 />
+                
+                {/* Botón para Mostrar / Ocultar Contraseña */}
+                <button
+                  type="button"
+                  onClick={() => setMostrarPassword((prev) => !prev)}
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 focus:outline-hidden transition-colors cursor-pointer"
+                  aria-label={mostrarPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                  title={mostrarPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                >
+                  {mostrarPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
               </div>
-            </div>
-
-            {/* Ayuda de credenciales para demostración */}
-            <div className="p-2.5 rounded-xl bg-[#ede4f6]/60 border border-[#ded0f2] text-[11px] text-purple-950 flex items-center gap-2">
-              <KeyRound className="w-3.5 h-3.5 text-purple-700 shrink-0" />
-              <span>
-                Clave predeterminada: <strong>motivosAdmin2026!</strong>
-              </span>
             </div>
 
             <button
               type="submit"
               disabled={cargando}
-              className="w-full mt-2 inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#d97786] hover:bg-[#c46372] active:scale-98 text-white font-bold text-sm shadow-md shadow-[#d97786]/20 transition-all disabled:opacity-60 cursor-pointer min-h-[46px]"
+              className="w-full mt-2 inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#d97786] hover:bg-[#c46372] active:scale-98 text-white font-bold text-sm shadow-sm transition-all disabled:opacity-60 cursor-pointer min-h-[46px]"
             >
               {cargando ? (
-                <span>Verificando credenciales...</span>
+                <span>Validando credenciales...</span>
               ) : (
                 <>
                   <span>Ingresar al Panel de Administración</span>

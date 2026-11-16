@@ -20,7 +20,7 @@ public class AdminAuthService {
     @Value("${app.admin.username:admin}")
     private String adminUsername;
 
-    @Value("${app.admin.password:motivosAdmin2026!}")
+    @Value("${app.admin.password:motivosAdministrador2026!}")
     private String adminPassword;
 
     @Value("${app.admin.nombre:Administrador Librer\u00EDa Motivos}")

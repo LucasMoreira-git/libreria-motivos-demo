@@ -33,7 +33,7 @@ export function AdminSimulationToolbar() {
       const res = await fetch('http://localhost:8080/api/admin/simulacion/ejecutar?forzar=true', {
         method: 'POST',
         headers: {
-          'X-Admin-Password': 'motivosAdmin2026!'
+          'X-Admin-Password': 'motivosAdministrador2026!'
         }
       });
 

@@ -67,8 +67,8 @@ public class BackendSimulationTest {
         assertFalse(respuestaInvalida.isAutenticado(), "No debe permitir acceso con contraseña incorrecta");
         assertNull(respuestaInvalida.getToken());
 
-        // Prueba con la contraseña configurada en application.properties (motivosAdmin2026!)
-        LoginRequestDTO requestValido = new LoginRequestDTO("admin", "motivosAdmin2026!");
+        // Prueba con la contraseña configurada en application.properties (motivosAdministrador2026!)
+        LoginRequestDTO requestValido = new LoginRequestDTO("admin", "motivosAdministrador2026!");
         LoginResponseDTO respuestaValida = adminAuthService.autenticar(requestValido);
         assertTrue(respuestaValida.isAutenticado(), "Debe autenticar con éxito al administrador");
         assertNotNull(respuestaValida.getToken(), "Debe emitir un token de sesión para el panel");

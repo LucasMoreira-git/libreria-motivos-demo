@@ -561,7 +561,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       // Contingencia local si el backend Spring Boot no está levantado
       if (
         username.trim().toLowerCase() === 'admin' &&
-        password.trim() === 'motivosAdmin2026!'
+        password.trim() === 'motivosAdministrador2026!'
       ) {
         const userObj = {
           username: 'admin',
