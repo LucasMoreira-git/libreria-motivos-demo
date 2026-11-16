@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Administración | Librería Motivos</title>
+  <style>
+    :root {
+      --primary: #8b5cf6;
+      --primary-dark: #6d28d9;
+      --primary-light: #f5f3ff;
+      --primary-border: #ddd6fe;
+      --slate-900: #0f172a;
+      --slate-800: #1e293b;
+      --slate-700: #334155;
+      --slate-600: #475569;
+      --slate-500: #64748b;
+      --slate-200: #e2e8f0;
+      --slate-100: #f1f5f9;
+      --slate-50: #f8fafc;
+      --emerald-600: #059669;
+      --emerald-50: #ecfdf5;
+      --emerald-200: #a7f3d0;
+      --rose-600: #e11d48;
+      --rose-50: #fff1f2;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    body {
+      background: #f8fafc;
+      color: var(--slate-800);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: #ffffff;
+      border-bottom: 1px solid var(--slate-200);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .logo-badge {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 0.75rem;
+      background: linear-gradient(135deg, #a855f7, #6366f1);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.25rem;
+      box-shadow: 0 4px 10px rgba(168, 85, 247, 0.3);
+    }
+    .brand-text h1 {
+      font-size: 1.125rem;
+      font-weight: 800;
+      color: var(--slate-900);
+    }
+    .brand-text p {
+      font-size: 0.75rem;
+      color: var(--slate-500);
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+    .admin-profile {
+      text-align: right;
+    }
+    .admin-name {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--slate-800);
+    }
+    .admin-role {
+      font-size: 0.7rem;
+      color: var(--emerald-600);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .btn-logout {
+      background: #ffffff;
+      border: 1px solid #fecdd3;
+      color: var(--rose-600);
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-logout:hover {
+      background: var(--rose-50);
+      border-color: #fda4af;
+    }
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+      width: 100%;
+      flex: 1;
+    }
+    .welcome-banner {
+      background: linear-gradient(135deg, #fdf2f8 0%, #f5f3ff 100%);
+      border: 1px solid var(--primary-border);
+      border-radius: 1rem;
+      padding: 1.5rem 2rem;
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .welcome-banner h2 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--slate-900);
+      margin-bottom: 0.25rem;
+    }
+    .welcome-banner p {
+      font-size: 0.875rem;
+      color: var(--slate-600);
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--emerald-50);
+      color: var(--emerald-600);
+      border: 1px solid var(--emerald-200);
+      padding: 0.35rem 0.85rem;
+      border-radius: 9999px;
+      font-size: 0.8125rem;
+      font-weight: 600;
+    }
+    .status-badge .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--emerald-600);
+    }
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+    .metric-card {
+      background: #ffffff;
+      padding: 1.25rem 1.5rem;
+      border-radius: 0.875rem;
+      border: 1px solid var(--slate-200);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .metric-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.04);
+    }
+    .metric-title {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--slate-500);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+    .metric-value {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--slate-900);
+    }
+    .nav-tabs {
+      display: flex;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--slate-200);
+      margin-bottom: 1.5rem;
+      overflow-x: auto;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      padding: 0.75rem 1.25rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--slate-500);
+      cursor: pointer;
+      position: relative;
+      transition: color 0.2s ease;
+      white-space: nowrap;
+    }
+    .tab-btn:hover {
+      color: var(--primary);
+    }
+    .tab-btn.active {
+      color: var(--primary-dark);
+    }
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--primary-dark);
+      border-radius: 2px 2px 0 0;
+    }
+    .table-container {
+      background: #ffffff;
+      border-radius: 0.875rem;
+      border: 1px solid var(--slate-200);
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.875rem;
+    }
+    th {
+      background: var(--slate-50);
+      color: var(--slate-600);
+      padding: 0.875rem 1.25rem;
+      font-weight: 600;
+      border-bottom: 1px solid var(--slate-200);
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+    }
+    td {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--slate-100);
+      color: var(--slate-700);
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    tr:hover td {
+      background: #fafafa;
+    }
+    .tag {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .tag-active {
+      background: var(--emerald-50);
+      color: var(--emerald-600);
+    }
+    .tag-category {
+      background: var(--primary-light);
+      color: var(--primary-dark);
+    }
+    .price-badge {
+      font-weight: 700;
+      color: var(--slate-900);
+    }
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      color: var(--slate-400);
+      font-size: 0.75rem;
+      border-top: 1px solid var(--slate-200);
+      background: #ffffff;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-brand">
+      <div class="logo-badge">M</div>
+      <div class="brand-text">
+        <h1>Librería Motivos</h1>
+        <p>Panel de Control y Gestión</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="admin-profile">
+        <div id="adminNameDisplay" class="admin-name">Administrador</div>
+        <div class="admin-role">Acceso Maestro</div>
+      </div>
+      <button class="btn-logout" onclick="handleLogout()">Cerrar Sesión</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="welcome-banner">
+      <div>
+        <h2 id="welcomeTitle">¡Bienvenido al Panel de Administración!</h2>
+        <p>Entorno Spring Boot configurado con JPA, entidades normalizadas y servicios REST auditados.</p>
+      </div>
+      <div class="status-badge">
+        <span class="dot"></span>
+        <span>Servidor Activo (Puerto 8080)</span>
+      </div>
+    </div>
+
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-title">Productos Activos</div>
+        <div id="metricProductos" class="metric-value">--</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-title">Categorías</div>
+        <div id="metricCategorias" class="metric-value">--</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-title">Promociones</div>
+        <div id="metricPromociones" class="metric-value">--</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-title">Horarios Semanales</div>
+        <div id="metricHorarios" class="metric-value">--</div>
+      </div>
+    </div>
+
+    <div class="nav-tabs">
+      <button class="tab-btn active" onclick="switchTab('productos', this)">Productos</button>
+      <button class="tab-btn" onclick="switchTab('categorias', this)">Categorías</button>
+      <button class="tab-btn" onclick="switchTab('promociones', this)">Promociones</button>
+      <button class="tab-btn" onclick="switchTab('horarios', this)">Horarios de Atención</button>
+    </div>
+
+    <div class="table-container">
+      <div id="tabContent">
+        <div style="padding: 2rem; text-align: center; color: var(--slate-500);">Cargando datos del sistema...</div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    Librería Motivos • Backend Spring Boot 3 & Hibernate • Guaymallén, Mendoza
+  </footer>
+
+  <script>
+    const adminToken = sessionStorage.getItem('motivos_admin_token');
+    const adminNombre = sessionStorage.getItem('motivos_admin_nombre') || 'Administrador';
+
+    // 1. Validar autenticación obligatoria
+    if (!adminToken) {
+      window.location.href = '/admin/login.html';
+    } else {
+      document.getElementById('adminNameDisplay').textContent = adminNombre;
+      document.getElementById('welcomeTitle').textContent = `¡Bienvenido, ${adminNombre}!`;
+      
+      fetch('/api/admin/auth/validate', {
+        method: 'POST',
+        headers: { 'X-Admin-Token': adminToken }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (!data.valido) {
+          sessionStorage.clear();
+          window.location.href = '/admin/login.html';
+        } else {
+          cargarDatosIniciales();
+        }
+      })
+      .catch(() => {
+        // En caso de corte de red, permitir revisión local
+        cargarDatosIniciales();
+      });
+    }
+
+    let cacheData = {
+      productos: [],
+      categorias: [],
+      promociones: [],
+      horarios: []
+    };
+
+    async function cargarDatosIniciales() {
+      try {
+        const [resProd, resCat, resProm, resHor] = await Promise.all([
+          fetch('/api/productos').then(r => r.json()).catch(() => []),
+          fetch('/api/categorias').then(r => r.json()).catch(() => []),
+          fetch('/api/promociones').then(r => r.json()).catch(() => []),
+          fetch('/api/horarios').then(r => r.json()).catch(() => [])
+        ]);
+
+        cacheData.productos = resProd;
+        cacheData.categorias = resCat;
+        cacheData.promociones = resProm;
+        cacheData.horarios = resHor;
+
+        document.getElementById('metricProductos').textContent = resProd.length;
+        document.getElementById('metricCategorias').textContent = resCat.length;
+        document.getElementById('metricPromociones').textContent = resProm.length;
+        document.getElementById('metricHorarios').textContent = resHor.length;
+
+        renderProductos();
+      } catch (err) {
+        document.getElementById('tabContent').innerHTML = `
+          <div style="padding: 2rem; text-align: center; color: #ef4444;">
+            Error al consultar los endpoints REST del backend.
+          </div>
+        `;
+      }
+    }
+
+    function switchTab(tab, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      if (tab === 'productos') renderProductos();
+      if (tab === 'categorias') renderCategorias();
+      if (tab === 'promociones') renderPromociones();
+      if (tab === 'horarios') renderHorarios();
+    }
+
+    function renderProductos() {
+      const items = cacheData.productos;
+      if (!items || items.length === 0) {
+        document.getElementById('tabContent').innerHTML = '<div style="padding: 2rem; text-align:center;">No hay productos registrados.</div>';
+        return;
+      }
+      let html = `
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Producto</th>
+              <th>Categoría</th>
+              <th>Precio Contado/Transf.</th>
+              <th>En Promo</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+      items.forEach(p => {
+        html += `
+          <tr>
+            <td>#${p.idProducto}</td>
+            <td>
+              <strong>${p.nombreProducto}</strong><br>
+              <small style="color: var(--slate-500);">${p.descripcionProducto || 'Sin descripción'}</small>
+            </td>
+            <td><span class="tag tag-category">${p.nombreCategoria || 'General'}</span></td>
+            <td><span class="price-badge">$ ${Number(p.precioEfectivoTransferencia || 0).toLocaleString('es-AR')}</span></td>
+            <td>${p.enPromocion ? '<span class="tag tag-active">Sí</span>' : 'No'}</td>
+            <td><span class="tag tag-active">Activo</span></td>
+          </tr>
+        `;
+      });
+      html += '</tbody></table>';
+      document.getElementById('tabContent').innerHTML = html;
+    }
+
+    function renderCategorias() {
+      const items = cacheData.categorias;
+      if (!items || items.length === 0) {
+        document.getElementById('tabContent').innerHTML = '<div style="padding: 2rem; text-align:center;">No hay categorías registradas.</div>';
+        return;
+      }
+      let html = `
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre de Categoría</th>
+              <th>Descripción</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+      items.forEach(c => {
+        html += `
+          <tr>
+            <td>#${c.idTipoCategoria}</td>
+            <td><strong>${c.nombreTipoCategoria}</strong></td>
+            <td>${c.descripcionTipoCategoria || 'Sin descripción'}</td>
+            <td><span class="tag tag-active">Activa</span></td>
+          </tr>
+        `;
+      });
+      html += '</tbody></table>';
+      document.getElementById('tabContent').innerHTML = html;
+    }
+
+    function renderPromociones() {
+      const items = cacheData.promociones;
+      if (!items || items.length === 0) {
+        document.getElementById('tabContent').innerHTML = '<div style="padding: 2rem; text-align:center;">No hay promociones registradas.</div>';
+        return;
+      }
+      let html = `
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Título Promoción</th>
+              <th>Descripción</th>
+              <th>Descuento</th>
+              <th>Vigencia</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+      items.forEach(pr => {
+        html += `
+          <tr>
+            <td>#${pr.idPromocion}</td>
+            <td><strong>${pr.tituloPromocion}</strong></td>
+            <td>${pr.descripcionPromocion || '-'}</td>
+            <td><strong>${pr.porcentajeDescuento ? pr.porcentajeDescuento + '%' : '-'}</strong></td>
+            <td><small>${pr.fechaInicioPromocion || ''} a ${pr.fechaFinPromocion || ''}</small></td>
+          </tr>
+        `;
+      });
+      html += '</tbody></table>';
+      document.getElementById('tabContent').innerHTML = html;
+    }
+
+    function renderHorarios() {
+      const items = cacheData.horarios;
+      if (!items || items.length === 0) {
+        document.getElementById('tabContent').innerHTML = '<div style="padding: 2rem; text-align:center;">No hay horarios registrados.</div>';
+        return;
+      }
+      let html = `
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Día / Período</th>
+              <th>Turno Mañana</th>
+              <th>Turno Tarde</th>
+              <th>Observación</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+      items.forEach(h => {
+        html += `
+          <tr>
+            <td>#${h.idHorarioAtencion}</td>
+            <td><strong>${h.diaSemana}</strong></td>
+            <td>${h.horaAperturaManana ? h.horaAperturaManana + ' - ' + h.horaCierreManana : 'Cerrado'}</td>
+            <td>${h.horaAperturaTarde ? h.horaAperturaTarde + ' - ' + h.horaCierreTarde : 'Cerrado'}</td>
+            <td>${h.observacion || '-'}</td>
+          </tr>
+        `;
+      });
+      html += '</tbody></table>';
+      document.getElementById('tabContent').innerHTML = html;
+    }
+
+    async function handleLogout() {
+      try {
+        if (adminToken) {
+          await fetch('/api/admin/auth/logout', {
+            method: 'POST',
+            headers: { 'X-Admin-Token': adminToken }
+          });
+        }
+      } catch (e) {
+        // Ignorar
+      } finally {
+        sessionStorage.clear();
+        window.location.href = '/admin/login.html';
+      }
+    }
+  </script>
+</body>
+</html>
