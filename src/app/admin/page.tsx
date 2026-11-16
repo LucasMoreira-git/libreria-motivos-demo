@@ -16,6 +16,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
+import { AdminSimulationToolbar } from '@/components/admin/AdminSimulationToolbar';
 
 // Función para calcular los días restantes de una vigencia respecto a la fecha simulada (26 de octubre de 2026)
 function calcularDiasRestantes(fechaStr?: string): number | null {
@@ -107,6 +108,9 @@ export default function AdminDashboardPage() {
           </Link>
         </div>
       </header>
+
+      {/* Barra de Simulación y Sincronización con BD (Removible para Producción) */}
+      <AdminSimulationToolbar />
 
       {/* 2. Tarjetas Resumen de los 4 Módulos de Gestión (ABMs) con Colores de la Marca */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">

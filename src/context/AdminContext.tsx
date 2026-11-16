@@ -80,6 +80,10 @@ interface AdminContextType {
   login: (username: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
 
+  // Sincronización Backend
+  backendEnLinea: boolean;
+  sincronizarConBackend: () => Promise<void>;
+
   // Entidades
   categorias: CategoriaAdmin[];
   productos: ProductoAdmin[];
@@ -122,10 +126,91 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   const [adminUser, setAdminUser] = useState<{ username: string; nombre: string } | null>(null);
   const [token, setToken] = useState<string | null>(null);
 
+  // Estado de Sincronización con Backend
+  const [backendEnLinea, setBackendEnLinea] = useState<boolean>(false);
+
   const [categorias, setCategorias] = useState<CategoriaAdmin[]>(CATEGORIAS_INICIALES);
   const [productos, setProductos] = useState<ProductoAdmin[]>(PRODUCTOS_INICIALES);
   const [promociones, setPromociones] = useState<PromocionAdmin[]>(PROMOCIONES_INICIALES);
   const [horarios, setHorarios] = useState<HorarioAtencionAdmin[]>(HORARIOS_INICIALES);
+
+  // Función para sincronizar datos reales desde Spring Boot REST API
+  const sincronizarConBackend = async () => {
+    try {
+      const [resCat, resProd, resProm, resHor] = await Promise.all([
+        fetch('http://localhost:8080/api/categorias').then((r) => (r.ok ? r.json() : null)),
+        fetch('http://localhost:8080/api/productos').then((r) => (r.ok ? r.json() : null)),
+        fetch('http://localhost:8080/api/promociones').then((r) => (r.ok ? r.json() : null)),
+        fetch('http://localhost:8080/api/horarios').then((r) => (r.ok ? r.json() : null)),
+      ]);
+
+      if (resCat && Array.isArray(resCat) && resCat.length > 0) {
+        const catMapeadas: CategoriaAdmin[] = resCat.map((c: any) => ({
+          idCategoria: String(c.id || c.idCategoria),
+          nombreCategoria: c.nombreTC || c.nombreCategoria,
+          slugCategoria: c.slugCategoria || '',
+          iconoCategoria: c.iconoCategoria || 'FolderTree',
+          descripcionCategoria: c.descripcionTC || '',
+          ordenCategoria: c.ordenCategoria || 1,
+          fechaHoraBajaCategoria: c.activo === false ? 'Baja' : null,
+        }));
+        setCategorias(catMapeadas);
+      }
+
+      if (resProd && Array.isArray(resProd) && resProd.length > 0) {
+        const prodMapeados: ProductoAdmin[] = resProd.map((p: any) => ({
+          idProducto: String(p.id || p.idProducto),
+          nombreProducto: p.nombreProducto,
+          detalleProducto: p.detalleProducto || '',
+          precioProducto: Number(p.precioProducto || 0),
+          fotoProducto: p.fotoProducto || '',
+          categoriaId: String(p.tipoCategoriaId || ''),
+          codTC: p.codigoProducto || String(p.tipoCategoriaId || ''),
+          categoriaNombre: p.tipoCategoriaNombre || '',
+          destacadoProducto: !!p.destacadoProducto,
+          enOfertaProducto: !!p.enOfertaProducto,
+          badgeProducto: p.badgeProducto || null,
+          fechaHoraBajaProducto: p.activo === false ? 'Baja' : null,
+        }));
+        setProductos(prodMapeados);
+      }
+
+      if (resProm && Array.isArray(resProm) && resProm.length > 0) {
+        const promMapeadas: PromocionAdmin[] = resProm.map((pr: any) => ({
+          idPromocion: String(pr.id || pr.idPromocion),
+          nombrePromocion: pr.nombrePromocion,
+          detallePromocion: pr.detallePromocion || '',
+          temporadaPromocion: pr.temporadaPromocion || 'Especial Primavera 2026',
+          fechaInicioPromocion: pr.fechaInicioPromocion || '',
+          fechaFinPromocion: pr.fechaFinPromocion || '',
+          fechaHoraFinPromocion: pr.fechaFinPromocion || '',
+          descuentoTextoPromocion: pr.descuentoTexto || '',
+          condicionPromocion: pr.condicionPromocion || '',
+          fotoComboPromocion: pr.fotoCombo || '',
+          fechaHoraBajaPromocion: pr.activo === false ? 'Baja' : null,
+        }));
+        setPromociones(promMapeadas);
+      }
+
+      if (resHor && Array.isArray(resHor) && resHor.length > 0) {
+        const horMapeados: HorarioAtencionAdmin[] = resHor.map((h: any) => ({
+          idHorarioAtencion: String(h.id || h.idHorarioAtencion),
+          diasTextoHA: h.diasTextoHA || h.diasSemanaHA || 'Lunes a Viernes',
+          diasSemanaHA: [1, 2, 3, 4, 5],
+          nombreTurnoHA: h.nombreTurnoHA || 'Turno',
+          horaInicioHA: h.horaInicioHA || '09:30',
+          horaFinHA: h.horaFinHA || '13:30',
+          esCerradoHA: !!h.esCerradoHA,
+          fechaHoraBajaHA: h.activo === false ? 'Baja' : null,
+        }));
+        setHorarios(horMapeados);
+      }
+
+      setBackendEnLinea(true);
+    } catch {
+      setBackendEnLinea(false);
+    }
+  };
 
   // Carga inicial de localStorage y sessionStorage en cliente
   useEffect(() => {
@@ -145,7 +230,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      // 2. Entidades
+      // 2. Entidades desde caché local
       const catGuardadas = localStorage.getItem('motivos_admin_categorias');
       if (catGuardadas) setCategorias(JSON.parse(catGuardadas));
 
@@ -157,6 +242,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
       const horGuardados = localStorage.getItem('motivos_admin_horarios');
       if (horGuardados) setHorarios(JSON.parse(horGuardados));
+
+      // 3. Consultar backend Spring Boot si está activo
+      sincronizarConBackend();
     } catch {
       // Ignorar errores de parseo
     }
@@ -227,14 +315,35 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   // ABM Productos
   const crearProducto = (data: Omit<ProductoAdmin, 'idProducto' | 'fechaHoraBajaProducto'>) => {
     const cat = categorias.find((c) => c.idCategoria === data.categoriaId);
+    const nuevoId = `prod-${Date.now()}`;
     const nuevo: ProductoAdmin = {
       ...data,
-      idProducto: `prod-${Date.now()}`,
+      idProducto: nuevoId,
       codTC: data.codTC !== undefined ? data.codTC : data.categoriaId,
       categoriaNombre: cat ? cat.nombreCategoria : '',
       fechaHoraBajaProducto: null,
     };
     setProductos((prev) => [nuevo, ...prev]);
+
+    // Persistencia en backend si está activo
+    if (backendEnLinea) {
+      const tipoCatId = Number(data.categoriaId) || (cat ? Number(cat.idCategoria) : 1);
+      fetch('http://localhost:8080/api/productos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          codigoProducto: `PROD-${Date.now().toString().slice(-4)}`,
+          nombreProducto: data.nombreProducto,
+          precioProducto: data.precioProducto,
+          detalleProducto: data.detalleProducto,
+          fotoProducto: data.fotoProducto,
+          tipoCategoriaId: isNaN(tipoCatId) ? 1 : tipoCatId,
+          destacadoProducto: data.destacadoProducto,
+          enOfertaProducto: data.enOfertaProducto,
+          badgeProducto: data.badgeProducto,
+        }),
+      }).catch(() => {});
+    }
   };
 
   const editarProducto = (producto: ProductoAdmin) => {
@@ -250,6 +359,27 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           : p
       )
     );
+
+    if (backendEnLinea) {
+      const numId = Number(producto.idProducto.replace(/\D/g, ''));
+      if (!isNaN(numId) && numId > 0) {
+        const tipoCatId = Number(producto.categoriaId) || (cat ? Number(cat.idCategoria) : 1);
+        fetch(`http://localhost:8080/api/productos/${numId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nombreProducto: producto.nombreProducto,
+            precioProducto: producto.precioProducto,
+            detalleProducto: producto.detalleProducto,
+            fotoProducto: producto.fotoProducto,
+            tipoCategoriaId: isNaN(tipoCatId) ? 1 : tipoCatId,
+            destacadoProducto: producto.destacadoProducto,
+            enOfertaProducto: producto.enOfertaProducto,
+            badgeProducto: producto.badgeProducto,
+          }),
+        }).catch(() => {});
+      }
+    }
   };
 
   const bajaLogicaProducto = (idProducto: string) => {
@@ -261,6 +391,15 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           : p
       )
     );
+
+    if (backendEnLinea) {
+      const numId = Number(idProducto.replace(/\D/g, ''));
+      if (!isNaN(numId) && numId > 0) {
+        fetch(`http://localhost:8080/api/productos/${numId}`, {
+          method: 'DELETE',
+        }).catch(() => {});
+      }
+    }
   };
 
   const reactivarProducto = (idProducto: string) => {
@@ -271,6 +410,15 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           : p
       )
     );
+
+    if (backendEnLinea) {
+      const numId = Number(idProducto.replace(/\D/g, ''));
+      if (!isNaN(numId) && numId > 0) {
+        fetch(`http://localhost:8080/api/productos/${numId}/reactivar`, {
+          method: 'PATCH',
+        }).catch(() => {});
+      }
+    }
   };
 
   // ABM Promociones
@@ -458,6 +606,8 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
         token,
         login,
         logout,
+        backendEnLinea,
+        sincronizarConBackend,
         categorias,
         productos,
         promociones,
