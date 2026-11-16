@@ -11,7 +11,9 @@ import {
   Clock, 
   ExternalLink, 
   ShieldCheck,
-  Store
+  Store,
+  LogOut,
+  Sparkles
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 
@@ -21,7 +23,7 @@ interface AdminSidebarProps {
 
 export function AdminSidebar({ onCerrarMovil }: AdminSidebarProps) {
   const pathname = usePathname();
-  const { productos, categorias, promociones, horarios } = useAdmin();
+  const { productos, categorias, promociones, horarios, logout, adminUser } = useAdmin();
 
   // Contadores activos para badges en el menú
   const totalCatActivas = categorias.filter((c) => !c.fechaHoraBajaCategoria).length;
@@ -63,41 +65,42 @@ export function AdminSidebar({ onCerrarMovil }: AdminSidebarProps) {
   ];
 
   return (
-    <aside className="w-64 lg:w-72 bg-slate-900 text-slate-100 flex flex-col h-full border-r border-slate-800 select-none shadow-xl">
-      {/* 1. Encabezado de Identidad del Dashboard */}
-      <div className="p-5 border-b border-slate-800/80">
+    <aside className="w-64 lg:w-72 bg-white text-slate-800 flex flex-col h-full border-r border-[#ded0f2] select-none shadow-sm">
+      
+      {/* 1. Encabezado de Identidad del Dashboard con los colores de la marca */}
+      <div className="p-5 border-b border-[#ded0f2]/80 bg-[#fdf8f9]">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-blue-800 text-white flex items-center justify-center font-black text-xl shadow-md border border-blue-400/30 shrink-0">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#d97786] via-[#b978b5] to-[#7e4f9e] text-white flex items-center justify-center font-heading font-black text-xl shadow-md border border-white/50 shrink-0">
             M
           </div>
           <div className="min-w-0">
-            <h2 className="font-heading text-sm font-black tracking-tight text-white truncate">
+            <h2 className="font-heading text-sm font-black tracking-tight text-purple-950 truncate">
               Librería Motivos
             </h2>
             <div className="flex items-center gap-1.5 mt-0.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                 Panel Administrador
               </span>
             </div>
           </div>
         </div>
 
-        {/* Badge de Rol */}
-        <div className="mt-3.5 px-3 py-1.5 rounded-lg bg-slate-800/90 border border-slate-700/80 flex items-center justify-between text-xs">
-          <span className="text-slate-400 text-[11px] font-medium flex items-center gap-1">
-            <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
-            Rol de Usuario:
+        {/* Badge de Rol con estilo lila suave */}
+        <div className="mt-3 px-3 py-1.5 rounded-xl bg-[#ede4f6]/80 border border-[#ded0f2] flex items-center justify-between text-xs">
+          <span className="text-purple-950 text-[11px] font-bold flex items-center gap-1">
+            <ShieldCheck className="w-3.5 h-3.5 text-[#d97786]" />
+            {adminUser?.nombre || 'Administrador'}
           </span>
-          <span className="font-bold text-amber-300 text-[11px]">
-            Admin Sistema
+          <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-[#d97786] text-white">
+            Admin
           </span>
         </div>
       </div>
 
       {/* 2. Enlaces de Navegación del Dashboard */}
-      <div className="flex-1 py-4 px-3 space-y-1.5 overflow-y-auto no-scrollbar">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-3 block mb-2">
+      <div className="flex-1 py-4 px-3 space-y-1 overflow-y-auto no-scrollbar">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-purple-900/60 px-3 block mb-2">
           Módulos de Gestión
         </span>
 
@@ -112,13 +115,13 @@ export function AdminSidebar({ onCerrarMovil }: AdminSidebarProps) {
               onClick={onCerrarMovil}
               className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 group active:scale-98 ${
                 esActivo
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-900/30'
-                  : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/80'
+                  ? 'bg-[#ede4f6] text-purple-950 font-bold shadow-2xs border-l-4 border-[#d97786]'
+                  : 'text-slate-600 hover:text-purple-950 hover:bg-[#fbf7fd]'
               }`}
             >
               <div className="flex items-center gap-3">
                 <Icono className={`w-4 h-4 shrink-0 transition-colors ${
-                  esActivo ? 'text-white' : 'text-slate-400 group-hover:text-blue-400'
+                  esActivo ? 'text-[#d97786]' : 'text-slate-400 group-hover:text-purple-700'
                 }`} />
                 <span>{item.titulo}</span>
               </div>
@@ -126,8 +129,8 @@ export function AdminSidebar({ onCerrarMovil }: AdminSidebarProps) {
               {item.badge !== null && (
                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                   esActivo 
-                    ? 'bg-blue-800 text-white' 
-                    : 'bg-slate-800 text-slate-300 group-hover:bg-slate-700'
+                    ? 'bg-[#d97786] text-white' 
+                    : 'bg-[#fef5f6] text-[#6e2e38] border border-[#f4d0d6]'
                 }`}>
                   {item.badge}
                 </span>
@@ -137,19 +140,28 @@ export function AdminSidebar({ onCerrarMovil }: AdminSidebarProps) {
         })}
       </div>
 
-      {/* 3. Pie de la Barra Lateral: Acceso a la Vitrina Pública */}
-      <div className="p-4 border-t border-slate-800 bg-slate-950/40">
+      {/* 3. Pie de la Barra Lateral: Acceso a la Vitrina y Cerrar Sesión */}
+      <div className="p-3 border-t border-[#ded0f2]/80 bg-[#fdf8f9] space-y-2">
         <Link
           href="/"
           target="_blank"
-          className="flex items-center justify-between w-full px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-bold transition-all duration-200 active:scale-95 group shadow-sm"
+          className="flex items-center justify-between w-full px-3.5 py-2 rounded-xl bg-[#ede4f6] hover:bg-[#ded0f2] text-purple-950 text-xs font-bold transition-all duration-200 active:scale-95 group shadow-2xs border border-[#ded0f2]"
         >
           <div className="flex items-center gap-2">
-            <Store className="w-4 h-4 text-emerald-400" />
+            <Store className="w-4 h-4 text-[#d97786]" />
             <span>Ver Vitrina Pública</span>
           </div>
-          <ExternalLink className="w-3.5 h-3.5 text-slate-400 group-hover:text-white" />
+          <ExternalLink className="w-3.5 h-3.5 text-purple-700 group-hover:translate-x-0.5 transition-transform" />
         </Link>
+
+        <button
+          type="button"
+          onClick={logout}
+          className="flex items-center justify-center gap-2 w-full px-3.5 py-2 rounded-xl text-rose-600 hover:text-rose-700 bg-white hover:bg-rose-50 border border-rose-200/80 text-xs font-bold transition-all duration-200 active:scale-95 cursor-pointer"
+        >
+          <LogOut className="w-3.5 h-3.5" />
+          <span>Cerrar Sesión</span>
+        </button>
       </div>
     </aside>
   );

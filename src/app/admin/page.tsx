@@ -75,32 +75,32 @@ export default function AdminDashboardPage() {
   return (
     <div className="space-y-6 sm:space-y-8">
       
-      {/* 1. Cabecera Compacta y Funcional */}
-      <header className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="space-y-1">
+      {/* 1. Cabecera con Paleta de la Marca (Rosa Suave + Lila Pastel) */}
+      <header className="bg-gradient-to-br from-[#fef5f6] via-[#fbf0f2] to-[#ede4f6] rounded-3xl p-6 sm:p-7 border border-[#f2d3d8] shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+        <div className="space-y-1.5">
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-purple-900/80 bg-white/80 px-2.5 py-0.5 rounded-full border border-purple-200/70">
               Sistema Operativo • Librería Motivos
             </span>
           </div>
-          <h2 className="font-heading text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+          <h2 className="font-heading text-xl sm:text-2xl font-black text-purple-950 tracking-tight">
             Panel de Control Operativo
           </h2>
-          <p className="text-xs sm:text-sm text-slate-500 max-w-2xl">
+          <p className="text-xs sm:text-sm text-slate-600 max-w-2xl">
             Supervisión del catálogo de productos, promociones comerciales de temporada y turnos de atención.
           </p>
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3 self-start md:self-center shrink-0">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700">
-            <Calendar className="w-4 h-4 text-blue-900" />
+          <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/90 border border-[#ded0f2] text-xs font-bold text-purple-950 shadow-2xs">
+            <Calendar className="w-4 h-4 text-[#d97786]" />
             <span>26 de octubre de 2026</span>
           </div>
           <Link
             href="/"
             target="_blank"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-blue-900 text-white text-xs font-bold transition-all duration-200 active:scale-95 shadow-2xs"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#d97786] hover:bg-[#c46372] text-white text-xs font-bold transition-all duration-200 active:scale-95 shadow-sm"
           >
             <span>Ver Vitrina</span>
             <ExternalLink className="w-3.5 h-3.5" />
@@ -108,21 +108,21 @@ export default function AdminDashboardPage() {
         </div>
       </header>
 
-      {/* 2. Tarjetas Resumen de los 4 Módulos de Gestión (ABMs) */}
+      {/* 2. Tarjetas Resumen de los 4 Módulos de Gestión (ABMs) con Colores de la Marca */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         
-        {/* Módulo 1: Categorías */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-2xs hover:shadow-md transition-all flex flex-col justify-between group">
+        {/* Módulo 1: Categorías (Lila / Morado) */}
+        <div className="bg-white rounded-2xl p-5 border border-[#ded0f2] shadow-2xs hover:shadow-md transition-all flex flex-col justify-between group">
           <div>
             <div className="flex items-center justify-between">
-              <span className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-900 flex items-center justify-center font-bold">
-                <FolderTree className="w-5 h-5" />
+              <span className="w-10 h-10 rounded-xl bg-[#ede4f6] text-purple-950 flex items-center justify-center font-bold">
+                <FolderTree className="w-5 h-5 text-purple-800" />
               </span>
-              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-[#ede4f6] text-purple-950">
                 {categorias.length} Total
               </span>
             </div>
-            <h3 className="font-heading text-base font-bold text-slate-900 mt-3">
+            <h3 className="font-heading text-base font-bold text-purple-950 mt-3">
               ABM Categorías
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">
@@ -130,7 +130,7 @@ export default function AdminDashboardPage() {
             </p>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+          <div className="mt-4 pt-3 border-t border-purple-100 flex items-center justify-between">
             <div className="text-xs">
               <span className="font-bold text-emerald-600">{catActivas} activas</span>
               {catBajas > 0 && (
@@ -139,26 +139,26 @@ export default function AdminDashboardPage() {
             </div>
             <Link
               href="/admin/categorias"
-              className="inline-flex items-center gap-1 text-xs font-bold text-indigo-900 hover:text-indigo-700 transition-colors group-hover:translate-x-0.5"
+              className="inline-flex items-center gap-1 text-xs font-bold text-purple-950 hover:text-purple-700 transition-colors group-hover:translate-x-0.5"
             >
               <span>Gestionar</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <ArrowRight className="w-3.5 h-3.5 text-[#d97786]" />
             </Link>
           </div>
         </div>
 
-        {/* Módulo 2: Promociones */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-2xs hover:shadow-md transition-all flex flex-col justify-between group">
+        {/* Módulo 2: Promociones (Rosado Suave / Blush Rose) */}
+        <div className="bg-white rounded-2xl p-5 border border-[#f4d0d6] shadow-2xs hover:shadow-md transition-all flex flex-col justify-between group">
           <div>
             <div className="flex items-center justify-between">
-              <span className="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center font-bold">
-                <Tag className="w-5 h-5" />
+              <span className="w-10 h-10 rounded-xl bg-[#fef5f6] text-[#6e2e38] flex items-center justify-center font-bold border border-[#f3cad2]">
+                <Tag className="w-5 h-5 text-[#d97786]" />
               </span>
-              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-[#fef5f6] text-[#6e2e38] border border-[#f4d0d6]">
                 {promociones.length} Total
               </span>
             </div>
-            <h3 className="font-heading text-base font-bold text-slate-900 mt-3">
+            <h3 className="font-heading text-base font-bold text-purple-950 mt-3">
               ABM Promociones
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">
@@ -166,7 +166,7 @@ export default function AdminDashboardPage() {
             </p>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+          <div className="mt-4 pt-3 border-t border-[#fbecee] flex items-center justify-between">
             <div className="text-xs">
               <span className="font-bold text-emerald-600">{promoActivas} activas</span>
               {promoBajas > 0 && (
@@ -175,7 +175,7 @@ export default function AdminDashboardPage() {
             </div>
             <Link
               href="/admin/promociones"
-              className="inline-flex items-center gap-1 text-xs font-bold text-orange-600 hover:text-orange-700 transition-colors group-hover:translate-x-0.5"
+              className="inline-flex items-center gap-1 text-xs font-bold text-[#d97786] hover:text-[#c46372] transition-colors group-hover:translate-x-0.5"
             >
               <span>Gestionar</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -183,18 +183,18 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* Módulo 3: Productos */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-2xs hover:shadow-md transition-all flex flex-col justify-between group">
+        {/* Módulo 3: Productos (Ámbar / Nude Cálido) */}
+        <div className="bg-white rounded-2xl p-5 border border-amber-200/80 shadow-2xs hover:shadow-md transition-all flex flex-col justify-between group">
           <div>
             <div className="flex items-center justify-between">
-              <span className="w-10 h-10 rounded-xl bg-blue-50 text-blue-900 flex items-center justify-center font-bold">
+              <span className="w-10 h-10 rounded-xl bg-amber-50 text-amber-800 flex items-center justify-center font-bold border border-amber-200/60">
                 <Package className="w-5 h-5" />
               </span>
-              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-800">
                 {productos.length} Total
               </span>
             </div>
-            <h3 className="font-heading text-base font-bold text-slate-900 mt-3">
+            <h3 className="font-heading text-base font-bold text-purple-950 mt-3">
               ABM Producto
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">
@@ -202,7 +202,7 @@ export default function AdminDashboardPage() {
             </p>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+          <div className="mt-4 pt-3 border-t border-amber-100 flex items-center justify-between">
             <div className="text-xs">
               <span className="font-bold text-emerald-600">{prodActivos} activos</span>
               {prodBajas > 0 && (
@@ -211,7 +211,7 @@ export default function AdminDashboardPage() {
             </div>
             <Link
               href="/admin/productos"
-              className="inline-flex items-center gap-1 text-xs font-bold text-blue-900 hover:text-blue-700 transition-colors group-hover:translate-x-0.5"
+              className="inline-flex items-center gap-1 text-xs font-bold text-amber-800 hover:text-amber-900 transition-colors group-hover:translate-x-0.5"
             >
               <span>Gestionar</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -219,18 +219,18 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* Módulo 4: Horarios */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-2xs hover:shadow-md transition-all flex flex-col justify-between group">
+        {/* Módulo 4: Horarios (Verde Sabia / Esmeralda) */}
+        <div className="bg-white rounded-2xl p-5 border border-emerald-200/80 shadow-2xs hover:shadow-md transition-all flex flex-col justify-between group">
           <div>
             <div className="flex items-center justify-between">
-              <span className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold">
+              <span className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-800 flex items-center justify-center font-bold border border-emerald-200/60">
                 <Clock className="w-5 h-5" />
               </span>
-              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800">
                 {horarios.length} Turnos
               </span>
             </div>
-            <h3 className="font-heading text-base font-bold text-slate-900 mt-3">
+            <h3 className="font-heading text-base font-bold text-purple-950 mt-3">
               ABM Horarios
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">
@@ -238,7 +238,7 @@ export default function AdminDashboardPage() {
             </p>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+          <div className="mt-4 pt-3 border-t border-emerald-100 flex items-center justify-between">
             <div className="text-xs">
               <span className="font-bold text-emerald-600">{horActivos} activos</span>
               {horBajas > 0 && (
@@ -247,7 +247,7 @@ export default function AdminDashboardPage() {
             </div>
             <Link
               href="/admin/horarios"
-              className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 hover:text-emerald-800 transition-colors group-hover:translate-x-0.5"
+              className="inline-flex items-center gap-1 text-xs font-bold text-emerald-800 hover:text-emerald-900 transition-colors group-hover:translate-x-0.5"
             >
               <span>Gestionar</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -261,7 +261,7 @@ export default function AdminDashboardPage() {
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="font-heading text-lg sm:text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+            <h3 className="font-heading text-lg sm:text-xl font-black text-purple-950 tracking-tight flex items-center gap-2">
               <AlertTriangle className="w-5 h-5 text-amber-500" />
               <span>Alertas Operativas del Negocio</span>
             </h3>
@@ -274,24 +274,24 @@ export default function AdminDashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           
           {/* Indicador 1: Promociones Próximas a Vencer */}
-          <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+          <div className="bg-white rounded-2xl p-5 sm:p-6 border border-[#ded0f2]/80 shadow-2xs flex flex-col justify-between">
             <div className="space-y-3.5">
               <div className="flex items-center justify-between">
-                <span className="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center font-bold">
-                  <Tag className="w-5 h-5" />
+                <span className="w-10 h-10 rounded-xl bg-[#fef5f6] text-[#6e2e38] flex items-center justify-center font-bold border border-[#f4d0d6]">
+                  <Tag className="w-5 h-5 text-[#d97786]" />
                 </span>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#fef5f6] text-[#6e2e38] border border-[#f4d0d6]">
                   {promosProximasAVencer.length} por vencer
                 </span>
               </div>
 
               <div>
-                <h4 className="font-heading text-base font-bold text-slate-900">
+                <h4 className="font-heading text-base font-bold text-purple-950">
                   Promociones Próximas a Vencer
                 </h4>
                 <div className="mt-1 flex items-center gap-1.5 text-[11px] font-mono text-slate-500">
                   <span className="text-slate-400">Atributo:</span>
-                  <span className="px-1.5 py-0.5 rounded bg-slate-100 text-blue-900 font-semibold">
+                  <span className="px-1.5 py-0.5 rounded bg-[#ede4f6] text-purple-950 font-semibold">
                     fechaHoraFinPromocion
                   </span>
                 </div>
@@ -306,13 +306,13 @@ export default function AdminDashboardPage() {
                     {promosProximasAVencer.map((pr) => (
                       <li 
                         key={pr.idPromocion}
-                        className="p-2.5 rounded-xl bg-amber-50/60 border border-amber-200/70 text-xs"
+                        className="p-2.5 rounded-xl bg-[#fef5f6] border border-[#f4d0d6] text-xs"
                       >
                         <div className="flex items-start justify-between gap-2">
                           <span className="font-bold text-slate-900 leading-snug">
                             {pr.nombrePromocion}
                           </span>
-                          <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full shrink-0">
+                          <span className="text-[10px] font-bold text-[#6e2e38] bg-[#fbecee] px-2 py-0.5 rounded-full shrink-0 border border-[#f4d0d6]">
                             {pr.diasRestantes} días
                           </span>
                         </div>
@@ -340,20 +340,20 @@ export default function AdminDashboardPage() {
             <div className="mt-5 pt-4 border-t border-slate-100">
               <Link
                 href="/admin/promociones"
-                className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-bold transition-all active:scale-98"
+                className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#fef5f6] hover:bg-[#fbecee] text-[#6e2e38] text-xs font-bold transition-all active:scale-98 border border-[#f4d0d6]"
               >
                 <span>Gestionar Promociones</span>
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4 text-[#d97786]" />
               </Link>
             </div>
           </div>
 
           {/* Indicador 2: Productos sin Categoría Asignada */}
-          <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+          <div className="bg-white rounded-2xl p-5 sm:p-6 border border-[#ded0f2]/80 shadow-2xs flex flex-col justify-between">
             <div className="space-y-3.5">
               <div className="flex items-center justify-between">
                 <span className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold ${
-                  prodsSinCategoria.length > 0 ? 'bg-rose-50 text-rose-700' : 'bg-emerald-50 text-emerald-700'
+                  prodsSinCategoria.length > 0 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                 }`}>
                   <FolderTree className="w-5 h-5" />
                 </span>
@@ -367,12 +367,12 @@ export default function AdminDashboardPage() {
               </div>
 
               <div>
-                <h4 className="font-heading text-base font-bold text-slate-900">
+                <h4 className="font-heading text-base font-bold text-purple-950">
                   Productos sin Categoría Asignada
                 </h4>
                 <div className="mt-1 flex items-center gap-1.5 text-[11px] font-mono text-slate-500">
                   <span className="text-slate-400">Atributo:</span>
-                  <span className="px-1.5 py-0.5 rounded bg-slate-100 text-blue-900 font-semibold">
+                  <span className="px-1.5 py-0.5 rounded bg-[#ede4f6] text-purple-950 font-semibold">
                     codTC (TipoCategoria)
                   </span>
                 </div>
@@ -415,33 +415,33 @@ export default function AdminDashboardPage() {
             <div className="mt-5 pt-4 border-t border-slate-100">
               <Link
                 href="/admin/productos"
-                className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-900 text-xs font-bold transition-all active:scale-98"
+                className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#ede4f6] hover:bg-[#ded0f2] text-purple-950 text-xs font-bold transition-all active:scale-98 border border-[#ded0f2]"
               >
                 <span>Gestionar Productos</span>
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4 text-[#d97786]" />
               </Link>
             </div>
           </div>
 
           {/* Indicador 3: Horarios de Atención que Requieren Revisión */}
-          <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-2xs flex flex-col justify-between">
+          <div className="bg-white rounded-2xl p-5 sm:p-6 border border-[#ded0f2]/80 shadow-2xs flex flex-col justify-between">
             <div className="space-y-3.5">
               <div className="flex items-center justify-between">
-                <span className="w-10 h-10 rounded-xl bg-sky-50 text-blue-900 flex items-center justify-center font-bold">
+                <span className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-800 flex items-center justify-center font-bold border border-emerald-200">
                   <Clock className="w-5 h-5" />
                 </span>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-sky-50 text-blue-900 border border-sky-200">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
                   {horariosRevision.length} en revisión
                 </span>
               </div>
 
               <div>
-                <h4 className="font-heading text-base font-bold text-slate-900">
+                <h4 className="font-heading text-base font-bold text-purple-950">
                   Horarios en Revisión Estacional
                 </h4>
                 <div className="mt-1 flex items-center gap-1.5 text-[11px] font-mono text-slate-500">
                   <span className="text-slate-400">Atributos:</span>
-                  <span className="px-1.5 py-0.5 rounded bg-slate-100 text-blue-900 font-semibold">
+                  <span className="px-1.5 py-0.5 rounded bg-[#ede4f6] text-purple-950 font-semibold">
                     horaInicioHA • horaFinHA
                   </span>
                 </div>
@@ -451,7 +451,7 @@ export default function AdminDashboardPage() {
                 <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1.5">
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-slate-900 flex items-center gap-1.5">
-                      <CalendarCheck className="w-3.5 h-3.5 text-blue-900" />
+                      <CalendarCheck className="w-3.5 h-3.5 text-[#d97786]" />
                       Turno Domingos y Feriados
                     </span>
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-200 text-slate-700">
@@ -463,8 +463,8 @@ export default function AdminDashboardPage() {
                   </p>
                 </div>
 
-                <div className="flex items-start gap-2 p-2.5 rounded-xl bg-blue-50/60 border border-blue-200/70 text-[11px] text-blue-900">
-                  <Info className="w-4 h-4 shrink-0 mt-0.5 text-blue-700" />
+                <div className="flex items-start gap-2 p-2.5 rounded-xl bg-[#ede4f6]/60 border border-[#ded0f2] text-[11px] text-purple-950">
+                  <Info className="w-4 h-4 shrink-0 mt-0.5 text-purple-700" />
                   <span>
                     El widget en vivo de la vitrina sincroniza en tiempo real según estos turnos.
                   </span>
@@ -475,7 +475,7 @@ export default function AdminDashboardPage() {
             <div className="mt-5 pt-4 border-t border-slate-100">
               <Link
                 href="/admin/horarios"
-                className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-900 text-xs font-bold transition-all active:scale-98"
+                className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-900 text-xs font-bold transition-all active:scale-98 border border-emerald-200"
               >
                 <span>Gestionar Horarios</span>
                 <ArrowRight className="w-4 h-4" />

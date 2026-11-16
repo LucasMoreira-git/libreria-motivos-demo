@@ -73,6 +73,13 @@ function obtenerFechaHoraActual(): string {
 }
 
 interface AdminContextType {
+  // Autenticación
+  isAuthenticated: boolean;
+  adminUser: { username: string; nombre: string } | null;
+  token: string | null;
+  login: (username: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  logout: () => void;
+
   // Entidades
   categorias: CategoriaAdmin[];
   productos: ProductoAdmin[];
@@ -110,14 +117,35 @@ interface AdminContextType {
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
 
 export function AdminProvider({ children }: { children: React.ReactNode }) {
+  // Estado de Autenticación
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [adminUser, setAdminUser] = useState<{ username: string; nombre: string } | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+
   const [categorias, setCategorias] = useState<CategoriaAdmin[]>(CATEGORIAS_INICIALES);
   const [productos, setProductos] = useState<ProductoAdmin[]>(PRODUCTOS_INICIALES);
   const [promociones, setPromociones] = useState<PromocionAdmin[]>(PROMOCIONES_INICIALES);
   const [horarios, setHorarios] = useState<HorarioAtencionAdmin[]>(HORARIOS_INICIALES);
 
-  // Carga inicial de localStorage en cliente
+  // Carga inicial de localStorage y sessionStorage en cliente
   useEffect(() => {
     try {
+      // 1. Verificar sesión activa de administrador
+      const sesionToken = sessionStorage.getItem('motivos_admin_token');
+      const sesionUser = sessionStorage.getItem('motivos_admin_user');
+      if (sesionToken) {
+        setToken(sesionToken);
+        setIsAuthenticated(true);
+        if (sesionUser) {
+          try {
+            setAdminUser(JSON.parse(sesionUser));
+          } catch {
+            setAdminUser({ username: 'admin', nombre: 'Administrador Librería Motivos' });
+          }
+        }
+      }
+
+      // 2. Entidades
       const catGuardadas = localStorage.getItem('motivos_admin_categorias');
       if (catGuardadas) setCategorias(JSON.parse(catGuardadas));
 
@@ -340,9 +368,96 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     } catch {}
   };
 
+  // Autenticación de Administrador (Conecta con Spring Boot o fallback seguro de contingencia)
+  const login = async (
+    username: string,
+    password: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await fetch('http://localhost:8080/api/admin/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.autenticado) {
+          const userObj = {
+            username: data.username || username,
+            nombre: data.nombre || 'Administrador Librería Motivos',
+          };
+          const authToken = data.token || `token-${Date.now()}`;
+
+          setToken(authToken);
+          setAdminUser(userObj);
+          setIsAuthenticated(true);
+
+          sessionStorage.setItem('motivos_admin_token', authToken);
+          sessionStorage.setItem('motivos_admin_user', JSON.stringify(userObj));
+          return { success: true };
+        } else {
+          return {
+            success: false,
+            error: data.mensaje || 'Credenciales incorrectas.',
+          };
+        }
+      } else {
+        const data = await res.json().catch(() => ({}));
+        return {
+          success: false,
+          error: data.mensaje || 'Usuario o contraseña no válidos.',
+        };
+      }
+    } catch {
+      // Contingencia local si el backend Spring Boot no está levantado
+      if (
+        username.trim().toLowerCase() === 'admin' &&
+        password.trim() === 'motivosAdmin2026!'
+      ) {
+        const userObj = {
+          username: 'admin',
+          nombre: 'Administrador Librería Motivos',
+        };
+        const fallbackToken = `token-local-${Date.now()}`;
+
+        setToken(fallbackToken);
+        setAdminUser(userObj);
+        setIsAuthenticated(true);
+
+        sessionStorage.setItem('motivos_admin_token', fallbackToken);
+        sessionStorage.setItem('motivos_admin_user', JSON.stringify(userObj));
+        return { success: true };
+      }
+      return {
+        success: false,
+        error: 'Credenciales inválidas. Compruebe el usuario y contraseña del sistema.',
+      };
+    }
+  };
+
+  const logout = () => {
+    if (token) {
+      fetch('http://localhost:8080/api/admin/auth/logout', {
+        method: 'POST',
+        headers: { 'X-Admin-Token': token },
+      }).catch(() => {});
+    }
+    setToken(null);
+    setAdminUser(null);
+    setIsAuthenticated(false);
+    sessionStorage.removeItem('motivos_admin_token');
+    sessionStorage.removeItem('motivos_admin_user');
+  };
+
   return (
     <AdminContext.Provider
       value={{
+        isAuthenticated,
+        adminUser,
+        token,
+        login,
+        logout,
         categorias,
         productos,
         promociones,
