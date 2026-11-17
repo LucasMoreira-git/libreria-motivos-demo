@@ -12,10 +12,16 @@ public class ProductoDTO {
     private String nombreProducto;
     private String detalleProducto;
     private Double precioProducto;
+    private Double precioDescuentoProducto;
     private Double precioAnteriorProducto;
+    private Double precioEfectivo;
+    private Date fechaFinDescuento;
+    private Boolean tieneDescuentoVigente;
     private String fotoProducto;
     private Boolean destacadoProducto;
     private Boolean enOfertaProducto;
+    private Boolean ultimasUnidadesProducto;
+    private Boolean nuevoIngresoProducto;
     private String badgeProducto;
     private Long tipoCategoriaId;
     private String tipoCategoriaNombre;
@@ -161,5 +167,53 @@ public class ProductoDTO {
 
     public void setFechaHoraBajaProducto(Date fechaHoraBajaProducto) {
         this.fechaHoraBajaProducto = fechaHoraBajaProducto;
+    }
+
+    public Double getPrecioDescuentoProducto() {
+        return precioDescuentoProducto;
+    }
+
+    public void setPrecioDescuentoProducto(Double precioDescuentoProducto) {
+        this.precioDescuentoProducto = precioDescuentoProducto;
+    }
+
+    public Double getPrecioEfectivo() {
+        return precioEfectivo;
+    }
+
+    public void setPrecioEfectivo(Double precioEfectivo) {
+        this.precioEfectivo = precioEfectivo;
+    }
+
+    public Date getFechaFinDescuento() {
+        return fechaFinDescuento;
+    }
+
+    public void setFechaFinDescuento(Date fechaFinDescuento) {
+        this.fechaFinDescuento = fechaFinDescuento;
+    }
+
+    public Boolean getTieneDescuentoVigente() {
+        return tieneDescuentoVigente;
+    }
+
+    public void setTieneDescuentoVigente(Boolean tieneDescuentoVigente) {
+        this.tieneDescuentoVigente = tieneDescuentoVigente;
+    }
+
+    public Boolean getUltimasUnidadesProducto() {
+        return ultimasUnidadesProducto;
+    }
+
+    public void setUltimasUnidadesProducto(Boolean ultimasUnidadesProducto) {
+        this.ultimasUnidadesProducto = ultimasUnidadesProducto;
+    }
+
+    public Boolean getNuevoIngresoProducto() {
+        return nuevoIngresoProducto;
+    }
+
+    public void setNuevoIngresoProducto(Boolean nuevoIngresoProducto) {
+        this.nuevoIngresoProducto = nuevoIngresoProducto;
     }
 }

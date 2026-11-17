@@ -47,10 +47,17 @@ public class Producto {
     @Column(name = "precio_producto", nullable = false)
     private Double precioProducto;
 
+    @Column(name = "precio_descuento_producto")
+    private Double precioDescuentoProducto;
+
     @Column(name = "precio_anterior_producto")
     private Double precioAnteriorProducto;
 
-    @Column(name = "foto_producto", length = 500)
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "fecha_fin_descuento")
+    private Date fechaFinDescuento;
+
+    @Column(name = "foto_producto", columnDefinition = "LONGTEXT")
     private String fotoProducto;
 
     @Column(name = "destacado_producto", nullable = false)
@@ -58,6 +65,12 @@ public class Producto {
 
     @Column(name = "en_oferta_producto", nullable = false)
     private Boolean enOfertaProducto = false;
+
+    @Column(name = "ultimas_unidades_producto", nullable = false)
+    private Boolean ultimasUnidadesProducto = false;
+
+    @Column(name = "nuevo_ingreso_producto", nullable = false)
+    private Boolean nuevoIngresoProducto = false;
 
     @Column(name = "badge_producto", length = 50)
     private String badgeProducto;
@@ -124,6 +137,32 @@ public class Producto {
 
     public boolean isActivo() {
         return this.fechaHoraBajaProducto == null;
+    }
+
+    /**
+     * Evalúa si el producto posee un descuento especial vigente en el tiempo.
+     * Si no tiene fecha límite o la fecha límite aún no expiró, el descuento es válido.
+     */
+    public boolean tieneDescuentoVigente() {
+        if (precioDescuentoProducto == null || precioDescuentoProducto <= 0) {
+            return false;
+        }
+        if (fechaFinDescuento == null) {
+            return true;
+        }
+        return !fechaFinDescuento.before(new Date());
+    }
+
+    /**
+     * Obtiene el precio efectivo a cobrar/mostrar al cliente:
+     * Si el descuento sigue vigente, devuelve precioDescuentoProducto.
+     * En caso contrario o si ya expiró, devuelve el precioProducto regular.
+     */
+    public Double getPrecioEfectivo() {
+        if (tieneDescuentoVigente()) {
+            return precioDescuentoProducto;
+        }
+        return precioProducto;
     }
 
     // Getters y Setters
@@ -237,6 +276,38 @@ public class Producto {
 
     public void setPromocion(Promocion promocion) {
         this.promocion = promocion;
+    }
+
+    public Double getPrecioDescuentoProducto() {
+        return precioDescuentoProducto;
+    }
+
+    public void setPrecioDescuentoProducto(Double precioDescuentoProducto) {
+        this.precioDescuentoProducto = precioDescuentoProducto;
+    }
+
+    public Date getFechaFinDescuento() {
+        return fechaFinDescuento;
+    }
+
+    public void setFechaFinDescuento(Date fechaFinDescuento) {
+        this.fechaFinDescuento = fechaFinDescuento;
+    }
+
+    public Boolean getUltimasUnidadesProducto() {
+        return ultimasUnidadesProducto;
+    }
+
+    public void setUltimasUnidadesProducto(Boolean ultimasUnidadesProducto) {
+        this.ultimasUnidadesProducto = ultimasUnidadesProducto;
+    }
+
+    public Boolean getNuevoIngresoProducto() {
+        return nuevoIngresoProducto;
+    }
+
+    public void setNuevoIngresoProducto(Boolean nuevoIngresoProducto) {
+        this.nuevoIngresoProducto = nuevoIngresoProducto;
     }
 
     @Override

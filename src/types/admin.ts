@@ -18,13 +18,19 @@ export interface ProductoAdmin {
   nombreProducto: string;
   detalleProducto: string;
   precioProducto: number;
+  precioDescuentoProducto?: number | null;
+  fechaFinDescuento?: string | null; // ISO string YYYY-MM-DDTHH:mm o YYYY-MM-DD
+  tieneDescuentoVigente?: boolean;
+  precioEfectivo?: number;
   fotoProducto: string;
   categoriaId: string;
   codTC?: string; // Código de TipoCategoria (dominio)
   categoriaNombre?: string;
   destacadoProducto: boolean;
   enOfertaProducto: boolean;
-  badgeProducto: 'OFERTA' | 'NOVEDAD' | null;
+  ultimasUnidadesProducto?: boolean;
+  nuevoIngresoProducto?: boolean;
+  badgeProducto: string | null;
   fechaHoraBajaProducto: string | null; // Null si activa, ISO / Timestamp si dada de baja
 }
 

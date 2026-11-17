@@ -12,6 +12,35 @@ interface ProductCardProps {
   onVerDetalle?: (producto: Producto) => void;
 }
 
+function obtenerEstiloBadge(textoBadge: string): string {
+  const t = textoBadge.toUpperCase();
+  if (t.includes('OFERTA') || t.includes('DESCUENTO')) {
+    return 'bg-[#d97786] text-white';
+  }
+  if (t.includes('VENDIDO') || t.includes('TOP')) {
+    return 'bg-amber-500 text-slate-950 font-black';
+  }
+  if (t.includes('NOVEDAD') || t.includes('NUEVO')) {
+    return 'bg-blue-600 text-white';
+  }
+  if (t.includes('STOCK') || t.includes('UNIDADES') || t.includes('LIMITAD')) {
+    return 'bg-orange-600 text-white';
+  }
+  if (t.includes('ESCOLAR')) {
+    return 'bg-indigo-600 text-white';
+  }
+  if (t.includes('PREMIUM') || t.includes('EDICIÓN') || t.includes('EDICION')) {
+    return 'bg-slate-900 text-amber-300 border border-amber-300/40';
+  }
+  if (t.includes('TÉCNICO') || t.includes('TECNICO')) {
+    return 'bg-cyan-700 text-white';
+  }
+  if (t.includes('AMIGO') || t.includes('AHORRO') || t.includes('IMPERDIBLE')) {
+    return 'bg-emerald-600 text-white';
+  }
+  return 'bg-slate-900/90 text-white';
+}
+
 export function ProductCard({ producto, onVerDetalle }: ProductCardProps) {
   const urlFoto =
     producto.fotoProducto ||
@@ -24,6 +53,16 @@ export function ProductCard({ producto, onVerDetalle }: ProductCardProps) {
   );
 
   const precioFormateado = producto.precio.toLocaleString('es-AR');
+  const tieneDescuento = Boolean(
+    producto.precioAnterior && producto.precioAnterior > producto.precio
+  );
+  const porcentajeDescuento = tieneDescuento && producto.precioAnterior
+    ? Math.round(((producto.precioAnterior - producto.precio) / producto.precioAnterior) * 100)
+    : null;
+
+  const badgeTexto = producto.badge || producto.badgeProducto;
+  const esUltimasUnidades = Boolean(producto.ultimasUnidades || producto.ultimasUnidadesProducto);
+  const esNuevoIngreso = Boolean(producto.nuevoIngreso || producto.nuevoIngresoProducto);
 
   return (
     <Card className="group flex flex-col justify-between overflow-hidden rounded-2xl bg-white border border-slate-200/90 hover:border-[#eed0d5] shadow-2xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ease-out h-full">
@@ -41,7 +80,7 @@ export function ProductCard({ producto, onVerDetalle }: ProductCardProps) {
         }}
         aria-label={`Ver detalles de ${producto.nombre}`}
       >
-        {/* Contenedor con altura fija h-[220px] lg:h-[260px] y foto real simulada con object-cover */}
+        {/* Contenedor con altura fija h-[220px] lg:h-[260px] y foto real con object-cover */}
         <div className="relative w-full h-[220px] lg:h-[260px] overflow-hidden bg-slate-100 shrink-0">
           <img
             src={urlFoto}
@@ -57,17 +96,29 @@ export function ProductCard({ producto, onVerDetalle }: ProductCardProps) {
             </span>
           )}
 
-          {/* Badges absolutos superpuestos (OFERTA / NOVEDAD) en la esquina superior derecha */}
-          {producto.badge === 'OFERTA' && (
-            <span className="absolute top-2.5 right-2.5 z-10 bg-[#d97786] text-white text-[10px] sm:text-xs font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-md animate-in fade-in">
-              OFERTA
-            </span>
-          )}
-          {producto.badge === 'NOVEDAD' && (
-            <span className="absolute top-2.5 right-2.5 z-10 bg-blue-600 text-white text-[10px] sm:text-xs font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-md animate-in fade-in">
-              NOVEDAD
-            </span>
-          )}
+          {/* Badges en la esquina superior derecha */}
+          <div className="absolute top-2.5 right-2.5 z-10 flex flex-col items-end gap-1">
+            {badgeTexto && (
+              <span className={`text-[10px] sm:text-xs font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-md animate-in fade-in ${obtenerEstiloBadge(badgeTexto)}`}>
+                {badgeTexto}
+              </span>
+            )}
+            {porcentajeDescuento && !badgeTexto && (
+              <span className="bg-[#d97786] text-white text-[10px] sm:text-xs font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-md animate-in fade-in">
+                {porcentajeDescuento}% OFF
+              </span>
+            )}
+            {esUltimasUnidades && (
+              <span className="bg-amber-600/90 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-xs">
+                Últimas unid.
+              </span>
+            )}
+            {esNuevoIngreso && !badgeTexto && (
+              <span className="bg-indigo-600/90 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-xs">
+                Nuevo ingreso
+              </span>
+            )}
+          </div>
 
           {/* Indicador sutil de vista rápida en hover para pantallas de escritorio */}
           <div className="absolute inset-0 bg-slate-900/20 opacity-0 group-hover:opacity-100 transition-opacity hidden sm:flex items-center justify-center pointer-events-none">
@@ -80,6 +131,19 @@ export function ProductCard({ producto, onVerDetalle }: ProductCardProps) {
 
         {/* Textos del Producto: Nombre y Detalle */}
         <div className="p-3 sm:p-4 space-y-1.5 flex-1">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {esNuevoIngreso && (
+              <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200/80 px-1.5 py-0.2 rounded">
+                ✨ Novedad
+              </span>
+            )}
+            {esUltimasUnidades && (
+              <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200/80 px-1.5 py-0.2 rounded">
+                ⚠️ Stock limitado
+              </span>
+            )}
+          </div>
+
           <h3 className="font-heading font-bold text-slate-900 text-xs sm:text-sm leading-snug line-clamp-2 group-hover:text-[#b34f60] transition-colors">
             {producto.nombre}
           </h3>
@@ -94,16 +158,21 @@ export function ProductCard({ producto, onVerDetalle }: ProductCardProps) {
       <div className="p-3 sm:p-4 pt-0 sm:pt-0 mt-auto">
         <div className="pt-3 border-t border-slate-100 flex flex-col gap-2">
           
-          {/* Fila de Precio y Botón CTA (Inspirado en la referencia visual) */}
+          {/* Fila de Precio y Botón CTA */}
           <div className="flex items-center justify-between gap-2">
             <div className="flex flex-col min-w-0">
-              <div className="flex items-baseline gap-1.5">
+              <div className="flex items-baseline gap-1.5 flex-wrap">
                 <span className="font-heading text-base sm:text-lg lg:text-xl font-black text-slate-900 tracking-tight">
                   $ {precioFormateado}
                 </span>
                 {producto.precioAnterior && (
                   <span className="text-[10px] sm:text-xs text-slate-400 line-through">
                     ${producto.precioAnterior.toLocaleString('es-AR')}
+                  </span>
+                )}
+                {porcentajeDescuento && (
+                  <span className="text-[10px] font-black text-[#b34f60] bg-rose-50 px-1 py-0.2 rounded">
+                    -{porcentajeDescuento}%
                   </span>
                 )}
               </div>

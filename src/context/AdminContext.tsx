@@ -181,12 +181,18 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           nombreProducto: p.nombreProducto,
           detalleProducto: p.detalleProducto || '',
           precioProducto: Number(p.precioProducto || 0),
+          precioDescuentoProducto: p.precioDescuentoProducto !== null && p.precioDescuentoProducto !== undefined ? Number(p.precioDescuentoProducto) : null,
+          fechaFinDescuento: p.fechaFinDescuento ? new Date(p.fechaFinDescuento).toISOString() : null,
+          tieneDescuentoVigente: !!p.tieneDescuentoVigente,
+          precioEfectivo: p.precioEfectivo !== undefined ? Number(p.precioEfectivo) : Number(p.precioProducto || 0),
           fotoProducto: p.fotoProducto || '',
           categoriaId: String(p.tipoCategoriaId || ''),
           codTC: p.codigoProducto || String(p.tipoCategoriaId || ''),
           categoriaNombre: p.tipoCategoriaNombre || '',
           destacadoProducto: !!p.destacadoProducto,
           enOfertaProducto: !!p.enOfertaProducto,
+          ultimasUnidadesProducto: !!p.ultimasUnidadesProducto,
+          nuevoIngresoProducto: !!p.nuevoIngresoProducto,
           badgeProducto: p.badgeProducto || null,
           fechaHoraBajaProducto: p.fechaHoraBajaProducto 
             ? formatearTimestampBaja(p.fechaHoraBajaProducto) 
@@ -400,11 +406,14 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   const crearProducto = (data: Omit<ProductoAdmin, 'idProducto' | 'fechaHoraBajaProducto'>) => {
     const cat = categorias.find((c) => c.idCategoria === data.categoriaId);
     const nuevoId = `prod-${Date.now()}`;
+    const tieneDesc = !!(data.precioDescuentoProducto && data.fechaFinDescuento && new Date(data.fechaFinDescuento).getTime() > Date.now());
     const nuevo: ProductoAdmin = {
       ...data,
       idProducto: nuevoId,
       codTC: data.codTC !== undefined ? data.codTC : data.categoriaId,
       categoriaNombre: cat ? cat.nombreCategoria : '',
+      tieneDescuentoVigente: tieneDesc,
+      precioEfectivo: tieneDesc && data.precioDescuentoProducto ? data.precioDescuentoProducto : data.precioProducto,
       fechaHoraBajaProducto: null,
     };
     setProductos((prev) => [nuevo, ...prev]);
@@ -423,10 +432,14 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           codigoProducto: `PROD-${Date.now().toString().slice(-4)}`,
           nombreProducto: data.nombreProducto,
           precioProducto: data.precioProducto,
+          precioDescuentoProducto: data.precioDescuentoProducto ?? null,
+          fechaFinDescuento: data.fechaFinDescuento ?? null,
           detalleProducto: data.detalleProducto,
           fotoProducto: data.fotoProducto,
           destacadoProducto: data.destacadoProducto,
           enOfertaProducto: data.enOfertaProducto,
+          ultimasUnidadesProducto: data.ultimasUnidadesProducto ?? false,
+          nuevoIngresoProducto: data.nuevoIngresoProducto ?? false,
           badgeProducto: data.badgeProducto,
         }),
       })
@@ -437,13 +450,16 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
   const editarProducto = (producto: ProductoAdmin) => {
     const cat = categorias.find((c) => c.idCategoria === producto.categoriaId);
+    const tieneDesc = !!(producto.precioDescuentoProducto && producto.fechaFinDescuento && new Date(producto.fechaFinDescuento).getTime() > Date.now());
     setProductos((prev) =>
       prev.map((p) =>
         p.idProducto === producto.idProducto
           ? { 
               ...producto, 
               codTC: producto.codTC !== undefined ? producto.codTC : producto.categoriaId,
-              categoriaNombre: cat ? cat.nombreCategoria : p.categoriaNombre 
+              categoriaNombre: cat ? cat.nombreCategoria : p.categoriaNombre,
+              tieneDescuentoVigente: tieneDesc,
+              precioEfectivo: tieneDesc && producto.precioDescuentoProducto ? producto.precioDescuentoProducto : producto.precioProducto,
             }
           : p
       )
@@ -463,10 +479,14 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           body: JSON.stringify({
             nombreProducto: producto.nombreProducto,
             precioProducto: producto.precioProducto,
+            precioDescuentoProducto: producto.precioDescuentoProducto ?? null,
+            fechaFinDescuento: producto.fechaFinDescuento ?? null,
             detalleProducto: producto.detalleProducto,
             fotoProducto: producto.fotoProducto,
             destacadoProducto: producto.destacadoProducto,
             enOfertaProducto: producto.enOfertaProducto,
+            ultimasUnidadesProducto: producto.ultimasUnidadesProducto ?? false,
+            nuevoIngresoProducto: producto.nuevoIngresoProducto ?? false,
             badgeProducto: producto.badgeProducto,
           }),
         })

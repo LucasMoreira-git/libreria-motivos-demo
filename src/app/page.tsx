@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { PromoHero } from '@/components/modules/PromoHero';
@@ -18,23 +18,62 @@ export default function Home() {
   const { productos, categorias, promociones, horarios } = useAdmin();
   const whatsappUrl = getGeneralWhatsAppLink(DATOS_LIBRERIA_MOTIVOS.telefonoWhatsApp);
 
+  // Timestamp cliente para evitar conflictos de prerender con Date.now() en Next.js
+  const [timestampActual, setTimestampActual] = useState<number | null>(null);
+
+  useEffect(() => {
+    setTimestampActual(Date.now());
+    const interval = setInterval(() => {
+      setTimestampActual(Date.now());
+    }, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
   // Mapeo dinámico y reactivo del catálogo en vivo (excluyendo bajas lógicas)
   const productosActivos: Producto[] = useMemo(() => {
     return productos
       .filter((p) => !p.fechaHoraBajaProducto)
-      .map((p) => ({
-        id: p.idProducto,
-        nombre: p.nombreProducto,
-        detalle: p.detalleProducto,
-        precio: p.precioProducto,
-        foto: p.fotoProducto,
-        categoriaId: p.categoriaId,
-        categoriaNombre: p.categoriaNombre,
-        destacado: p.destacadoProducto,
-        enOferta: p.enOfertaProducto,
-        badge: p.badgeProducto as any,
-      }));
-  }, [productos]);
+      .map((p) => {
+        // Verificar si el descuento sigue vigente por fecha
+        const fechaFin = p.fechaFinDescuento ? new Date(p.fechaFinDescuento).getTime() : null;
+        const tieneDescuentoVigente = Boolean(
+          p.precioDescuentoProducto &&
+          p.precioDescuentoProducto > 0 &&
+          fechaFin !== null &&
+          (timestampActual === null ? (p.tieneDescuentoVigente ?? true) : fechaFin > timestampActual)
+        );
+
+        const precioFinal = tieneDescuentoVigente && p.precioDescuentoProducto
+          ? p.precioDescuentoProducto
+          : p.precioProducto;
+
+        const precioTachado = tieneDescuentoVigente ? p.precioProducto : undefined;
+
+        return {
+          id: p.idProducto,
+          nombre: p.nombreProducto,
+          detalle: p.detalleProducto,
+          precio: precioFinal,
+          precioAnterior: precioTachado,
+          precioDescuento: p.precioDescuentoProducto,
+          precioDescuentoProducto: p.precioDescuentoProducto,
+          fechaFinDescuento: p.fechaFinDescuento,
+          tieneDescuentoVigente,
+          precioEfectivo: precioFinal,
+          foto: p.fotoProducto,
+          categoriaId: p.categoriaId,
+          categoriaNombre: p.categoriaNombre,
+          destacado: p.destacadoProducto,
+          enOferta: tieneDescuentoVigente ? true : p.enOfertaProducto,
+          ultimasUnidades: p.ultimasUnidadesProducto,
+          ultimasUnidadesProducto: p.ultimasUnidadesProducto,
+          nuevoIngreso: p.nuevoIngresoProducto,
+          nuevoIngresoProducto: p.nuevoIngresoProducto,
+          badge: p.badgeProducto as any,
+          badgeProducto: p.badgeProducto,
+        };
+      });
+  }, [productos, timestampActual]);
 
   const categoriasActivas: TipoCategoria[] = useMemo(() => {
     return categorias

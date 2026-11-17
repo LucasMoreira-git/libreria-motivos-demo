@@ -13,15 +13,27 @@ export interface Producto {
   nombre: string;
   detalle: string;
   precio: number;
-  foto?: string;           // URL de foto simulada
+  precioDescuento?: number | null;
+  precioDescuentoProducto?: number | null;
+  fechaFinDescuento?: string | null;
+  tieneDescuentoVigente?: boolean;
+  precioEfectivo?: number;
+  foto?: string;           // URL o base64
   fotoProducto?: string;   // Alias de modelo de dominio
   fotoPlaceholder?: string;
   categoriaId: string;
   categoriaNombre?: string;
   destacado?: boolean;
+  destacadoProducto?: boolean;
   enOferta?: boolean;
+  enOfertaProducto?: boolean;
+  ultimasUnidades?: boolean;
+  ultimasUnidadesProducto?: boolean;
+  nuevoIngreso?: boolean;
+  nuevoIngresoProducto?: boolean;
   precioAnterior?: number;
-  badge?: 'OFERTA' | 'NOVEDAD' | null; // Badges absolutos superpuestos
+  badge?: string | null; // Badges absolutos superpuestos
+  badgeProducto?: string | null;
 }
 
 export interface Promocion {

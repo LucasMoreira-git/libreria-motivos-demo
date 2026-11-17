@@ -55,6 +55,14 @@ export function ProductModal({ producto, onCerrar }: ProductModalProps) {
 
   const urlFoto = producto.fotoProducto || producto.foto;
 
+  const badgeTexto = producto.badge || producto.badgeProducto;
+  const esUltimasUnidades = Boolean(producto.ultimasUnidades || producto.ultimasUnidadesProducto);
+  const esNuevoIngreso = Boolean(producto.nuevoIngreso || producto.nuevoIngresoProducto);
+  const tieneDescuento = Boolean(producto.precioAnterior && producto.precioAnterior > producto.precio);
+  const porcentajeDescuento = tieneDescuento && producto.precioAnterior
+    ? Math.round(((producto.precioAnterior - producto.precio) / producto.precioAnterior) * 100)
+    : null;
+
   return (
     <div 
       role="dialog"
@@ -98,20 +106,25 @@ export function ProductModal({ producto, onCerrar }: ProductModalProps) {
           </button>
 
           {/* Badges de Categoría y Oferta / Novedad */}
-          <div className="absolute bottom-3 left-3 flex items-center gap-1.5">
+          <div className="absolute bottom-3 left-3 flex flex-wrap items-center gap-1.5">
             {producto.categoriaNombre && (
               <span className="bg-slate-900/85 backdrop-blur-md text-white text-xs font-semibold px-2.5 py-1 rounded-full shadow-xs">
                 {producto.categoriaNombre}
               </span>
             )}
-            {producto.badge === 'OFERTA' && (
-              <span className="bg-[#d97786] text-white text-xs font-black uppercase px-2.5 py-1 rounded-full shadow-xs">
-                OFERTA
+            {badgeTexto && (
+              <span className="bg-[#d97786] text-white text-xs font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-xs">
+                {badgeTexto}
               </span>
             )}
-            {producto.badge === 'NOVEDAD' && (
-              <span className="bg-blue-600 text-white text-xs font-black uppercase px-2.5 py-1 rounded-full shadow-xs">
-                NOVEDAD
+            {esUltimasUnidades && (
+              <span className="bg-amber-600/90 text-white text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-xs">
+                Últimas unidades
+              </span>
+            )}
+            {esNuevoIngreso && !badgeTexto && (
+              <span className="bg-indigo-600/90 text-white text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-xs">
+                Nuevo ingreso
               </span>
             )}
           </div>
@@ -158,6 +171,11 @@ export function ProductModal({ producto, onCerrar }: ProductModalProps) {
                 <span className="font-heading text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
                   $ {producto.precio.toLocaleString('es-AR')}
                 </span>
+                {porcentajeDescuento && (
+                  <span className="text-xs font-black text-[#b34f60] bg-rose-50 px-1.5 py-0.5 rounded-md">
+                    -{porcentajeDescuento}%
+                  </span>
+                )}
               </div>
             </div>
 

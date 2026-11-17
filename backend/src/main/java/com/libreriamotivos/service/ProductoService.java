@@ -98,6 +98,18 @@ public class ProductoService {
             Optional<Promocion> promo = promocionRepository.findByIdAndFechaHoraBajaPromocionIsNull(promocionId);
             promo.ifPresent(producto::setPromocion);
         }
+        if (producto.getId() != null) {
+            Optional<Producto> existente = productoRepository.findById(producto.getId());
+            if (existente.isPresent()) {
+                Producto ex = existente.get();
+                if (producto.getFechaHoraAltaProducto() == null) {
+                    producto.setFechaHoraAltaProducto(ex.getFechaHoraAltaProducto());
+                }
+                if (producto.getFechaHoraBajaProducto() == null) {
+                    producto.setFechaHoraBajaProducto(ex.getFechaHoraBajaProducto());
+                }
+            }
+        }
         Producto guardado = productoRepository.save(producto);
         return convertirADTO(guardado);
     }
@@ -137,14 +149,29 @@ public class ProductoService {
         dto.setNombreProducto(entity.getNombreProducto());
         dto.setDetalleProducto(entity.getDetalleProducto());
         dto.setPrecioProducto(entity.getPrecioProducto());
-        dto.setPrecioAnteriorProducto(entity.getPrecioAnteriorProducto());
+        dto.setPrecioDescuentoProducto(entity.getPrecioDescuentoProducto());
+        dto.setFechaFinDescuento(entity.getFechaFinDescuento());
+        dto.setUltimasUnidadesProducto(entity.getUltimasUnidadesProducto());
+        dto.setNuevoIngresoProducto(entity.getNuevoIngresoProducto());
         dto.setFotoProducto(entity.getFotoProducto());
         dto.setDestacadoProducto(entity.getDestacadoProducto());
-        dto.setEnOfertaProducto(entity.getEnOfertaProducto());
         dto.setBadgeProducto(entity.getBadgeProducto());
         dto.setActivo(entity.isActivo());
         dto.setFechaHoraAltaProducto(entity.getFechaHoraAltaProducto());
         dto.setFechaHoraBajaProducto(entity.getFechaHoraBajaProducto());
+
+        // Lógica de Descuento Vigente
+        boolean tieneDescuento = entity.tieneDescuentoVigente();
+        dto.setTieneDescuentoVigente(tieneDescuento);
+        if (tieneDescuento) {
+            dto.setPrecioEfectivo(entity.getPrecioDescuentoProducto());
+            dto.setPrecioAnteriorProducto(entity.getPrecioProducto());
+            dto.setEnOfertaProducto(true);
+        } else {
+            dto.setPrecioEfectivo(entity.getPrecioProducto());
+            dto.setPrecioAnteriorProducto(entity.getPrecioAnteriorProducto());
+            dto.setEnOfertaProducto(entity.getEnOfertaProducto() != null ? entity.getEnOfertaProducto() : false);
+        }
 
         if (entity.getTipoCategoria() != null) {
             dto.setTipoCategoriaId(entity.getTipoCategoria().getId());
