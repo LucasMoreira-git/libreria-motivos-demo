@@ -157,7 +157,7 @@ mvn clean spring-boot:run
 ```
 El servidor backend se levantará en [http://localhost:8080](http://localhost:8080).
 
----
+
 
 ## Autor
 
@@ -168,4 +168,4 @@ El servidor backend se levantará en [http://localhost:8080](http://localhost:80
 
 ---
 
-Si este proyecto te resultó interesante o útil para tu portafolio, no dudes en dejarle una estrella en GitHub.
+Si este proyecto te resultó interesante, no dudes en dejarle una estrella en GitHub.
