@@ -27,7 +27,7 @@ Diseñada bajo un estándar de desarrollo profesional **Mobile First**, con arqu
 - **Modal de Detalle Rápido:** Vista ampliada de producto con badges de oferta/novedad, stock garantizado y botón de consulta directa.
 
 ### Motor de Automatización WhatsApp (wa.me)
-- **Mensajes Contextuales Estandarizados:** Generación automática de enlaces internacionales (`+54 9 261 563-5813`) con mensajes pre-redactados para cada producto:
+- **Mensajes Contextuales Estandarizados:** Generación automática de enlaces internacionale con mensajes pre-redactados para cada producto:
   > *"¡Hola! ¿Qué tal? Quería hacerles una consulta sobre [Nombre del producto]. ¡Gracias!"*
 - **Presupuestos Escolares y Comerciales:** Flujo directo para enviar listas completas o solicitar presupuestos por WhatsApp en un solo clic.
 
@@ -98,8 +98,8 @@ Libreria-Motivos/
 | **Íconos** | [Lucide React](https://lucide.dev/) | Iconografía SVG ligera, coherente y accesible |
 | **Backend API** | [Spring Boot 3.5](https://spring.io/) | API RESTful robusta y modular con Java 21 |
 | **Persistencia ORM** | [Spring Data JPA / Hibernate](https://spring.io/projects/spring-data-jpa) | Mapeo objeto-relacional con bajas lógicas (Soft Delete) |
-| **Base de Datos** | [MySQL 8.0](https://www.mysql.com/) | Motor relacional con integridad referencial |
-| **Productividad** | [Lombok](https://projectlombok.org/) | Reducción de boilerplate (`@Getter`, `@Setter`, `@Builder`) |
+| **Base de Datos** | [MySQL 8.0](https://www.mysql.com/) | Motor relacional |
+| **Productividad** | [Lombok](https://projectlombok.org/) | (`@Getter`, `@Setter`, `@Builder`) |
 
 ---
 
@@ -171,7 +171,7 @@ El servidor backend se levantará en [http://localhost:8080](http://localhost:80
 ## Autor
 
 **Lucas Moreira**  
-*Desarrollador Full Stack & Diseñador de Interfaces*  
+*Estudante de ingenieria en sistemas*  
 - **GitHub:** [@LucasMoreira-git](https://github.com/LucasMoreira-git)
 - **Ubicación:** Mendoza, Argentina
 
