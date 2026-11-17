@@ -159,19 +159,10 @@ El servidor backend se levantará en [http://localhost:8080](http://localhost:80
 
 ---
 
-## Auditoría de Seguridad & Buenas Prácticas
-
-- **Cero Credenciales Expuestas:** Todas las contraseñas y tokens sensibles de base de datos se parametrizan mediante variables de entorno (`${DB_PASSWORD:}`) con fallbacks seguros.
-- **Archivos Sensibles Ignorados:** Configuración rigurosa de `.gitignore` para omitir artefactos compilados (`.next/`, `backend/target/`, `node_modules/`), credenciales locales (`.env*`) y configuraciones de IDEs (`.idea/`, `.vscode/`).
-- **Seguridad en Formularios:** Validación de campos y sanitización de inputs para evitar inyecciones.
-- **Rendimiento Web:** Zero layout shifts (CLS = 0), Largest Contentful Paint (LCP) optimizado mediante prerender estático de Next.js y fuentes de sistema optimizadas.
-
----
-
 ## Autor
 
 **Lucas Moreira**  
-*Estudante de ingenieria en sistemas*  
+*Estudiante de ingenieria en sistemas*  
 - **GitHub:** [@LucasMoreira-git](https://github.com/LucasMoreira-git)
 - **Ubicación:** Mendoza, Argentina
 
