@@ -23,6 +23,7 @@ public class ProductoDTO {
     private String promocionNombre;
     private boolean activo;
     private Date fechaHoraAltaProducto;
+    private Date fechaHoraBajaProducto;
 
     public ProductoDTO() {}
 
@@ -152,5 +153,13 @@ public class ProductoDTO {
 
     public void setFechaHoraAltaProducto(Date fechaHoraAltaProducto) {
         this.fechaHoraAltaProducto = fechaHoraAltaProducto;
+    }
+
+    public Date getFechaHoraBajaProducto() {
+        return fechaHoraBajaProducto;
+    }
+
+    public void setFechaHoraBajaProducto(Date fechaHoraBajaProducto) {
+        this.fechaHoraBajaProducto = fechaHoraBajaProducto;
     }
 }

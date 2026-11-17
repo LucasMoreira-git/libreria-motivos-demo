@@ -72,6 +72,22 @@ function obtenerFechaHoraActual(): string {
   return `${dia}/${mes}/${anio} ${horas}:${minutos} hs`;
 }
 
+function formatearTimestampBaja(fechaRaw: any): string | null {
+  if (!fechaRaw) return null;
+  try {
+    const d = new Date(fechaRaw);
+    if (isNaN(d.getTime())) return String(fechaRaw);
+    const dia = String(d.getDate()).padStart(2, '0');
+    const mes = String(d.getMonth() + 1).padStart(2, '0');
+    const anio = d.getFullYear();
+    const horas = String(d.getHours()).padStart(2, '0');
+    const minutos = String(d.getMinutes()).padStart(2, '0');
+    return `${dia}/${mes}/${anio} ${horas}:${minutos} hs`;
+  } catch {
+    return String(fechaRaw);
+  }
+}
+
 interface AdminContextType {
   // Autenticación
   isAuthenticated: boolean;
@@ -134,14 +150,14 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   const [promociones, setPromociones] = useState<PromocionAdmin[]>(PROMOCIONES_INICIALES);
   const [horarios, setHorarios] = useState<HorarioAtencionAdmin[]>(HORARIOS_INICIALES);
 
-  // Función para sincronizar datos reales desde Spring Boot REST API
+  // Función para sincronizar datos reales desde Spring Boot REST API (incluyendo bajas lógicas para el panel)
   const sincronizarConBackend = async () => {
     try {
       const [resCat, resProd, resProm, resHor] = await Promise.all([
-        fetch('http://localhost:8080/api/categorias').then((r) => (r.ok ? r.json() : null)),
-        fetch('http://localhost:8080/api/productos').then((r) => (r.ok ? r.json() : null)),
-        fetch('http://localhost:8080/api/promociones').then((r) => (r.ok ? r.json() : null)),
-        fetch('http://localhost:8080/api/horarios').then((r) => (r.ok ? r.json() : null)),
+        fetch('http://localhost:8080/api/categorias?incluirInactivas=true').then((r) => (r.ok ? r.json() : null)),
+        fetch('http://localhost:8080/api/productos?incluirInactivos=true').then((r) => (r.ok ? r.json() : null)),
+        fetch('http://localhost:8080/api/promociones?incluirInactivas=true').then((r) => (r.ok ? r.json() : null)),
+        fetch('http://localhost:8080/api/horarios?incluirInactivos=true').then((r) => (r.ok ? r.json() : null)),
       ]);
 
       if (resCat && Array.isArray(resCat) && resCat.length > 0) {
@@ -152,7 +168,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           iconoCategoria: c.iconoCategoria || 'FolderTree',
           descripcionCategoria: c.descripcionTC || '',
           ordenCategoria: c.ordenCategoria || 1,
-          fechaHoraBajaCategoria: c.activo === false ? 'Baja' : null,
+          fechaHoraBajaCategoria: c.fechaHoraBajaTC 
+            ? formatearTimestampBaja(c.fechaHoraBajaTC) 
+            : (c.activo === false ? 'Baja lógica' : null),
         }));
         setCategorias(catMapeadas);
       }
@@ -170,7 +188,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           destacadoProducto: !!p.destacadoProducto,
           enOfertaProducto: !!p.enOfertaProducto,
           badgeProducto: p.badgeProducto || null,
-          fechaHoraBajaProducto: p.activo === false ? 'Baja' : null,
+          fechaHoraBajaProducto: p.fechaHoraBajaProducto 
+            ? formatearTimestampBaja(p.fechaHoraBajaProducto) 
+            : (p.activo === false ? 'Baja lógica' : null),
         }));
         setProductos(prodMapeados);
       }
@@ -187,7 +207,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           descuentoTextoPromocion: pr.descuentoTexto || '',
           condicionPromocion: pr.condicionPromocion || '',
           fotoComboPromocion: pr.fotoCombo || '',
-          fechaHoraBajaPromocion: pr.activo === false ? 'Baja' : null,
+          fechaHoraBajaPromocion: pr.fechaHoraBajaPromocion 
+            ? formatearTimestampBaja(pr.fechaHoraBajaPromocion) 
+            : (pr.activo === false ? 'Baja lógica' : null),
         }));
         setPromociones(promMapeadas);
       }
@@ -201,7 +223,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           horaInicioHA: h.horaInicioHA || '09:30',
           horaFinHA: h.horaFinHA || '13:30',
           esCerradoHA: !!h.esCerradoHA,
-          fechaHoraBajaHA: h.activo === false ? 'Baja' : null,
+          fechaHoraBajaHA: h.fechaHoraBajaHA 
+            ? formatearTimestampBaja(h.fechaHoraBajaHA) 
+            : (h.activo === false ? 'Baja lógica' : null),
         }));
         setHorarios(horMapeados);
       }

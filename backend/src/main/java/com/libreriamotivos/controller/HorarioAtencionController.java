@@ -26,7 +26,11 @@ public class HorarioAtencionController {
     }
 
     @GetMapping
-    public ResponseEntity<List<HorarioAtencionDTO>> listarActivos() {
+    public ResponseEntity<List<HorarioAtencionDTO>> listarActivos(
+            @RequestParam(required = false, defaultValue = "false") boolean incluirInactivos) {
+        if (incluirInactivos) {
+            return ResponseEntity.ok(horarioService.listarTodos());
+        }
         return ResponseEntity.ok(horarioService.listarActivos());
     }
 

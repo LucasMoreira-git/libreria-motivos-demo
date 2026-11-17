@@ -1,6 +1,7 @@
 package com.libreriamotivos.dto;
 
 import java.time.LocalTime;
+import java.util.Date;
 
 /**
  * DTO para la transferencia de datos de HorarioAtencion.
@@ -17,6 +18,7 @@ public class HorarioAtencionDTO {
     private String detallesHA;
     private Boolean esCerradoHA;
     private boolean activo;
+    private Date fechaHoraBajaHA;
 
     public HorarioAtencionDTO() {}
 
@@ -98,5 +100,13 @@ public class HorarioAtencionDTO {
 
     public void setActivo(boolean activo) {
         this.activo = activo;
+    }
+
+    public Date getFechaHoraBajaHA() {
+        return fechaHoraBajaHA;
+    }
+
+    public void setFechaHoraBajaHA(Date fechaHoraBajaHA) {
+        this.fechaHoraBajaHA = fechaHoraBajaHA;
     }
 }

@@ -44,6 +44,14 @@ public class ProductoService {
     }
 
     @Transactional(readOnly = true)
+    public List<ProductoDTO> listarTodos() {
+        return productoRepository.findAll()
+                .stream()
+                .map(this::convertirADTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
     public Optional<ProductoDTO> obtenerPorId(Long id) {
         return productoRepository.findByIdAndFechaHoraBajaProductoIsNull(id)
                 .map(this::convertirADTO);
@@ -136,6 +144,7 @@ public class ProductoService {
         dto.setBadgeProducto(entity.getBadgeProducto());
         dto.setActivo(entity.isActivo());
         dto.setFechaHoraAltaProducto(entity.getFechaHoraAltaProducto());
+        dto.setFechaHoraBajaProducto(entity.getFechaHoraBajaProducto());
 
         if (entity.getTipoCategoria() != null) {
             dto.setTipoCategoriaId(entity.getTipoCategoria().getId());

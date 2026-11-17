@@ -34,6 +34,14 @@ public class HorarioAtencionService {
     }
 
     @Transactional(readOnly = true)
+    public List<HorarioAtencionDTO> listarTodos() {
+        return horarioRepository.findAll()
+                .stream()
+                .map(this::convertirADTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
     public Optional<HorarioAtencionDTO> obtenerPorId(Long id) {
         return horarioRepository.findByIdAndFechaHoraBajaHAIsNull(id)
                 .map(this::convertirADTO);
@@ -79,6 +87,7 @@ public class HorarioAtencionService {
         dto.setDetallesHA(entity.getDetallesHA());
         dto.setEsCerradoHA(entity.getEsCerradoHA());
         dto.setActivo(entity.isActivo());
+        dto.setFechaHoraBajaHA(entity.getFechaHoraBajaHA());
         return dto;
     }
 }

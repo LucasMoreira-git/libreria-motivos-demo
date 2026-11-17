@@ -1,5 +1,7 @@
 package com.libreriamotivos.dto;
 
+import java.util.Date;
+
 /**
  * DTO para la transferencia de datos de TipoCategoria.
  */
@@ -14,6 +16,7 @@ public class TipoCategoriaDTO {
     private Integer ordenCategoria;
     private boolean activo;
     private int cantidadProductos;
+    private Date fechaHoraBajaTC;
 
     public TipoCategoriaDTO() {}
 
@@ -87,5 +90,13 @@ public class TipoCategoriaDTO {
 
     public void setCantidadProductos(int cantidadProductos) {
         this.cantidadProductos = cantidadProductos;
+    }
+
+    public Date getFechaHoraBajaTC() {
+        return fechaHoraBajaTC;
+    }
+
+    public void setFechaHoraBajaTC(Date fechaHoraBajaTC) {
+        this.fechaHoraBajaTC = fechaHoraBajaTC;
     }
 }

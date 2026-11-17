@@ -26,7 +26,12 @@ public class PromocionController {
     }
 
     @GetMapping
-    public ResponseEntity<List<PromocionDTO>> listarActivas(@RequestParam(required = false) String temporada) {
+    public ResponseEntity<List<PromocionDTO>> listarActivas(
+            @RequestParam(required = false, defaultValue = "false") boolean incluirInactivas,
+            @RequestParam(required = false) String temporada) {
+        if (incluirInactivas) {
+            return ResponseEntity.ok(promocionService.listarTodas());
+        }
         if (temporada != null && !temporada.isBlank()) {
             return ResponseEntity.ok(promocionService.listarPorTemporada(temporada));
         }

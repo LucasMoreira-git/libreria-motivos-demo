@@ -27,7 +27,11 @@ public class TipoCategoriaController {
     }
 
     @GetMapping
-    public ResponseEntity<List<TipoCategoriaDTO>> listarActivas() {
+    public ResponseEntity<List<TipoCategoriaDTO>> listarActivas(
+            @RequestParam(required = false, defaultValue = "false") boolean incluirInactivas) {
+        if (incluirInactivas) {
+            return ResponseEntity.ok(categoriaService.listarTodas());
+        }
         return ResponseEntity.ok(categoriaService.listarActivas());
     }
 

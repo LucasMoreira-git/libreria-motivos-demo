@@ -34,6 +34,14 @@ public class PromocionService {
     }
 
     @Transactional(readOnly = true)
+    public List<PromocionDTO> listarTodas() {
+        return promocionRepository.findAll()
+                .stream()
+                .map(this::convertirADTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
     public Optional<PromocionDTO> obtenerPorId(Long id) {
         return promocionRepository.findByIdAndFechaHoraBajaPromocionIsNull(id)
                 .map(this::convertirADTO);
@@ -88,6 +96,7 @@ public class PromocionService {
         dto.setFotoCombo(entity.getFotoCombo());
         dto.setCondicionPromocion(entity.getCondicionPromocion());
         dto.setActivo(entity.isActivo());
+        dto.setFechaHoraBajaPromocion(entity.getFechaHoraBajaPromocion());
         if (entity.getProductos() != null) {
             long activos = entity.getProductos().stream().filter(p -> p.getFechaHoraBajaProducto() == null).count();
             dto.setCantidadProductos((int) activos);

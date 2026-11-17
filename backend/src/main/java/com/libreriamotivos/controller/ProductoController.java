@@ -27,6 +27,7 @@ public class ProductoController {
 
     @GetMapping
     public ResponseEntity<List<ProductoDTO>> listar(
+            @RequestParam(required = false, defaultValue = "false") boolean incluirInactivos,
             @RequestParam(required = false) Long categoriaId,
             @RequestParam(required = false) Long promocionId,
             @RequestParam(required = false) String buscar,
@@ -43,6 +44,10 @@ public class ProductoController {
         }
         if (promocionId != null) {
             return ResponseEntity.ok(productoService.listarPorPromocion(promocionId));
+        }
+
+        if (incluirInactivos) {
+            return ResponseEntity.ok(productoService.listarTodos());
         }
 
         return ResponseEntity.ok(productoService.listarActivos());

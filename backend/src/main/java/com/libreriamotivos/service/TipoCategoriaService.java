@@ -34,6 +34,14 @@ public class TipoCategoriaService {
     }
 
     @Transactional(readOnly = true)
+    public List<TipoCategoriaDTO> listarTodas() {
+        return categoriaRepository.findAll()
+                .stream()
+                .map(this::convertirADTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
     public Optional<TipoCategoriaDTO> obtenerPorId(Long id) {
         return categoriaRepository.findByIdAndFechaHoraBajaTCIsNull(id)
                 .map(this::convertirADTO);
@@ -89,6 +97,7 @@ public class TipoCategoriaService {
         dto.setDescripcionTC(entity.getDescripcionTC());
         dto.setOrdenCategoria(entity.getOrdenCategoria());
         dto.setActivo(entity.isActivo());
+        dto.setFechaHoraBajaTC(entity.getFechaHoraBajaTC());
         if (entity.getProductos() != null) {
             long activos = entity.getProductos().stream().filter(p -> p.getFechaHoraBajaProducto() == null).count();
             dto.setCantidadProductos((int) activos);

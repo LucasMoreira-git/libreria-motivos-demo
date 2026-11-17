@@ -19,6 +19,7 @@ public class PromocionDTO {
     private String condicionPromocion;
     private boolean activo;
     private int cantidadProductos;
+    private Date fechaHoraBajaPromocion;
 
     public PromocionDTO() {}
 
@@ -116,5 +117,13 @@ public class PromocionDTO {
 
     public void setCantidadProductos(int cantidadProductos) {
         this.cantidadProductos = cantidadProductos;
+    }
+
+    public Date getFechaHoraBajaPromocion() {
+        return fechaHoraBajaPromocion;
+    }
+
+    public void setFechaHoraBajaPromocion(Date fechaHoraBajaPromocion) {
+        this.fechaHoraBajaPromocion = fechaHoraBajaPromocion;
     }
 }
