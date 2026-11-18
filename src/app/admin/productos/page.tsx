@@ -227,14 +227,14 @@ export default function ABMProductosPage() {
       return;
     }
 
-    if (precioProducto === '' || Number(precioProducto) <= 0) {
-      setErrorValidacion('El precio del producto es obligatorio y no puede ser $0.');
+    if (precioProducto === '' || Number(precioProducto) < 0 || Number(precioProducto) > 1000000) {
+      setErrorValidacion('El precio del producto debe estar comprendido entre $0 y $1.000.000 ARS.');
       return;
     }
 
     if (tieneDescuento) {
-      if (precioDescuentoProducto === '' || Number(precioDescuentoProducto) <= 0) {
-        setErrorValidacion('Si activás el descuento, ingresá un precio rebajado mayor a $0.');
+      if (precioDescuentoProducto === '' || Number(precioDescuentoProducto) < 0 || Number(precioDescuentoProducto) > 1000000) {
+        setErrorValidacion('Si activás el descuento, ingresá un precio rebajado entre $0 y $1.000.000.');
         return;
       }
       if (Number(precioDescuentoProducto) >= Number(precioProducto)) {
@@ -702,18 +702,19 @@ export default function ABMProductosPage() {
                       <input
                         type="number"
                         required
-                        min={1}
-                        step={100}
+                        min={0}
+                        max={1000000}
+                        step="any"
                         value={precioProducto}
                         onChange={(e) => {
                           const val = e.target.value;
                           setPrecioProducto(val === '' ? '' : Number(val));
                         }}
-                        placeholder="Ej: 5600"
+                        placeholder="Ej: 15000"
                         className="w-full pl-8 pr-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 font-mono font-bold focus:outline-hidden focus:border-blue-900 focus:bg-white transition-all"
                       />
                     </div>
-                    <span className="text-[11px] text-slate-400 mt-0.5 block">No puede quedar en $0.</span>
+                    <span className="text-[11px] text-slate-400 mt-0.5 block">Rango permitido: $0 a $1.000.000 ARS.</span>
                   </div>
 
                   <div>
@@ -854,14 +855,15 @@ export default function ABMProductosPage() {
                             <input
                               type="number"
                               required={tieneDescuento}
-                              min={1}
-                              step={100}
+                              min={0}
+                              max={1000000}
+                              step="any"
                               value={precioDescuentoProducto}
                               onChange={(e) => {
                                 const val = e.target.value;
                                 setPrecioDescuentoProducto(val === '' ? '' : Number(val));
                               }}
-                              placeholder="Ej: 4200"
+                              placeholder="Ej: 12000"
                               className="w-full pl-7 pr-3 py-2 rounded-xl border border-rose-200 bg-white text-slate-900 font-mono font-bold focus:outline-hidden focus:border-rose-600 text-xs"
                             />
                           </div>
