@@ -172,11 +172,11 @@ export function Header() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Ver opiniones y reseñas en Google Maps"
-                title="Opiniones en Google Maps (4.9 ★)"
+                title="Opiniones en Google Maps (4.9 estrellas)"
                 className="p-2 rounded-xl text-purple-800 hover:text-amber-700 hover:bg-amber-100/60 active:scale-95 transition-all duration-200 touch-manipulation flex items-center gap-1"
               >
                 <Star className="w-4 h-4 fill-amber-400 text-amber-500" />
-                <span className="hidden xl:inline text-xs font-bold text-purple-950">4.9 ★</span>
+                <span className="hidden xl:inline text-xs font-bold text-purple-950">4.9</span>
               </a>
             </div>
 
@@ -411,7 +411,7 @@ export function Header() {
                         className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-purple-900 hover:text-amber-700 hover:bg-amber-50 transition-colors"
                       >
                         <Star className="w-4 h-4 fill-amber-400 text-amber-500" />
-                        <span>4.9 ★</span>
+                        <span>4.9</span>
                       </a>
                     </div>
                   </div>

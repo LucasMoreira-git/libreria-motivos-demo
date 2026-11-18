@@ -5,7 +5,8 @@ import { Producto } from '@/types/catalogo';
 import { DATOS_LIBRERIA_MOTIVOS } from '@/lib/mock-data';
 import { getProductWhatsAppLink } from '@/lib/whatsapp';
 import { Card } from '@/components/ui/card';
-import { Eye } from 'lucide-react';
+import { Eye, Star, Tag, AlertTriangle, Sparkles, Info } from 'lucide-react';
+import { AppIcon } from '@/lib/icon-registry';
 
 interface ProductCardProps {
   producto: Producto;
@@ -63,6 +64,15 @@ export function ProductCard({ producto, onVerDetalle }: ProductCardProps) {
   const badgeTexto = producto.badge || producto.badgeProducto;
   const esUltimasUnidades = Boolean(producto.ultimasUnidades || producto.ultimasUnidadesProducto);
   const esNuevoIngreso = Boolean(producto.nuevoIngreso || producto.nuevoIngresoProducto);
+  const esDestacado = Boolean(producto.destacado || producto.destacadoProducto);
+
+  // Icono representativo del producto
+  const iconoRepresentativo = producto.iconoProducto || producto.icono || (
+    esDestacado ? 'star' :
+    (producto.enOferta || producto.enOfertaProducto || tieneDescuento) ? 'tag' :
+    esUltimasUnidades ? 'alert-triangle' :
+    esNuevoIngreso ? 'sparkles' : null
+  );
 
   return (
     <Card className="group flex flex-col justify-between overflow-hidden rounded-2xl bg-white border border-slate-200/90 hover:border-[#eed0d5] shadow-2xs hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ease-out h-full">
@@ -99,23 +109,29 @@ export function ProductCard({ producto, onVerDetalle }: ProductCardProps) {
           {/* Badges en la esquina superior derecha */}
           <div className="absolute top-2.5 right-2.5 z-10 flex flex-col items-end gap-1">
             {badgeTexto && (
-              <span className={`text-[10px] sm:text-xs font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-md animate-in fade-in ${obtenerEstiloBadge(badgeTexto)}`}>
-                {badgeTexto}
+              <span className={`inline-flex items-center gap-1.5 text-[10px] sm:text-xs font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-md animate-in fade-in ${obtenerEstiloBadge(badgeTexto)}`}>
+                {iconoRepresentativo && (
+                  <AppIcon name={iconoRepresentativo} size={11} className="shrink-0" />
+                )}
+                <span>{badgeTexto}</span>
               </span>
             )}
             {porcentajeDescuento && !badgeTexto && (
-              <span className="bg-[#d97786] text-white text-[10px] sm:text-xs font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-md animate-in fade-in">
-                {porcentajeDescuento}% OFF
+              <span className="inline-flex items-center gap-1 bg-[#d97786] text-white text-[10px] sm:text-xs font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-md animate-in fade-in">
+                <Tag className="w-3 h-3 shrink-0" />
+                <span>{porcentajeDescuento}% OFF</span>
               </span>
             )}
             {esUltimasUnidades && (
-              <span className="bg-amber-600/90 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-xs">
-                Últimas unid.
+              <span className="inline-flex items-center gap-1 bg-amber-600/90 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-xs">
+                <AlertTriangle className="w-3 h-3 shrink-0" />
+                <span>Últimas unid.</span>
               </span>
             )}
             {esNuevoIngreso && !badgeTexto && (
-              <span className="bg-indigo-600/90 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-xs">
-                Nuevo ingreso
+              <span className="inline-flex items-center gap-1 bg-indigo-600/90 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-xs">
+                <Sparkles className="w-3 h-3 shrink-0" />
+                <span>Nuevo ingreso</span>
               </span>
             )}
           </div>
@@ -132,14 +148,22 @@ export function ProductCard({ producto, onVerDetalle }: ProductCardProps) {
         {/* Textos del Producto: Nombre y Detalle */}
         <div className="p-3 sm:p-4 space-y-1.5 flex-1">
           <div className="flex items-center gap-1.5 flex-wrap">
+            {esDestacado && (
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-800 bg-amber-50 border border-amber-200/80 px-1.5 py-0.5 rounded">
+                <Star className="w-3 h-3 fill-amber-400 text-amber-500 shrink-0" />
+                <span>Destacado</span>
+              </span>
+            )}
             {esNuevoIngreso && (
-              <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200/80 px-1.5 py-0.2 rounded">
-                ✨ Novedad
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200/80 px-1.5 py-0.5 rounded">
+                <Sparkles className="w-3 h-3 text-indigo-600 shrink-0" />
+                <span>Novedad</span>
               </span>
             )}
             {esUltimasUnidades && (
-              <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200/80 px-1.5 py-0.2 rounded">
-                ⚠️ Stock limitado
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200/80 px-1.5 py-0.5 rounded">
+                <AlertTriangle className="w-3 h-3 text-amber-600 shrink-0" />
+                <span>Stock limitado</span>
               </span>
             )}
           </div>
@@ -193,8 +217,9 @@ export function ProductCard({ producto, onVerDetalle }: ProductCardProps) {
             </a>
           </div>
 
-          {/* Aclaración de qué significa Precio contado/transf. */}
-          <div className="p-1.5 px-2 rounded-lg bg-slate-50 border border-slate-100/80 text-[10px] text-slate-500 leading-tight">
+          {/* Aclaración con icono vectorial Info */}
+          <div className="p-1.5 px-2 rounded-lg bg-slate-50 border border-slate-100/80 text-[10px] text-slate-500 leading-tight flex items-center gap-1.5">
+            <Info className="w-3.5 h-3.5 text-slate-400 shrink-0" />
             <span>Abonando en efectivo, débito o transferencia bancaria en el local.</span>
           </div>
 
@@ -203,3 +228,4 @@ export function ProductCard({ producto, onVerDetalle }: ProductCardProps) {
     </Card>
   );
 }
+

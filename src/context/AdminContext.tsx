@@ -193,6 +193,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           enOfertaProducto: !!p.enOfertaProducto,
           ultimasUnidadesProducto: !!p.ultimasUnidadesProducto,
           nuevoIngresoProducto: !!p.nuevoIngresoProducto,
+          iconoProducto: p.iconoProducto || null,
           badgeProducto: p.badgeProducto || null,
           fechaHoraBajaProducto: p.fechaHoraBajaProducto 
             ? formatearTimestampBaja(p.fechaHoraBajaProducto) 
@@ -440,6 +441,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           enOfertaProducto: data.enOfertaProducto,
           ultimasUnidadesProducto: data.ultimasUnidadesProducto ?? false,
           nuevoIngresoProducto: data.nuevoIngresoProducto ?? false,
+          iconoProducto: data.iconoProducto || null,
           badgeProducto: data.badgeProducto,
         }),
       })
@@ -487,6 +489,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
             enOfertaProducto: producto.enOfertaProducto,
             ultimasUnidadesProducto: producto.ultimasUnidadesProducto ?? false,
             nuevoIngresoProducto: producto.nuevoIngresoProducto ?? false,
+            iconoProducto: producto.iconoProducto || null,
             badgeProducto: producto.badgeProducto,
           }),
         })

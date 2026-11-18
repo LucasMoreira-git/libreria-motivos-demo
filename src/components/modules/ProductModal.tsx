@@ -4,7 +4,8 @@ import React, { useEffect } from 'react';
 import { Producto } from '@/types/catalogo';
 import { DATOS_LIBRERIA_MOTIVOS } from '@/lib/mock-data';
 import { getProductWhatsAppLink } from '@/lib/whatsapp';
-import { X, Tag, BookOpen, PenTool, Palette, Briefcase, Ruler, Gift, ShieldCheck } from 'lucide-react';
+import { X, Tag, BookOpen, PenTool, Palette, Briefcase, Ruler, Gift, ShieldCheck, Info, Star, AlertTriangle, Sparkles } from 'lucide-react';
+import { AppIcon } from '@/lib/icon-registry';
 
 interface ProductModalProps {
   producto: Producto | null;
@@ -113,18 +114,21 @@ export function ProductModal({ producto, onCerrar }: ProductModalProps) {
               </span>
             )}
             {badgeTexto && (
-              <span className="bg-[#d97786] text-white text-xs font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-xs">
-                {badgeTexto}
+              <span className="inline-flex items-center gap-1.5 bg-[#d97786] text-white text-xs font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-xs">
+                <AppIcon name={producto.iconoProducto || producto.icono || 'tag'} size={12} className="shrink-0" />
+                <span>{badgeTexto}</span>
               </span>
             )}
             {esUltimasUnidades && (
-              <span className="bg-amber-600/90 text-white text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-xs">
-                Últimas unidades
+              <span className="inline-flex items-center gap-1 bg-amber-600/90 text-white text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-xs">
+                <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                <span>Últimas unidades</span>
               </span>
             )}
             {esNuevoIngreso && !badgeTexto && (
-              <span className="bg-indigo-600/90 text-white text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-xs">
-                Nuevo ingreso
+              <span className="inline-flex items-center gap-1 bg-indigo-600/90 text-white text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-xs">
+                <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                <span>Nuevo ingreso</span>
               </span>
             )}
           </div>
@@ -181,7 +185,7 @@ export function ProductModal({ producto, onCerrar }: ProductModalProps) {
 
             {/* Aclaración de Precio contado / transferencia */}
             <div className="p-2.5 rounded-xl bg-[#fbf0f2] border border-[#eed0d5] text-[11px] sm:text-xs text-[#6e2e38] flex items-start gap-2">
-              <span className="font-bold text-[#b34f60] shrink-0">ℹ️ Aclaración:</span>
+              <Info className="w-4 h-4 text-[#b34f60] shrink-0 mt-0.5" />
               <span className="leading-relaxed">
                 <strong>«Precio contado/transf.»</strong>: valor especial abonando en efectivo, tarjeta de débito o transferencia bancaria directa en nuestro local de Guaymallén.
               </span>

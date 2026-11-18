@@ -134,8 +134,9 @@ export function PromoHero({ promociones = PROMOCIONES_MOCK }: PromoHeroProps) {
             />
             {/* Overlay sutil inferior con badge */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent flex items-end p-4">
-              <span className="bg-white/95 backdrop-blur-md text-slate-900 text-xs font-black px-3 py-1 rounded-full shadow-md">
-                Combo Especial 🎒
+              <span className="bg-white/95 backdrop-blur-md text-slate-900 text-xs font-black px-3 py-1 rounded-full shadow-md inline-flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-[#d97786]" />
+                <span>Combo Especial</span>
               </span>
             </div>
           </div>

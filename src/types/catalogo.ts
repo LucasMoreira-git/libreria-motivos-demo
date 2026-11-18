@@ -31,6 +31,8 @@ export interface Producto {
   ultimasUnidadesProducto?: boolean;
   nuevoIngreso?: boolean;
   nuevoIngresoProducto?: boolean;
+  icono?: string | null;            // Identificador de icono Lucide (ej: 'star', 'tag', 'sparkles')
+  iconoProducto?: string | null;
   precioAnterior?: number;
   badge?: string | null; // Badges absolutos superpuestos
   badgeProducto?: string | null;

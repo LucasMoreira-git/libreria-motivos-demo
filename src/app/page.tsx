@@ -71,6 +71,8 @@ export default function Home() {
           nuevoIngresoProducto: p.nuevoIngresoProducto,
           badge: p.badgeProducto as any,
           badgeProducto: p.badgeProducto,
+          icono: p.iconoProducto || null,
+          iconoProducto: p.iconoProducto || null,
         };
       });
   }, [productos, timestampActual]);

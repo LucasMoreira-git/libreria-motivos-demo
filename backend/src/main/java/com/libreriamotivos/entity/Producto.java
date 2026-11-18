@@ -75,6 +75,9 @@ public class Producto {
     @Column(name = "badge_producto", length = 50)
     private String badgeProducto;
 
+    @Column(name = "icono_producto", length = 50)
+    private String iconoProducto;
+
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "fecha_hora_alta_producto")
     private Date fechaHoraAltaProducto;
@@ -308,6 +311,14 @@ public class Producto {
 
     public void setNuevoIngresoProducto(Boolean nuevoIngresoProducto) {
         this.nuevoIngresoProducto = nuevoIngresoProducto;
+    }
+
+    public String getIconoProducto() {
+        return iconoProducto;
+    }
+
+    public void setIconoProducto(String iconoProducto) {
+        this.iconoProducto = iconoProducto;
     }
 
     @Override

@@ -23,6 +23,7 @@ public class ProductoDTO {
     private Boolean ultimasUnidadesProducto;
     private Boolean nuevoIngresoProducto;
     private String badgeProducto;
+    private String iconoProducto;
     private Long tipoCategoriaId;
     private String tipoCategoriaNombre;
     private Long promocionId;
@@ -215,5 +216,13 @@ public class ProductoDTO {
 
     public void setNuevoIngresoProducto(Boolean nuevoIngresoProducto) {
         this.nuevoIngresoProducto = nuevoIngresoProducto;
+    }
+
+    public String getIconoProducto() {
+        return iconoProducto;
+    }
+
+    public void setIconoProducto(String iconoProducto) {
+        this.iconoProducto = iconoProducto;
     }
 }

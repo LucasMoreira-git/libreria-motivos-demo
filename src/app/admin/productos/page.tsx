@@ -11,6 +11,9 @@ import {
   X, 
   CheckCircle2, 
   AlertCircle, 
+  AlertTriangle,
+  Star,
+  Tag,
   Filter, 
   Upload, 
   Image as ImageIcon,
@@ -19,27 +22,29 @@ import {
   Clock, 
   Percent, 
   Layers,
-  ChevronRight
+  ChevronRight,
+  Info
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { ProductoAdmin } from '@/types/admin';
 import { DATOS_LIBRERIA_MOTIVOS } from '@/lib/mock-data';
+import { AppIcon, VisualIconPicker, PRODUCT_ICON_OPTIONS } from '@/lib/icon-registry';
 
 const BADGES_DISPONIBLES = [
   { valor: '', etiqueta: 'Sin Badge Superpuesto' },
-  { valor: 'MÁS VENDIDO', etiqueta: '🔥 MÁS VENDIDO (Top ventas)' },
-  { valor: 'OFERTA ESPECIAL', etiqueta: '🏷️ OFERTA ESPECIAL' },
-  { valor: 'NUEVO INGRESO', etiqueta: '✨ NUEVO INGRESO' },
-  { valor: 'NOVEDAD', etiqueta: '🆕 NOVEDAD' },
-  { valor: 'ÚLTIMAS UNIDADES', etiqueta: '⚠️ ÚLTIMAS UNIDADES' },
-  { valor: 'ESCOLAR 2026', etiqueta: '🎒 ESCOLAR 2026' },
-  { valor: 'DIBUJO TÉCNICO', etiqueta: '📐 DIBUJO TÉCNICO' },
-  { valor: 'LÍNEA PREMIUM', etiqueta: '👑 LÍNEA PREMIUM' },
-  { valor: 'EDICIÓN LIMITADA', etiqueta: '⭐ EDICIÓN LIMITADA' },
-  { valor: 'IMPERDIBLE', etiqueta: '💥 IMPERDIBLE' },
-  { valor: 'RECOMENDADO', etiqueta: '👍 RECOMENDADO' },
-  { valor: 'PRECIO AMIGO', etiqueta: '🤝 PRECIO AMIGO' },
-  { valor: 'COMBO AHORRO', etiqueta: '📦 COMBO AHORRO' },
+  { valor: 'MÁS VENDIDO', etiqueta: 'MÁS VENDIDO (Top ventas)' },
+  { valor: 'OFERTA ESPECIAL', etiqueta: 'OFERTA ESPECIAL' },
+  { valor: 'NUEVO INGRESO', etiqueta: 'NUEVO INGRESO' },
+  { valor: 'NOVEDAD', etiqueta: 'NOVEDAD' },
+  { valor: 'ÚLTIMAS UNIDADES', etiqueta: 'ÚLTIMAS UNIDADES' },
+  { valor: 'ESCOLAR 2026', etiqueta: 'ESCOLAR 2026' },
+  { valor: 'DIBUJO TÉCNICO', etiqueta: 'DIBUJO TÉCNICO' },
+  { valor: 'LÍNEA PREMIUM', etiqueta: 'LÍNEA PREMIUM' },
+  { valor: 'EDICIÓN LIMITADA', etiqueta: 'EDICIÓN LIMITADA' },
+  { valor: 'IMPERDIBLE', etiqueta: 'IMPERDIBLE' },
+  { valor: 'RECOMENDADO', etiqueta: 'RECOMENDADO' },
+  { valor: 'PRECIO AMIGO', etiqueta: 'PRECIO AMIGO' },
+  { valor: 'COMBO AHORRO', etiqueta: 'COMBO AHORRO' },
 ];
 
 function aFormatoInputDateTime(isoString?: string | null): string {
@@ -101,6 +106,7 @@ export default function ABMProductosPage() {
 
   // Badges superpuestos
   const [badgeProducto, setBadgeProducto] = useState<string>('');
+  const [iconoProducto, setIconoProducto] = useState<string>('');
 
   // Sección Descuentos Programados
   const [tieneDescuento, setTieneDescuento] = useState(false);
@@ -133,6 +139,7 @@ export default function ABMProductosPage() {
     setUltimasUnidadesProducto(false);
     setNuevoIngresoProducto(false);
     setBadgeProducto('');
+    setIconoProducto('');
     setTieneDescuento(false);
     setPrecioDescuentoProducto('');
     setFechaFinDescuento('');
@@ -154,6 +161,7 @@ export default function ABMProductosPage() {
     setUltimasUnidadesProducto(!!prod.ultimasUnidadesProducto);
     setNuevoIngresoProducto(!!prod.nuevoIngresoProducto);
     setBadgeProducto(prod.badgeProducto || '');
+    setIconoProducto(prod.iconoProducto || '');
 
     const tieneDescVig = Boolean(prod.precioDescuentoProducto && prod.precioDescuentoProducto > 0);
     setTieneDescuento(tieneDescVig);
@@ -259,6 +267,7 @@ export default function ABMProductosPage() {
         enOfertaProducto: tieneDescuento ? true : enOfertaProducto,
         ultimasUnidadesProducto,
         nuevoIngresoProducto,
+        iconoProducto: iconoProducto.trim() || null,
         badgeProducto: badgeProducto.trim() || null,
         fechaHoraBajaProducto: prodOriginal?.fechaHoraBajaProducto || null,
       });
@@ -276,6 +285,7 @@ export default function ABMProductosPage() {
         enOfertaProducto: tieneDescuento ? true : enOfertaProducto,
         ultimasUnidadesProducto,
         nuevoIngresoProducto,
+        iconoProducto: iconoProducto.trim() || null,
         badgeProducto: badgeProducto.trim() || null,
       });
       mostrarExito('¡Nuevo producto registrado exitosamente!');
@@ -513,23 +523,27 @@ export default function ABMProductosPage() {
                       <td className="py-3 px-4">
                         <div className="flex flex-wrap gap-1">
                           {prod.badgeProducto && (
-                            <span className={`px-1.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider ${obtenerEstiloBadge(prod.badgeProducto)}`}>
-                              {prod.badgeProducto}
+                            <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider ${obtenerEstiloBadge(prod.badgeProducto)}`}>
+                              <AppIcon name={prod.iconoProducto || 'tag'} size={10} className="shrink-0" />
+                              <span>{prod.badgeProducto}</span>
                             </span>
                           )}
                           {prod.destacadoProducto && (
-                            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
-                              ⭐ Destacado
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                              <Star className="w-3 h-3 text-amber-600 shrink-0" />
+                              <span>Destacado</span>
                             </span>
                           )}
                           {prod.ultimasUnidadesProducto && (
-                            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-orange-50 text-orange-800 border border-orange-200">
-                              ⚠️ Stock Crítico
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-orange-50 text-orange-800 border border-orange-200">
+                              <AlertTriangle className="w-3 h-3 text-orange-600 shrink-0" />
+                              <span>Stock Crítico</span>
                             </span>
                           )}
                           {prod.nuevoIngresoProducto && (
-                            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-800 border border-indigo-200">
-                              ✨ Nuevo Ingreso
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-800 border border-indigo-200">
+                              <Sparkles className="w-3 h-3 text-indigo-600 shrink-0" />
+                              <span>Nuevo Ingreso</span>
                             </span>
                           )}
                           {!prod.badgeProducto && !prod.destacadoProducto && !prod.ultimasUnidadesProducto && !prod.nuevoIngresoProducto && (
@@ -878,64 +892,86 @@ export default function ABMProductosPage() {
                 </div>
 
                 {/* 4 Opciones Visuales de Vitrina */}
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-4">
                   <span className="font-bold text-slate-800 block text-xs flex items-center gap-1.5">
                     <Layers className="w-4 h-4 text-blue-900" />
                     <span>4 Opciones Visuales en la Vitrina Web</span>
                   </span>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    <label className="flex items-center gap-2 p-2 rounded-xl bg-white border border-slate-200/90 cursor-pointer text-xs hover:border-slate-300 transition-colors">
+                    <label className="flex items-center gap-2.5 p-2 rounded-xl bg-white border border-slate-200/90 cursor-pointer text-xs hover:border-slate-300 transition-colors">
                       <input
                         type="checkbox"
                         checked={destacadoProducto}
                         onChange={(e) => setDestacadoProducto(e.target.checked)}
                         className="rounded text-blue-900 focus:ring-blue-500 cursor-pointer"
                       />
-                      <div>
-                        <span className="font-bold text-slate-900 block">⭐ Producto Destacado</span>
-                        <span className="text-[10px] text-slate-500">Prioridad alta en portada</span>
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <Star className="w-4 h-4 text-amber-500 shrink-0" />
+                        <div className="min-w-0">
+                          <span className="font-bold text-slate-900 block truncate">Producto Destacado</span>
+                          <span className="text-[10px] text-slate-500 block truncate">Prioridad alta en portada</span>
+                        </div>
                       </div>
                     </label>
 
-                    <label className="flex items-center gap-2 p-2 rounded-xl bg-white border border-slate-200/90 cursor-pointer text-xs hover:border-slate-300 transition-colors">
+                    <label className="flex items-center gap-2.5 p-2 rounded-xl bg-white border border-slate-200/90 cursor-pointer text-xs hover:border-slate-300 transition-colors">
                       <input
                         type="checkbox"
                         checked={enOfertaProducto}
                         onChange={(e) => setEnOfertaProducto(e.target.checked)}
                         className="rounded text-blue-900 focus:ring-blue-500 cursor-pointer"
                       />
-                      <div>
-                        <span className="font-bold text-slate-900 block">🏷️ En Oferta Especial</span>
-                        <span className="text-[10px] text-slate-500">Etiquetado promocional</span>
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <Tag className="w-4 h-4 text-[#d97786] shrink-0" />
+                        <div className="min-w-0">
+                          <span className="font-bold text-slate-900 block truncate">En Oferta Especial</span>
+                          <span className="text-[10px] text-slate-500 block truncate">Etiquetado promocional</span>
+                        </div>
                       </div>
                     </label>
 
-                    <label className="flex items-center gap-2 p-2 rounded-xl bg-white border border-slate-200/90 cursor-pointer text-xs hover:border-slate-300 transition-colors">
+                    <label className="flex items-center gap-2.5 p-2 rounded-xl bg-white border border-slate-200/90 cursor-pointer text-xs hover:border-slate-300 transition-colors">
                       <input
                         type="checkbox"
                         checked={ultimasUnidadesProducto}
                         onChange={(e) => setUltimasUnidadesProducto(e.target.checked)}
                         className="rounded text-blue-900 focus:ring-blue-500 cursor-pointer"
                       />
-                      <div>
-                        <span className="font-bold text-slate-900 block">⚠️ Disponibilidad Limitada</span>
-                        <span className="text-[10px] text-slate-500">Alerta de stock crítico</span>
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <AlertTriangle className="w-4 h-4 text-orange-500 shrink-0" />
+                        <div className="min-w-0">
+                          <span className="font-bold text-slate-900 block truncate">Disponibilidad Limitada</span>
+                          <span className="text-[10px] text-slate-500 block truncate">Alerta de stock crítico</span>
+                        </div>
                       </div>
                     </label>
 
-                    <label className="flex items-center gap-2 p-2 rounded-xl bg-white border border-slate-200/90 cursor-pointer text-xs hover:border-slate-300 transition-colors">
+                    <label className="flex items-center gap-2.5 p-2 rounded-xl bg-white border border-slate-200/90 cursor-pointer text-xs hover:border-slate-300 transition-colors">
                       <input
                         type="checkbox"
                         checked={nuevoIngresoProducto}
                         onChange={(e) => setNuevoIngresoProducto(e.target.checked)}
                         className="rounded text-blue-900 focus:ring-blue-500 cursor-pointer"
                       />
-                      <div>
-                        <span className="font-bold text-slate-900 block">✨ Nuevo Ingreso</span>
-                        <span className="text-[10px] text-slate-500">Lanzamiento de temporada</span>
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <Sparkles className="w-4 h-4 text-indigo-500 shrink-0" />
+                        <div className="min-w-0">
+                          <span className="font-bold text-slate-900 block truncate">Nuevo Ingreso</span>
+                          <span className="text-[10px] text-slate-500 block truncate">Lanzamiento de temporada</span>
+                        </div>
                       </div>
                     </label>
+                  </div>
+
+                  {/* Selector Visual de Icono Vectorial */}
+                  <div className="pt-3 border-t border-slate-200/80">
+                    <VisualIconPicker
+                      selectedIcon={iconoProducto}
+                      onSelect={setIconoProducto}
+                      options={PRODUCT_ICON_OPTIONS}
+                      titulo="Icono Vectorial de Vitrina (Lucide React)"
+                    />
                   </div>
 
                   {/* Selector Extenso de Badges */}
@@ -993,23 +1029,27 @@ export default function ABMProductosPage() {
                       {/* Badges Top Right */}
                       <div className="absolute top-2.5 right-2.5 z-10 flex flex-col items-end gap-1">
                         {badgeProducto ? (
-                          <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shadow-md ${obtenerEstiloBadge(badgeProducto)}`}>
-                            {badgeProducto}
+                          <span className={`inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shadow-md ${obtenerEstiloBadge(badgeProducto)}`}>
+                            <AppIcon name={iconoProducto || 'star'} size={10} className="shrink-0" />
+                            <span>{badgeProducto}</span>
                           </span>
                         ) : descuentoActivoEnPreview && porcentajeOffPreview ? (
-                          <span className="bg-[#d97786] text-white text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shadow-md">
-                            {porcentajeOffPreview}% OFF
+                          <span className="inline-flex items-center gap-1 bg-[#d97786] text-white text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full shadow-md">
+                            <Tag className="w-2.5 h-2.5 shrink-0" />
+                            <span>{porcentajeOffPreview}% OFF</span>
                           </span>
                         ) : null}
 
                         {ultimasUnidadesProducto && (
-                          <span className="bg-amber-600/90 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-xs">
-                            Últimas unid.
+                          <span className="inline-flex items-center gap-1 bg-amber-600/90 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-xs">
+                            <AlertTriangle className="w-2.5 h-2.5 shrink-0" />
+                            <span>Últimas unid.</span>
                           </span>
                         )}
                         {nuevoIngresoProducto && !badgeProducto && (
-                          <span className="bg-indigo-600/90 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-xs">
-                            Nuevo ingreso
+                          <span className="inline-flex items-center gap-1 bg-indigo-600/90 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-xs">
+                            <Sparkles className="w-2.5 h-2.5 shrink-0" />
+                            <span>Nuevo ingreso</span>
                           </span>
                         )}
                       </div>
@@ -1019,14 +1059,22 @@ export default function ABMProductosPage() {
                     <div className="p-3.5 space-y-1.5 flex-1 flex flex-col justify-between">
                       <div>
                         <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                          {destacadoProducto && (
+                            <span className="inline-flex items-center gap-1 text-[9px] font-bold text-amber-800 bg-amber-50 border border-amber-200/80 px-1.5 py-0.5 rounded">
+                              <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-500 shrink-0" />
+                              <span>Destacado</span>
+                            </span>
+                          )}
                           {nuevoIngresoProducto && (
-                            <span className="text-[9px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200/80 px-1 py-0.2 rounded">
-                              ✨ Novedad
+                            <span className="inline-flex items-center gap-1 text-[9px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200/80 px-1.5 py-0.5 rounded">
+                              <Sparkles className="w-2.5 h-2.5 text-indigo-600 shrink-0" />
+                              <span>Novedad</span>
                             </span>
                           )}
                           {ultimasUnidadesProducto && (
-                            <span className="text-[9px] font-bold text-amber-700 bg-amber-50 border border-amber-200/80 px-1 py-0.2 rounded">
-                              ⚠️ Stock limitado
+                            <span className="inline-flex items-center gap-1 text-[9px] font-bold text-amber-700 bg-amber-50 border border-amber-200/80 px-1.5 py-0.5 rounded">
+                              <AlertTriangle className="w-2.5 h-2.5 text-amber-600 shrink-0" />
+                              <span>Stock limitado</span>
                             </span>
                           )}
                         </div>

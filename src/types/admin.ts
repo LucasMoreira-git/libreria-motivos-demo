@@ -30,6 +30,7 @@ export interface ProductoAdmin {
   enOfertaProducto: boolean;
   ultimasUnidadesProducto?: boolean;
   nuevoIngresoProducto?: boolean;
+  iconoProducto?: string | null; // Identificador del icono vectorial de Lucide (ej: 'star', 'tag', 'sparkles')
   badgeProducto: string | null;
   fechaHoraBajaProducto: string | null; // Null si activa, ISO / Timestamp si dada de baja
 }

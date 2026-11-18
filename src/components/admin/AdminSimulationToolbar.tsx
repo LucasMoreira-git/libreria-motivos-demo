@@ -42,7 +42,7 @@ export function AdminSimulationToolbar() {
         await sincronizarConBackend();
         setMensaje({
           tipo: 'exito',
-          texto: `✓ Base de datos precargada con éxito: ${data.totalProductos || 10} productos, ${data.totalCategorias || 5} categorías, ${data.totalPromociones || 2} promociones y ${data.totalHorarios || 4} turnos.`
+          texto: `Base de datos precargada con éxito: ${data.totalProductos || 10} productos, ${data.totalCategorias || 5} categorías, ${data.totalPromociones || 2} promociones y ${data.totalHorarios || 4} turnos.`
         });
       } else {
         setMensaje({
@@ -67,7 +67,7 @@ export function AdminSimulationToolbar() {
       await sincronizarConBackend();
       setMensaje({
         tipo: 'exito',
-        texto: '✓ Datos sincronizados con el backend.'
+        texto: 'Datos sincronizados con el backend.'
       });
     } catch {
       setMensaje({

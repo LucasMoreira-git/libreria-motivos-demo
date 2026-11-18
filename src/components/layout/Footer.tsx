@@ -10,7 +10,8 @@ import {
   Mail, 
   ExternalLink, 
   Sparkles,
-  CheckCircle2
+  CheckCircle2,
+  Star
 } from 'lucide-react';
 
 // Ícono SVG de Instagram oficial
@@ -198,9 +199,11 @@ export function Footer() {
                   href={DATOS_LIBRERIA_MOTIVOS.googleReviewsUrl} 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  className="text-slate-600 hover:text-purple-950 transition-colors"
+                  className="text-slate-600 hover:text-purple-950 transition-colors inline-flex items-center gap-1.5"
                 >
-                  Opiniones de Clientes (4.9 ★)
+                  <span>Opiniones de Clientes (4.9</span>
+                  <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500 inline" />
+                  <span>)</span>
                 </a>
               </li>
             </ul>

@@ -156,6 +156,7 @@ public class ProductoService {
         dto.setFotoProducto(entity.getFotoProducto());
         dto.setDestacadoProducto(entity.getDestacadoProducto());
         dto.setBadgeProducto(entity.getBadgeProducto());
+        dto.setIconoProducto(entity.getIconoProducto());
         dto.setActivo(entity.isActivo());
         dto.setFechaHoraAltaProducto(entity.getFechaHoraAltaProducto());
         dto.setFechaHoraBajaProducto(entity.getFechaHoraBajaProducto());
