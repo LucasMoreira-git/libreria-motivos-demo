@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { gestorHorarios } from '@/lib/mock-data';
+import { gestorHorarios, parsearDiasSemanaDesdeTexto } from '@/lib/mock-data';
 import { EstadoAtencion } from '@/types/horario';
 import { HorarioAtencionAdmin } from '@/types/admin';
 import { Clock, MapPin, Sparkles, CreditCard, CheckCircle2 } from 'lucide-react';
@@ -57,11 +57,9 @@ const GRUPOS_DEFAULT: GrupoHorario[] = [
 ];
 
 function inferirDiasSemana(diasTexto: string, fallback?: number[]): number[] {
+  const parseados = parsearDiasSemanaDesdeTexto(diasTexto);
+  if (parseados.length > 0) return parseados;
   if (fallback && fallback.length > 0) return fallback;
-  const t = diasTexto.toLowerCase();
-  if (t.includes('lunes') && t.includes('viernes')) return [1, 2, 3, 4, 5];
-  if (t.includes('sábado') || t.includes('sabado')) return [6];
-  if (t.includes('domingo')) return [0];
   return [];
 }
 

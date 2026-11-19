@@ -20,6 +20,10 @@ export const metadata: Metadata = {
   title: "Librería Motivos — Vitrina Web | Guaymallén, Mendoza",
   description:
     "Vitrina web de Librería Motivos en Guaymallén, Mendoza. Útiles escolares, papelería de oficina, regalería y atención directa por WhatsApp.",
+  icons: {
+    icon: "/images/logo-motivos.jpg",
+    apple: "/images/logo-motivos.jpg",
+  },
 };
 
 export default function RootLayout({

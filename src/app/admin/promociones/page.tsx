@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { PromocionAdmin } from '@/types/admin';
+import { DEFAULT_BRAND_IMAGE } from '@/lib/mock-data';
 
 export default function ABMPromocionesPage() {
   const { promociones, crearPromocion, editarPromocion, bajaLogicaPromocion, reactivarPromocion } = useAdmin();
@@ -144,7 +145,7 @@ export default function ABMPromocionesPage() {
       return;
     }
 
-    const fotoFinal = fotoComboPromocion.trim() || 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=900&q=80';
+    const fotoFinal = fotoComboPromocion.trim() || DEFAULT_BRAND_IMAGE;
 
     if (modoEdicion && promocionSeleccionadaId) {
       const promoOriginal = promociones.find((p) => p.idPromocion === promocionSeleccionadaId);
@@ -312,11 +313,13 @@ export default function ABMPromocionesPage() {
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
                           <img
-                            src={promo.fotoComboPromocion || 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=900&q=80'}
+                            src={promo.fotoComboPromocion || DEFAULT_BRAND_IMAGE}
                             alt={promo.nombrePromocion}
-                            className={`w-12 h-12 rounded-xl object-cover border border-slate-200 shrink-0 ${
-                              estaDadaDeBaja ? 'grayscale opacity-60' : ''
-                            }`}
+                            className={`w-12 h-12 rounded-xl border border-slate-200 shrink-0 ${
+                              (promo.fotoComboPromocion || DEFAULT_BRAND_IMAGE) === DEFAULT_BRAND_IMAGE
+                                ? 'object-contain bg-[#fdfbf7] p-0.5'
+                                : 'object-cover'
+                            } ${estaDadaDeBaja ? 'grayscale opacity-60' : ''}`}
                           />
                           <div className="min-w-0 max-w-xs">
                             <p className="font-heading font-bold text-xs sm:text-sm text-slate-900 truncate">
@@ -612,19 +615,34 @@ export default function ABMPromocionesPage() {
                           </div>
                         </div>
                       ) : (
-                        <div 
-                          onClick={() => fileInputRef.current?.click()}
-                          className="border-2 border-dashed border-slate-200 hover:border-orange-500 bg-white hover:bg-orange-50/20 rounded-xl p-5 text-center cursor-pointer transition-all duration-200"
-                        >
-                          <div className="w-10 h-10 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center mx-auto mb-2">
-                            <ImageIcon className="w-5 h-5" />
+                        <div className="space-y-2">
+                          <div 
+                            onClick={() => fileInputRef.current?.click()}
+                            className="border-2 border-dashed border-slate-200 hover:border-orange-500 bg-white hover:bg-orange-50/20 rounded-xl p-5 text-center cursor-pointer transition-all duration-200"
+                          >
+                            <div className="w-10 h-10 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center mx-auto mb-2">
+                              <ImageIcon className="w-5 h-5" />
+                            </div>
+                            <p className="text-xs font-bold text-slate-800">
+                              Hacé clic para subir la foto real del combo promocional
+                            </p>
+                            <p className="text-[11px] text-slate-400 mt-0.5">
+                              Si no subís una foto, se mostrará el logo oficial de Librería Motivos
+                            </p>
                           </div>
-                          <p className="text-xs font-bold text-slate-800">
-                            Hacé clic para subir la foto real del combo promocional
-                          </p>
-                          <p className="text-[11px] text-slate-400 mt-0.5">
-                            Admite formatos JPG, PNG, WebP
-                          </p>
+
+                          <button
+                            type="button"
+                            onClick={() => setFotoComboPromocion(DEFAULT_BRAND_IMAGE)}
+                            className="w-full inline-flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-white hover:bg-[#fdfbf7] border border-slate-200 hover:border-orange-400 text-xs font-semibold text-slate-700 transition-colors cursor-pointer"
+                          >
+                            <img
+                              src={DEFAULT_BRAND_IMAGE}
+                              alt="Logo Motivos"
+                              className="w-5 h-5 rounded-full object-cover border border-slate-200"
+                            />
+                            <span>Usar imagen oficial de Librería Motivos</span>
+                          </button>
                         </div>
                       )}
                     </div>
@@ -637,6 +655,7 @@ export default function ABMPromocionesPage() {
                         placeholder="https://images.unsplash.com/..."
                         className="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-slate-900 focus:outline-hidden focus:border-orange-600 transition-all text-xs font-mono"
                       />
+                      <p className="text-[11px] text-slate-400 mt-1">Si se omite, se asignará automáticamente el logo oficial de Librería Motivos.</p>
                     </div>
                   )}
                 </div>
@@ -681,11 +700,21 @@ export default function ABMPromocionesPage() {
                     </p>
 
                     {/* Foto Combo */}
-                    <div className="relative w-full h-32 rounded-xl overflow-hidden bg-slate-100 border border-slate-200">
+                    <div
+                      className={`relative w-full h-32 rounded-xl overflow-hidden border border-slate-200 ${
+                        (fotoComboPromocion || DEFAULT_BRAND_IMAGE) === DEFAULT_BRAND_IMAGE
+                          ? 'bg-[#fdfbf7]'
+                          : 'bg-slate-100'
+                      }`}
+                    >
                       <img 
-                        src={fotoComboPromocion || 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=900&q=80'} 
+                        src={fotoComboPromocion || DEFAULT_BRAND_IMAGE} 
                         alt="Combo preview"
-                        className="w-full h-full object-cover object-center"
+                        className={`w-full h-full object-center ${
+                          (fotoComboPromocion || DEFAULT_BRAND_IMAGE) === DEFAULT_BRAND_IMAGE
+                            ? 'object-contain p-2'
+                            : 'object-cover'
+                        }`}
                       />
                       <div className="absolute bottom-2 left-2 bg-white/95 backdrop-blur-md text-slate-900 text-[10px] font-bold px-2 py-0.5 rounded-md shadow-xs inline-flex items-center gap-1">
                         <Sparkles className="w-3 h-3 text-[#d97786]" />

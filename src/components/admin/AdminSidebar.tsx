@@ -67,12 +67,14 @@ export function AdminSidebar({ onCerrarMovil }: AdminSidebarProps) {
   return (
     <aside className="w-64 lg:w-72 bg-white text-slate-800 flex flex-col h-full border-r border-[#ded0f2] select-none shadow-sm">
       
-      {/* 1. Encabezado de Identidad del Dashboard con los colores de la marca */}
+      {/* 1. Encabezado de Identidad del Dashboard con el logo oficial de la marca */}
       <div className="p-5 border-b border-[#ded0f2]/80 bg-[#fdf8f9]">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#d97786] via-[#b978b5] to-[#7e4f9e] text-white flex items-center justify-center font-heading font-black text-xl shadow-md border border-white/50 shrink-0">
-            M
-          </div>
+          <img
+            src="/images/logo-motivos.jpg"
+            alt="Logo oficial de Librería Motivos"
+            className="w-11 h-11 rounded-full object-cover shadow-xs border border-[#f3cad2] bg-[#fdfbf7] shrink-0"
+          />
           <div className="min-w-0">
             <h2 className="font-heading text-sm font-black tracking-tight text-purple-950 truncate">
               Librería Motivos

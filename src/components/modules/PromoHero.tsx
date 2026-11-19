@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Promocion } from '@/types/catalogo';
 import { PROMOCIONES_MOCK } from '@/lib/mock-catalogo';
-import { DATOS_LIBRERIA_MOTIVOS } from '@/lib/mock-data';
+import { DATOS_LIBRERIA_MOTIVOS, DEFAULT_BRAND_IMAGE } from '@/lib/mock-data';
 import { getPromoWhatsAppLink } from '@/lib/whatsapp';
 import { Sparkles, Calendar, Tag, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -24,7 +24,8 @@ export function PromoHero({ promociones = PROMOCIONES_MOCK }: PromoHeroProps) {
 
   const fotoCombo =
     promoActual.fotoCombo ||
-    'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=900&q=80';
+    DEFAULT_BRAND_IMAGE;
+  const esLogoPorDefecto = fotoCombo === DEFAULT_BRAND_IMAGE;
 
   const irAnterior = () => {
     setPromoActivaIndex((prev) => (prev - 1 + promociones.length) % promociones.length);
@@ -155,12 +156,18 @@ export function PromoHero({ promociones = PROMOCIONES_MOCK }: PromoHeroProps) {
           </div>
 
           {/* COLUMNA DERECHA: Foto Representativa del Combo con entrada desde la derecha */}
-          <div className="relative w-full h-[220px] sm:h-[280px] md:h-[320px] lg:h-[350px] rounded-2xl lg:rounded-3xl overflow-hidden shadow-md border-2 border-white/80 group hero-stagger-image">
+          <div
+            className={`relative w-full h-[220px] sm:h-[280px] md:h-[320px] lg:h-[350px] rounded-2xl lg:rounded-3xl overflow-hidden shadow-md border-2 border-white/80 group hero-stagger-image ${
+              esLogoPorDefecto ? 'bg-[#fdfbf7]' : ''
+            }`}
+          >
             <img
               src={fotoCombo}
               alt={promoActual.nombre}
               loading="lazy"
-              className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out"
+              className={`w-full h-full object-center group-hover:scale-105 transition-transform duration-500 ease-out ${
+                esLogoPorDefecto ? 'object-contain p-5' : 'object-cover'
+              }`}
             />
             {/* Overlay sutil inferior con badge */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent flex items-end p-4">

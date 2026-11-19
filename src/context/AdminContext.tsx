@@ -8,7 +8,7 @@ import {
   HorarioAtencionAdmin 
 } from '@/types/admin';
 import { CATEGORIAS_MOCK, PRODUCTOS_MOCK, PROMOCIONES_MOCK } from '@/lib/mock-catalogo';
-import { TURNOS_MOCK } from '@/lib/mock-data';
+import { TURNOS_MOCK, parsearDiasSemanaDesdeTexto } from '@/lib/mock-data';
 
 // Seeds iniciales adaptados al modelo de dominio estricto
 const CATEGORIAS_INICIALES: CategoriaAdmin[] = CATEGORIAS_MOCK.map((c) => ({
@@ -222,18 +222,21 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (resHor && Array.isArray(resHor) && resHor.length > 0) {
-        const horMapeados: HorarioAtencionAdmin[] = resHor.map((h: any) => ({
-          idHorarioAtencion: String(h.id || h.idHorarioAtencion),
-          diasTextoHA: h.diasTextoHA || h.diasSemanaHA || 'Lunes a Viernes',
-          diasSemanaHA: [1, 2, 3, 4, 5],
-          nombreTurnoHA: h.nombreTurnoHA || 'Turno',
-          horaInicioHA: h.horaInicioHA || '09:30',
-          horaFinHA: h.horaFinHA || '13:30',
-          esCerradoHA: !!h.esCerradoHA,
-          fechaHoraBajaHA: h.fechaHoraBajaHA 
-            ? formatearTimestampBaja(h.fechaHoraBajaHA) 
-            : (h.activo === false ? 'Baja lógica' : null),
-        }));
+        const horMapeados: HorarioAtencionAdmin[] = resHor.map((h: any) => {
+          const diasTexto = h.diasTextoHA || h.diasSemanaHA || 'Lunes a Viernes';
+          return {
+            idHorarioAtencion: String(h.id || h.idHorarioAtencion),
+            diasTextoHA: diasTexto,
+            diasSemanaHA: parsearDiasSemanaDesdeTexto(diasTexto),
+            nombreTurnoHA: h.nombreTurnoHA || 'Turno',
+            horaInicioHA: h.horaInicioHA || '09:30',
+            horaFinHA: h.horaFinHA || '13:30',
+            esCerradoHA: !!h.esCerradoHA,
+            fechaHoraBajaHA: h.fechaHoraBajaHA 
+              ? formatearTimestampBaja(h.fechaHoraBajaHA) 
+              : (h.activo === false ? 'Baja lógica' : null),
+          };
+        });
         setHorarios(horMapeados);
       }
 
@@ -649,8 +652,10 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
   // ABM Horarios
   const crearHorario = (data: Omit<HorarioAtencionAdmin, 'idHorarioAtencion' | 'fechaHoraBajaHA'>) => {
+    const diasParseados = parsearDiasSemanaDesdeTexto(data.diasTextoHA);
     const nuevo: HorarioAtencionAdmin = {
       ...data,
+      diasSemanaHA: diasParseados.length > 0 ? diasParseados : data.diasSemanaHA,
       idHorarioAtencion: `ha-${Date.now()}`,
       fechaHoraBajaHA: null,
     };
@@ -677,8 +682,13 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   };
 
   const editarHorario = (horario: HorarioAtencionAdmin) => {
+    const diasParseados = parsearDiasSemanaDesdeTexto(horario.diasTextoHA);
+    const horarioNormalizado: HorarioAtencionAdmin = {
+      ...horario,
+      diasSemanaHA: diasParseados.length > 0 ? diasParseados : horario.diasSemanaHA,
+    };
     setHorarios((prev) =>
-      prev.map((h) => (h.idHorarioAtencion === horario.idHorarioAtencion ? horario : h))
+      prev.map((h) => (h.idHorarioAtencion === horario.idHorarioAtencion ? horarioNormalizado : h))
     );
 
     if (backendEnLinea) {

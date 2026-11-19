@@ -85,22 +85,18 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20 gap-3">
           
-          {/* 1. IZQUIERDA: Logo e Identidad del Negocio (Identidad de Marca en armonía morada suave) */}
+          {/* 1. IZQUIERDA: Logo Oficial e Identidad del Negocio */}
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-            <div className="relative flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-purple-600 via-indigo-600 to-purple-700 text-white shadow-sm shrink-0 border border-purple-400/50">
-              <span className="text-xl sm:text-2xl font-black tracking-tighter select-none font-serif text-white">
-                M
-              </span>
-              <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-amber-400 flex items-center justify-center border-2 border-white shadow-2xs">
-                <Sparkles className="w-2 h-2 text-purple-950" />
-              </div>
-            </div>
-
             <a 
               href="/" 
-              className="group inline-flex items-center focus:outline-hidden"
+              className="group inline-flex items-center gap-2.5 sm:gap-3 min-w-0 focus:outline-hidden"
               aria-label="Ir a página de inicio de Librería Motivos"
             >
+              <img
+                src="/images/logo-motivos.jpg"
+                alt="Logo oficial de Librería Motivos"
+                className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover shadow-xs border-2 border-white shrink-0 bg-[#fdfbf7] group-hover:scale-105 transition-transform duration-200"
+              />
               <h1 className="font-heading text-base sm:text-lg lg:text-xl font-extrabold text-purple-950 tracking-tight leading-none group-hover:text-purple-700 transition-colors truncate">
                 {DATOS_LIBRERIA_MOTIVOS.nombre}
               </h1>

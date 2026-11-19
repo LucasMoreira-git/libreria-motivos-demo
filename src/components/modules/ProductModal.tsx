@@ -3,18 +3,12 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Producto } from '@/types/catalogo';
-import { DATOS_LIBRERIA_MOTIVOS } from '@/lib/mock-data';
+import { DATOS_LIBRERIA_MOTIVOS, DEFAULT_BRAND_IMAGE } from '@/lib/mock-data';
 import { getProductWhatsAppLink } from '@/lib/whatsapp';
 import { useConsulta } from '@/context/ConsultaContext';
 import {
   X,
   Tag,
-  BookOpen,
-  PenTool,
-  Palette,
-  Briefcase,
-  Ruler,
-  Gift,
   ShieldCheck,
   Star,
   AlertTriangle,
@@ -77,24 +71,8 @@ export function ProductModal({ producto, onCerrar }: ProductModalProps) {
     DATOS_LIBRERIA_MOTIVOS.telefonoWhatsApp
   );
 
-  const obtenerIcono = () => {
-    switch (producto.categoriaId) {
-      case 'escolar':
-        return <BookOpen className="w-16 h-16 text-blue-600/70" />;
-      case 'arte':
-        return <Palette className="w-16 h-16 text-rose-500/70" />;
-      case 'oficina':
-        return <Briefcase className="w-16 h-16 text-slate-600/70" />;
-      case 'tecnico':
-        return <Ruler className="w-16 h-16 text-cyan-600/70" />;
-      case 'regaleria':
-        return <Gift className="w-16 h-16 text-emerald-600/70" />;
-      default:
-        return <PenTool className="w-16 h-16 text-indigo-600/70" />;
-    }
-  };
-
-  const urlFoto = producto.fotoProducto || producto.foto;
+  const urlFoto = producto.fotoProducto || producto.foto || DEFAULT_BRAND_IMAGE;
+  const esLogoPorDefecto = urlFoto === DEFAULT_BRAND_IMAGE;
 
   const badgeTexto = producto.badge || producto.badgeProducto;
   const esUltimasUnidades = Boolean(
@@ -179,23 +157,18 @@ export function ProductModal({ producto, onCerrar }: ProductModalProps) {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Columna Izquierda: Foto del Producto */}
-        <div className="md:col-span-5 relative w-full h-56 sm:h-64 md:h-auto md:min-h-[380px] bg-slate-100 overflow-hidden flex items-center justify-center shrink-0">
-          {urlFoto ? (
-            <img
-              src={urlFoto}
-              alt={producto.nombre}
-              className="w-full h-full object-cover object-center"
-            />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-indigo-50 via-slate-50 to-blue-100 flex flex-col items-center justify-center p-6">
-              <div className="w-24 h-24 rounded-3xl bg-white/90 backdrop-blur-xs shadow-md border border-white/60 flex items-center justify-center mb-2">
-                {obtenerIcono()}
-              </div>
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                Librería Motivos • Guaymallén
-              </span>
-            </div>
-          )}
+        <div
+          className={`md:col-span-5 relative w-full h-56 sm:h-64 md:h-auto md:min-h-[380px] overflow-hidden flex items-center justify-center shrink-0 ${
+            esLogoPorDefecto ? 'bg-[#fdfbf7]' : 'bg-slate-100'
+          }`}
+        >
+          <img
+            src={urlFoto}
+            alt={producto.nombre}
+            className={`w-full h-full object-center ${
+              esLogoPorDefecto ? 'object-contain p-5' : 'object-cover'
+            }`}
+          />
 
           {/* Botón Cerrar en Móvil */}
           <button

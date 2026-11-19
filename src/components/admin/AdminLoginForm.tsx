@@ -76,9 +76,13 @@ export function AdminLoginForm({ onSuccess }: AdminLoginFormProps) {
               <span>Acceso Administrativo</span>
             </div>
 
-            {/* 2. Logo con sombra más discreta */}
-            <div className="mx-auto w-13 h-13 rounded-2xl bg-gradient-to-br from-[#d97786] via-[#b978b5] to-[#7e4f9e] text-white flex items-center justify-center font-heading font-black text-xl shadow-xs border border-white/80">
-              M
+            {/* 2. Logo oficial con sombra discreta */}
+            <div className="mx-auto w-20 h-20 rounded-full overflow-hidden shadow-xs border-2 border-[#f3cad2] bg-[#fdfbf7]">
+              <img
+                src="/images/logo-motivos.jpg"
+                alt="Logo oficial de Librería Motivos"
+                className="w-full h-full object-cover"
+              />
             </div>
 
             {/* 3. Nombre de la librería con mayor respiro vertical */}

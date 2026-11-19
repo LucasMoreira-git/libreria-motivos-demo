@@ -15,6 +15,33 @@ export interface DatosNegocio {
   mensajePredeterminadoWA: string;
 }
 
+export const DEFAULT_BRAND_IMAGE = '/images/logo-motivos.jpg';
+
+export function parsearDiasSemanaDesdeTexto(texto: string): number[] {
+  const t = texto
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+
+  if (t.includes('lunes') && t.includes('viernes') && t.includes(' a ')) {
+    return [1, 2, 3, 4, 5];
+  }
+  if (t.includes('lunes') && t.includes('sabado') && t.includes(' a ')) {
+    return [1, 2, 3, 4, 5, 6];
+  }
+
+  const dias: number[] = [];
+  if (t.includes('domingo') || t.includes('feriado')) dias.push(0);
+  if (t.includes('lunes')) dias.push(1);
+  if (t.includes('martes')) dias.push(2);
+  if (t.includes('miercoles')) dias.push(3);
+  if (t.includes('jueves')) dias.push(4);
+  if (t.includes('viernes')) dias.push(5);
+  if (t.includes('sabado')) dias.push(6);
+
+  return dias;
+}
+
 export const DATOS_LIBRERIA_MOTIVOS: DatosNegocio = {
   nombre: 'Librería Motivos',
   rubro: 'Librería, Papelería y Regalería',

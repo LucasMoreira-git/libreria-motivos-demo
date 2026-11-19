@@ -298,20 +298,21 @@ export function Footer() {
             </p>
           </div>
 
-          {/* Derecha: Sello Emblemático / Logo Badge inspirado en el cuadro de la imagen de referencia */}
-          <div className="shrink-0 bg-white/95 px-5 py-3 rounded-2xl border border-purple-200 shadow-2xs flex flex-col items-center justify-center text-center">
-            {/* Círculo con monograma M y líneas horizontales dobles laterales */}
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-0.5 bg-purple-300" />
-              <div className="w-7 h-7 rounded-full border border-purple-400 flex items-center justify-center text-purple-900 font-serif font-black text-sm bg-purple-50">
-                M
-              </div>
-              <div className="w-6 h-0.5 bg-purple-300" />
+          {/* Derecha: Sello Emblemático con Logo Original */}
+          <div className="shrink-0 bg-white/95 px-4 py-2.5 rounded-2xl border border-purple-200 shadow-2xs flex items-center gap-3">
+            <img
+              src="/images/logo-motivos.jpg"
+              alt="Motivos - Regalos y Mimos"
+              className="w-12 h-12 rounded-full object-cover border border-purple-200/80 bg-[#fdfbf7] shrink-0"
+            />
+            <div className="text-left">
+              <span className="font-heading text-xs font-extrabold text-purple-950 block leading-tight">
+                Motivos
+              </span>
+              <span className="text-[10px] font-semibold text-purple-800/80 uppercase tracking-wider block mt-0.5">
+                Regalos y Mimos
+              </span>
             </div>
-            {/* Texto en letra serif/cursiva sutil */}
-            <span className="font-serif italic text-xs font-semibold text-purple-900 tracking-wider mt-1">
-              librería motivos
-            </span>
           </div>
 
         </div>

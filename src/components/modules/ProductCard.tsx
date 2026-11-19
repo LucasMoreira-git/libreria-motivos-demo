@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Producto } from '@/types/catalogo';
-import { DATOS_LIBRERIA_MOTIVOS } from '@/lib/mock-data';
+import { DATOS_LIBRERIA_MOTIVOS, DEFAULT_BRAND_IMAGE } from '@/lib/mock-data';
 import { getProductWhatsAppLink } from '@/lib/whatsapp';
 import { useConsulta } from '@/context/ConsultaContext';
 import { Card } from '@/components/ui/card';
@@ -55,7 +55,8 @@ export function ProductCard({
   const urlFoto =
     producto.fotoProducto ||
     producto.foto ||
-    'https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?auto=format&fit=crop&w=700&q=80';
+    DEFAULT_BRAND_IMAGE;
+  const esLogoPorDefecto = urlFoto === DEFAULT_BRAND_IMAGE;
 
   const whatsappUrl = getProductWhatsAppLink(
     producto,
@@ -176,12 +177,18 @@ export function ProductCard({
         aria-label={`Ver detalles de ${producto.nombre}`}
       >
         {/* Contenedor de Imagen */}
-        <div className="relative w-full h-[200px] sm:h-[220px] lg:h-[245px] overflow-hidden bg-slate-100 shrink-0">
+        <div
+          className={`relative w-full h-[200px] sm:h-[220px] lg:h-[245px] overflow-hidden shrink-0 ${
+            esLogoPorDefecto ? 'bg-[#fdfbf7]' : 'bg-slate-100'
+          }`}
+        >
           <img
             src={urlFoto}
             alt={producto.nombre}
             loading="lazy"
-            className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300 ease-out select-none"
+            className={`w-full h-full object-center group-hover:scale-105 transition-transform duration-300 ease-out select-none ${
+              esLogoPorDefecto ? 'object-contain p-3' : 'object-cover'
+            }`}
           />
 
           {/* Badge de Categoría en la esquina superior izquierda */}
