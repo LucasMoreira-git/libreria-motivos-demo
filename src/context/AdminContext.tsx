@@ -8,7 +8,7 @@ import {
   HorarioAtencionAdmin 
 } from '@/types/admin';
 import { CATEGORIAS_MOCK, PRODUCTOS_MOCK, PROMOCIONES_MOCK } from '@/lib/mock-catalogo';
-import { TURNOS_MOCK, parsearDiasSemanaDesdeTexto, aFormatoFechaInput } from '@/lib/mock-data';
+import { TURNOS_MOCK, DEFAULT_BRAND_IMAGE, parsearDiasSemanaDesdeTexto, aFormatoFechaInput } from '@/lib/mock-data';
 
 // Seeds iniciales adaptados al modelo de dominio estricto
 const CATEGORIAS_INICIALES: CategoriaAdmin[] = CATEGORIAS_MOCK.map((c) => ({
@@ -26,7 +26,7 @@ const PRODUCTOS_INICIALES: ProductoAdmin[] = PRODUCTOS_MOCK.map((p) => ({
   nombreProducto: p.nombre,
   detalleProducto: p.detalle,
   precioProducto: p.precio,
-  fotoProducto: p.fotoProducto || p.foto || '',
+  fotoProducto: p.fotoProducto || p.foto || DEFAULT_BRAND_IMAGE,
   categoriaId: p.categoriaId,
   codTC: p.categoriaId,
   categoriaNombre: p.categoriaNombre || '',
@@ -47,7 +47,7 @@ const PROMOCIONES_INICIALES: PromocionAdmin[] = PROMOCIONES_MOCK.map((pr) => ({
   descuentoTextoPromocion: pr.descuentoTexto,
   condicionPromocion: pr.condicion || '',
   badgeTextoPromocion: pr.badgeTexto || '',
-  fotoComboPromocion: pr.fotoCombo || '',
+  fotoComboPromocion: pr.fotoCombo || DEFAULT_BRAND_IMAGE,
   fechaHoraBajaPromocion: null,
 }));
 
@@ -185,7 +185,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           fechaFinDescuento: p.fechaFinDescuento ? new Date(p.fechaFinDescuento).toISOString() : null,
           tieneDescuentoVigente: !!p.tieneDescuentoVigente,
           precioEfectivo: p.precioEfectivo !== undefined ? Number(p.precioEfectivo) : Number(p.precioProducto || 0),
-          fotoProducto: p.fotoProducto || '',
+          fotoProducto: p.fotoProducto?.trim() ? p.fotoProducto : DEFAULT_BRAND_IMAGE,
           categoriaId: String(p.tipoCategoriaId || ''),
           codTC: p.codigoProducto || String(p.tipoCategoriaId || ''),
           categoriaNombre: p.tipoCategoriaNombre || '',
@@ -216,7 +216,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
             fechaHoraFinPromocion: finIso,
             descuentoTextoPromocion: pr.descuentoTexto || '',
             condicionPromocion: pr.condicionPromocion || '',
-            fotoComboPromocion: pr.fotoCombo || '',
+            fotoComboPromocion: pr.fotoCombo?.trim() ? pr.fotoCombo : DEFAULT_BRAND_IMAGE,
             fechaHoraBajaPromocion: pr.fechaHoraBajaPromocion 
               ? formatearTimestampBaja(pr.fechaHoraBajaPromocion) 
               : (pr.activo === false ? 'Oculta' : null),
@@ -414,9 +414,11 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   const crearProducto = (data: Omit<ProductoAdmin, 'idProducto' | 'fechaHoraBajaProducto'>) => {
     const cat = categorias.find((c) => c.idCategoria === data.categoriaId);
     const nuevoId = `prod-${Date.now()}`;
+    const fotoNormalizada = data.fotoProducto?.trim() || DEFAULT_BRAND_IMAGE;
     const tieneDesc = !!(data.precioDescuentoProducto && data.fechaFinDescuento && new Date(data.fechaFinDescuento).getTime() > Date.now());
     const nuevo: ProductoAdmin = {
       ...data,
+      fotoProducto: fotoNormalizada,
       idProducto: nuevoId,
       codTC: data.codTC !== undefined ? data.codTC : data.categoriaId,
       categoriaNombre: cat ? cat.nombreCategoria : '',
@@ -443,7 +445,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           precioDescuentoProducto: data.precioDescuentoProducto ?? null,
           fechaFinDescuento: data.fechaFinDescuento ?? null,
           detalleProducto: data.detalleProducto,
-          fotoProducto: data.fotoProducto,
+          fotoProducto: fotoNormalizada,
           destacadoProducto: data.destacadoProducto,
           enOfertaProducto: data.enOfertaProducto,
           ultimasUnidadesProducto: data.ultimasUnidadesProducto ?? false,
@@ -459,12 +461,14 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
   const editarProducto = (producto: ProductoAdmin) => {
     const cat = categorias.find((c) => c.idCategoria === producto.categoriaId);
+    const fotoNormalizada = producto.fotoProducto?.trim() || DEFAULT_BRAND_IMAGE;
     const tieneDesc = !!(producto.precioDescuentoProducto && producto.fechaFinDescuento && new Date(producto.fechaFinDescuento).getTime() > Date.now());
     setProductos((prev) =>
       prev.map((p) =>
         p.idProducto === producto.idProducto
           ? { 
               ...producto, 
+              fotoProducto: fotoNormalizada,
               codTC: producto.codTC !== undefined ? producto.codTC : producto.categoriaId,
               categoriaNombre: cat ? cat.nombreCategoria : p.categoriaNombre,
               tieneDescuentoVigente: tieneDesc,
@@ -491,7 +495,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
             precioDescuentoProducto: producto.precioDescuentoProducto ?? null,
             fechaFinDescuento: producto.fechaFinDescuento ?? null,
             detalleProducto: producto.detalleProducto,
-            fotoProducto: producto.fotoProducto,
+            fotoProducto: fotoNormalizada,
             destacadoProducto: producto.destacadoProducto,
             enOfertaProducto: producto.enOfertaProducto,
             ultimasUnidadesProducto: producto.ultimasUnidadesProducto ?? false,
@@ -553,9 +557,11 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   const crearPromocion = (data: Omit<PromocionAdmin, 'idPromocion' | 'fechaHoraBajaPromocion'>) => {
     const fechaInicioIso = aFormatoFechaInput(data.fechaInicioPromocion);
     const fechaFinIso = aFormatoFechaInput(data.fechaFinPromocion);
+    const fotoNormalizada = data.fotoComboPromocion?.trim() || DEFAULT_BRAND_IMAGE;
 
     const nueva: PromocionAdmin = {
       ...data,
+      fotoComboPromocion: fotoNormalizada,
       fechaInicioPromocion: fechaInicioIso || data.fechaInicioPromocion,
       fechaFinPromocion: fechaFinIso || data.fechaFinPromocion,
       idPromocion: `promo-${Date.now()}`,
@@ -577,7 +583,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           fechaFinPromocion: fechaFinIso ? `${fechaFinIso}T12:00:00.000Z` : null,
           descuentoTexto: data.descuentoTextoPromocion,
           condicionPromocion: data.condicionPromocion,
-          fotoCombo: data.fotoComboPromocion,
+          fotoCombo: fotoNormalizada,
         }),
       })
         .then((res) => {
@@ -590,12 +596,14 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   const editarPromocion = (promocion: PromocionAdmin) => {
     const fechaInicioIso = aFormatoFechaInput(promocion.fechaInicioPromocion);
     const fechaFinIso = aFormatoFechaInput(promocion.fechaFinPromocion);
+    const fotoNormalizada = promocion.fotoComboPromocion?.trim() || DEFAULT_BRAND_IMAGE;
 
     setPromociones((prev) =>
       prev.map((pr) =>
         pr.idPromocion === promocion.idPromocion
           ? {
               ...promocion,
+              fotoComboPromocion: fotoNormalizada,
               fechaInicioPromocion: fechaInicioIso || promocion.fechaInicioPromocion,
               fechaFinPromocion: fechaFinIso || promocion.fechaFinPromocion,
               fechaHoraFinPromocion: fechaFinIso || promocion.fechaHoraFinPromocion || promocion.fechaFinPromocion,
@@ -618,7 +626,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
             fechaFinPromocion: fechaFinIso ? `${fechaFinIso}T12:00:00.000Z` : null,
             descuentoTexto: promocion.descuentoTextoPromocion,
             condicionPromocion: promocion.condicionPromocion,
-            fotoCombo: promocion.fotoComboPromocion,
+            fotoCombo: fotoNormalizada,
           }),
         })
           .then((res) => {

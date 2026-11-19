@@ -79,8 +79,8 @@ export function Footer() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 sm:pt-16 pb-8">
         
-        {/* PARTE SUPERIOR: Grilla de 4 Columnas inspirada en la referencia visual */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10 pb-12">
+        {/* PARTE SUPERIOR: Grilla equilibrada de 3 Columnas */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12 pb-12">
           
           {/* COLUMNA 1: Información del Negocio y Dirección */}
           <div className="space-y-4">
@@ -120,41 +120,7 @@ export function Footer() {
             </div>
           </div>
 
-          {/* COLUMNA 2: Catálogo & Rubros */}
-          <div className="space-y-4">
-            <h4 className="font-heading text-sm font-bold uppercase tracking-wider text-purple-950">
-              Catálogo & Rubros
-            </h4>
-            <ul className="space-y-2 text-xs sm:text-sm">
-              <li>
-                <a href="#catalogo" className="text-slate-600 hover:text-purple-950 transition-colors">
-                  Útiles Escolares & Colegiales
-                </a>
-              </li>
-              <li>
-                <a href="#catalogo" className="text-slate-600 hover:text-purple-950 transition-colors">
-                  Artículos de Oficina & Comercial
-                </a>
-              </li>
-              <li>
-                <a href="#catalogo" className="text-slate-600 hover:text-purple-950 transition-colors">
-                  Artística, Acrílicos y Pinceles
-                </a>
-              </li>
-              <li>
-                <a href="#catalogo" className="text-slate-600 hover:text-purple-950 transition-colors">
-                  Regalería & Didácticos Infantiles
-                </a>
-              </li>
-              <li>
-                <a href="#catalogo" className="text-slate-600 hover:text-purple-950 transition-colors">
-                  Dibujo Técnico y Geometría
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          {/* COLUMNA 3: Atención & Servicios */}
+          {/* COLUMNA 2: Atención & Servicios */}
           <div className="space-y-4">
             <h4 className="font-heading text-sm font-bold uppercase tracking-wider text-purple-950">
               Atención & Servicios
@@ -299,14 +265,14 @@ export function Footer() {
           </div>
 
           {/* Derecha: Sello Emblemático con Logo Original */}
-          <div className="shrink-0 bg-white/95 px-4 py-2.5 rounded-2xl border border-purple-200 shadow-2xs flex items-center gap-3">
+          <div className="shrink-0 bg-white/95 px-4 py-2.5 rounded-2xl border border-purple-200 shadow-xs flex items-center gap-3.5">
             <img
               src="/images/logo-motivos.jpg"
               alt="Motivos - Regalos y Mimos"
-              className="w-12 h-12 rounded-full object-cover border border-purple-200/80 bg-[#fdfbf7] shrink-0"
+              className="w-16 h-16 rounded-full object-cover border-2 border-white ring-2 ring-purple-200/80 bg-[#fdfbf7] shrink-0 shadow-xs"
             />
             <div className="text-left">
-              <span className="font-heading text-xs font-extrabold text-purple-950 block leading-tight">
+              <span className="font-heading text-sm font-extrabold text-purple-950 block leading-tight">
                 Motivos
               </span>
               <span className="text-[10px] font-semibold text-purple-800/80 uppercase tracking-wider block mt-0.5">

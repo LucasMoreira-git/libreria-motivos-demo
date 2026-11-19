@@ -28,6 +28,7 @@ import {
   aFormatoFechaInput,
   formatearFechaLegible,
 } from '@/lib/mock-data';
+import { DatePickerAR } from '@/components/ui/DatePickerAR';
 
 interface AvisoImagen {
   tipo: 'optimo' | 'advertencia';
@@ -105,12 +106,16 @@ export default function PromocionesAdminPage() {
     setFechaFinPromocion(aFormatoFechaInput(promo.fechaFinPromocion) || obtenerFechaHoyIso(30));
     setDescuentoTextoPromocion(promo.descuentoTextoPromocion);
     setCondicionPromocion(promo.condicionPromocion || '');
-    setFotoComboPromocion(promo.fotoComboPromocion || '');
+    setFotoComboPromocion(
+      promo.fotoComboPromocion === DEFAULT_BRAND_IMAGE ? '' : (promo.fotoComboPromocion || '')
+    );
     setBadgeTextoPromocion(promo.badgeTextoPromocion || '');
     setMostrarUrlExterna(
       Boolean(
-        promo.fotoComboPromocion?.startsWith('http') &&
-          !promo.fotoComboPromocion?.startsWith('data:image')
+        promo.fotoComboPromocion &&
+          promo.fotoComboPromocion !== DEFAULT_BRAND_IMAGE &&
+          promo.fotoComboPromocion.startsWith('http') &&
+          !promo.fotoComboPromocion.startsWith('data:image')
       )
     );
     setAvisoFormatoFoto(null);
@@ -597,34 +602,32 @@ export default function PromocionesAdminPage() {
                   </div>
                 </div>
 
-                {/* Fechas con Calendario Desplegable */}
+                {/* Fechas con Calendario Desplegable en formato DIA/MES/AÑO */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block font-bold text-slate-700 mb-1 flex items-center gap-1.5">
                       <Calendar className="w-3.5 h-3.5 text-orange-600" />
-                      <span>Válida desde *</span>
+                      <span>Válida desde (dd/mm/aaaa) *</span>
                     </label>
-                    <input
-                      type="date"
-                      required
+                    <DatePickerAR
                       value={fechaInicioPromocion}
-                      onChange={(e) => setFechaInicioPromocion(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 font-mono text-xs sm:text-sm focus:outline-hidden focus:border-orange-600 focus:bg-white transition-all cursor-pointer"
+                      onChange={setFechaInicioPromocion}
+                      required
+                      ariaLabel="Fecha de inicio de la promoción"
                     />
                   </div>
 
                   <div>
                     <label className="block font-bold text-slate-700 mb-1 flex items-center gap-1.5">
                       <Calendar className="w-3.5 h-3.5 text-orange-600" />
-                      <span>Válida hasta *</span>
+                      <span>Válida hasta (dd/mm/aaaa) *</span>
                     </label>
-                    <input
-                      type="date"
-                      required
-                      min={fechaInicioPromocion || undefined}
+                    <DatePickerAR
                       value={fechaFinPromocion}
-                      onChange={(e) => setFechaFinPromocion(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 font-mono text-xs sm:text-sm focus:outline-hidden focus:border-orange-600 focus:bg-white transition-all cursor-pointer"
+                      onChange={setFechaFinPromocion}
+                      min={fechaInicioPromocion || undefined}
+                      required
+                      ariaLabel="Fecha de fin de la promoción"
                     />
                   </div>
                 </div>
@@ -668,7 +671,7 @@ export default function PromocionesAdminPage() {
                         className="hidden"
                       />
 
-                      {fotoComboPromocion ? (
+                      {fotoComboPromocion && fotoComboPromocion !== DEFAULT_BRAND_IMAGE ? (
                         <div className="flex items-center gap-3 p-2 bg-white rounded-xl border border-slate-200">
                           <img
                             src={fotoComboPromocion}
@@ -705,7 +708,7 @@ export default function PromocionesAdminPage() {
                           </div>
                         </div>
                       ) : (
-                        <div className="space-y-2">
+                        <div className="space-y-2.5">
                           <div
                             onClick={() => fileInputRef.current?.click()}
                             className="border-2 border-dashed border-slate-200 hover:border-orange-500 bg-white hover:bg-orange-50/20 rounded-xl p-5 text-center cursor-pointer transition-all duration-200"
@@ -717,25 +720,20 @@ export default function PromocionesAdminPage() {
                               Hacé clic para subir una foto de la promoción
                             </p>
                             <p className="text-[11px] text-slate-400 mt-0.5">
-                              Si no subís ninguna, se mostrará el logo oficial de Librería Motivos
+                              Opcional: si no cargás una foto, siempre se asignará la imagen oficial de la librería
                             </p>
                           </div>
 
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setFotoComboPromocion(DEFAULT_BRAND_IMAGE);
-                              setAvisoFormatoFoto(null);
-                            }}
-                            className="w-full inline-flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-white hover:bg-[#fdfbf7] border border-slate-200 hover:border-orange-400 text-xs font-semibold text-slate-700 transition-colors cursor-pointer"
-                          >
+                          <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-[#fdfbf7] border border-[#f2d3d8]/80 text-[11px] text-slate-600">
                             <img
                               src={DEFAULT_BRAND_IMAGE}
-                              alt="Logo Motivos"
-                              className="w-5 h-5 rounded-full object-cover border border-slate-200"
+                              alt="Logo oficial de Librería Motivos"
+                              className="w-8 h-8 rounded-full object-cover border border-[#f2d3d8] shrink-0"
                             />
-                            <span>Usar imagen oficial de Librería Motivos</span>
-                          </button>
+                            <span className="leading-snug">
+                              <strong className="text-purple-950">Imagen oficial automática:</strong> sin foto propia se mostrará siempre el logo de Librería Motivos.
+                            </span>
+                          </div>
                         </div>
                       )}
                     </div>

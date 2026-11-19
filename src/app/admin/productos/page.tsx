@@ -150,8 +150,15 @@ export default function ProductosAdminPage() {
     setDetalleProducto(prod.detalleProducto);
     setPrecioProducto(prod.precioProducto || '');
     setCategoriaId(prod.categoriaId);
-    setFotoProducto(prod.fotoProducto || '');
-    setMostrarUrlExterna(Boolean(prod.fotoProducto?.startsWith('http') && !prod.fotoProducto?.startsWith('data:image')));
+    setFotoProducto(prod.fotoProducto === DEFAULT_BRAND_IMAGE ? '' : (prod.fotoProducto || ''));
+    setMostrarUrlExterna(
+      Boolean(
+        prod.fotoProducto &&
+          prod.fotoProducto !== DEFAULT_BRAND_IMAGE &&
+          prod.fotoProducto.startsWith('http') &&
+          !prod.fotoProducto.startsWith('data:image')
+      )
+    );
     setAvisoFormatoFoto(null);
     setDestacadoProducto(!!prod.destacadoProducto);
     setEnOfertaProducto(!!prod.enOfertaProducto);
@@ -792,7 +799,7 @@ export default function ProductosAdminPage() {
                         className="hidden"
                       />
 
-                      {fotoProducto ? (
+                      {fotoProducto && fotoProducto !== DEFAULT_BRAND_IMAGE ? (
                         <div className="flex items-center gap-3 p-2 bg-white rounded-xl border border-slate-200">
                           <img 
                             src={fotoProducto} 
@@ -822,7 +829,7 @@ export default function ProductosAdminPage() {
                           </div>
                         </div>
                       ) : (
-                        <div className="space-y-2">
+                        <div className="space-y-2.5">
                           <div 
                             onClick={() => fileInputRef.current?.click()}
                             className="border-2 border-dashed border-slate-200 hover:border-blue-900 bg-white hover:bg-blue-50/20 rounded-xl p-5 text-center cursor-pointer transition-all duration-200"
@@ -834,22 +841,20 @@ export default function ProductosAdminPage() {
                               Hacé clic para subir o sacar una foto real del producto
                             </p>
                             <p className="text-[11px] text-slate-400 mt-0.5">
-                              Si no subís una foto, se mostrará el logo oficial de Librería Motivos
+                              Opcional: si no cargás una foto, siempre se asignará la imagen oficial de la librería
                             </p>
                           </div>
 
-                          <button
-                            type="button"
-                            onClick={() => setFotoProducto(DEFAULT_BRAND_IMAGE)}
-                            className="w-full inline-flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-white hover:bg-[#fdfbf7] border border-slate-200 hover:border-[#d97786] text-xs font-semibold text-slate-700 transition-colors cursor-pointer"
-                          >
+                          <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-[#fdfbf7] border border-[#f2d3d8]/80 text-[11px] text-slate-600">
                             <img
                               src={DEFAULT_BRAND_IMAGE}
-                              alt="Logo Motivos"
-                              className="w-5 h-5 rounded-full object-cover border border-slate-200"
+                              alt="Logo oficial de Librería Motivos"
+                              className="w-8 h-8 rounded-full object-cover border border-[#f2d3d8] shrink-0"
                             />
-                            <span>Usar imagen oficial de Librería Motivos</span>
-                          </button>
+                            <span className="leading-snug">
+                              <strong className="text-purple-950">Imagen oficial automática:</strong> sin foto propia se mostrará siempre el logo de Librería Motivos.
+                            </span>
+                          </div>
                         </div>
                       )}
                     </div>

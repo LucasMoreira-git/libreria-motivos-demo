@@ -98,17 +98,17 @@ export function AdminSidebar({ onCerrarMovil }: AdminSidebarProps) {
       
       {/* 1. Encabezado de Identidad del Dashboard con el logo oficial de la marca */}
       <div className="p-5 border-b border-[#ded0f2]/80 bg-[#fdf8f9]">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3.5">
           <img
             src="/images/logo-motivos.jpg"
             alt="Logo oficial de Librería Motivos"
-            className="w-11 h-11 rounded-full object-cover shadow-xs border border-[#f3cad2] bg-[#fdfbf7] shrink-0"
+            className="w-16 h-16 rounded-full object-cover shadow-sm border-2 border-white ring-2 ring-[#f3cad2] bg-[#fdfbf7] shrink-0"
           />
           <div className="min-w-0">
-            <h2 className="font-heading text-sm font-black tracking-tight text-purple-950 truncate">
+            <h2 className="font-heading text-base font-black tracking-tight text-purple-950 truncate">
               Librería Motivos
             </h2>
-            <div className="flex items-center gap-1.5 mt-0.5">
+            <div className="flex items-center gap-1.5 mt-1">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                 Panel Administrador

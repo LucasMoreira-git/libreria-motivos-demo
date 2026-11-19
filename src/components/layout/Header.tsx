@@ -81,54 +81,63 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-30 w-full bg-[#ede4f6] backdrop-blur-md border-b border-purple-200/90 shadow-md transition-all">
+    <header className="sticky top-0 z-30 w-full bg-gradient-to-r from-[#fdf5f7]/95 via-[#f4ebfb]/95 to-[#fdf5f7]/95 backdrop-blur-md border-b border-[#e5d2ee] shadow-md shadow-purple-950/5 transition-all">
+      {/* Cinta decorativa superior con los colores de marca */}
+      <div className="h-1 w-full bg-gradient-to-r from-[#d97786] via-[#a779cf] to-[#d97786]" />
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 sm:h-20 gap-3">
+        <div className="flex items-center justify-between h-18 sm:h-22 gap-3">
           
-          {/* 1. IZQUIERDA: Logo Oficial e Identidad del Negocio */}
-          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          {/* 1. IZQUIERDA: Logo Oficial Protagonista (sin texto redundante al lado) */}
+          <div className="flex items-center min-w-0">
             <a 
               href="/" 
-              className="group inline-flex items-center gap-2.5 sm:gap-3 min-w-0 focus:outline-hidden"
+              className="group inline-flex items-center gap-3 focus:outline-hidden"
               aria-label="Ir a página de inicio de Librería Motivos"
             >
-              <img
-                src="/images/logo-motivos.jpg"
-                alt="Logo oficial de Librería Motivos"
-                className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover shadow-xs border-2 border-white shrink-0 bg-[#fdfbf7] group-hover:scale-105 transition-transform duration-200"
-              />
-              <h1 className="font-heading text-base sm:text-lg lg:text-xl font-extrabold text-purple-950 tracking-tight leading-none group-hover:text-purple-700 transition-colors truncate">
+              <div className="relative">
+                <div
+                  aria-hidden="true"
+                  className="absolute -inset-1 rounded-full bg-gradient-to-tr from-[#d97786]/35 via-[#b88ce2]/30 to-[#f5b7c2]/40 blur-xs opacity-75 group-hover:opacity-100 transition-opacity duration-300"
+                />
+                <img
+                  src="/images/logo-motivos.jpg"
+                  alt="Motivos - Regalos y Mimos"
+                  className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover shadow-md border-2 border-white ring-2 ring-[#f1cbd3] shrink-0 bg-[#fdfbf7] group-hover:scale-105 transition-transform duration-300"
+                />
+              </div>
+              <h1 className="sr-only">
                 {DATOS_LIBRERIA_MOTIVOS.nombre}
               </h1>
             </a>
           </div>
 
-          {/* 2. CENTRO: Enlaces de Navegación Rápida en Contenedor Morado Claro (Desktop / Tablet) */}
+          {/* 2. CENTRO: Barra de Navegación Elevada con Píldoras Luminosas */}
           <nav 
             aria-label="Navegación rápida de secciones"
-            className="hidden md:flex items-center gap-1 lg:gap-2 px-3 py-1.5 rounded-full bg-[#e2d5f3]/80 border border-purple-300/80 shadow-2xs backdrop-blur-xs"
+            className="hidden md:flex items-center gap-1 lg:gap-1.5 px-2.5 py-1.5 rounded-full bg-white/90 border border-[#e7d4ee] shadow-sm shadow-purple-950/5 backdrop-blur-sm"
           >
             <a 
               href="#catalogo" 
-              className="px-3 py-1 rounded-full text-xs lg:text-sm font-bold text-purple-950 hover:bg-white/80 hover:text-purple-900 transition-all duration-200"
+              className="px-4 py-1.5 rounded-full text-xs lg:text-sm font-bold text-purple-950 hover:bg-[#fef2f4] hover:text-[#b34f60] transition-all duration-200"
             >
               Catálogo
             </a>
             <a 
               href="#promociones" 
-              className="px-3 py-1 rounded-full text-xs lg:text-sm font-bold text-purple-950 hover:bg-white/80 hover:text-purple-900 transition-all duration-200"
+              className="px-4 py-1.5 rounded-full text-xs lg:text-sm font-bold text-purple-950 hover:bg-[#fef2f4] hover:text-[#b34f60] transition-all duration-200"
             >
               Promociones
             </a>
             <a 
               href="#horarios" 
-              className="px-3 py-1 rounded-full text-xs lg:text-sm font-bold text-purple-950 hover:bg-white/80 hover:text-purple-900 transition-all duration-200"
+              className="px-4 py-1.5 rounded-full text-xs lg:text-sm font-bold text-purple-950 hover:bg-[#f4ecfa] hover:text-purple-800 transition-all duration-200"
             >
               Horarios
             </a>
             <a 
               href="#ubicacion" 
-              className="px-3 py-1 rounded-full text-xs lg:text-sm font-bold text-purple-950 hover:bg-white/80 hover:text-purple-900 transition-all duration-200"
+              className="px-4 py-1.5 rounded-full text-xs lg:text-sm font-bold text-purple-950 hover:bg-[#f4ecfa] hover:text-purple-800 transition-all duration-200"
             >
               Ubicación
             </a>
@@ -137,68 +146,68 @@ export function Header() {
           {/* 3. DERECHA: Búsqueda Global, Redes Sociales y Badge Interactivo de Estado */}
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             
-            {/* Ícono de Búsqueda Global de Lucide React */}
+            {/* Botón de Búsqueda Global con etiqueta en escritorio */}
             <button
               type="button"
               onClick={handleScrollToSearch}
               aria-label="Buscar productos en el catálogo"
               title="Buscar en el catálogo"
-              className="p-2 sm:p-2.5 rounded-xl text-purple-900 hover:text-purple-950 hover:bg-purple-200/60 active:scale-95 transition-all duration-200 touch-manipulation cursor-pointer flex items-center justify-center border border-purple-200/70"
+              className="px-2.5 py-2 sm:px-3 sm:py-2 rounded-full bg-white/90 hover:bg-white text-purple-900 hover:text-[#b34f60] active:scale-95 transition-all duration-200 touch-manipulation cursor-pointer flex items-center justify-center gap-1.5 border border-[#e5d2ee] shadow-2xs hover:shadow-xs"
             >
-              <Search className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+              <Search className="w-4 h-4 shrink-0" />
+              <span className="hidden xl:inline text-xs font-bold">Buscar</span>
             </button>
 
-            {/* Íconos Sutiles a Instagram y Reseñas de Google Maps (Visibles en sm y desktop) */}
-            <div className="hidden sm:flex items-center gap-1 border-l border-purple-200/90 pl-1.5 ml-0.5">
-              {/* Instagram */}
+            {/* Íconos a Instagram y Reseñas de Google Maps */}
+            <div className="hidden sm:flex items-center gap-1.5">
               <a
                 href={DATOS_LIBRERIA_MOTIVOS.instagramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Seguir a Librería Motivos en Instagram"
-                title="Instagram de Librería Motivos"
-                className="p-2 rounded-xl text-purple-800 hover:text-purple-950 hover:bg-purple-200/60 active:scale-95 transition-all duration-200 touch-manipulation flex items-center justify-center"
+                title="Instagram: @motivos.regalos_"
+                className="w-9 h-9 rounded-full bg-white/90 hover:bg-gradient-to-tr hover:from-purple-600 hover:to-pink-500 text-pink-600 hover:text-white border border-[#e5d2ee] hover:border-transparent shadow-2xs active:scale-95 transition-all duration-200 touch-manipulation flex items-center justify-center"
               >
                 <InstagramIcon className="w-4 h-4" />
               </a>
 
-              {/* Reseñas de Google Maps */}
               <a
                 href={DATOS_LIBRERIA_MOTIVOS.googleReviewsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Ver opiniones y reseñas en Google Maps"
                 title="Opiniones en Google Maps (4.9 estrellas)"
-                className="p-2 rounded-xl text-purple-800 hover:text-amber-700 hover:bg-amber-100/60 active:scale-95 transition-all duration-200 touch-manipulation flex items-center gap-1"
+                className="px-2.5 h-9 rounded-full bg-white/90 hover:bg-amber-50 text-amber-700 border border-amber-200/80 shadow-2xs active:scale-95 transition-all duration-200 touch-manipulation flex items-center gap-1"
               >
-                <Star className="w-4 h-4 fill-amber-400 text-amber-500" />
-                <span className="hidden xl:inline text-xs font-bold text-purple-950">4.9</span>
+                <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
+                <span className="text-xs font-extrabold text-purple-950">4.9</span>
               </a>
             </div>
 
-            {/* Badge Interactivo de Estado ('Abierto'/'Cerrado') con Tooltip Limpio (sin animaciones pulsantes) */}
+            {/* Badge Interactivo de Estado ('Abierto'/'Cerrado') */}
             <div className="relative">
               <button
                 type="button"
                 onClick={() => setMostrarTooltipHorarios(!mostrarTooltipHorarios)}
-                className="group focus:outline-hidden rounded-full focus-visible:ring-2 focus-visible:ring-purple-500 active:scale-95 transition-all duration-200 touch-manipulation cursor-pointer select-none"
+                className="group focus:outline-hidden rounded-full focus-visible:ring-2 focus-visible:ring-[#d97786] active:scale-95 transition-all duration-200 touch-manipulation cursor-pointer select-none"
                 aria-expanded={mostrarTooltipHorarios}
                 aria-haspopup="dialog"
                 aria-label={`Estado actual: ${estado.estadoTexto}. ${estado.mensajeDetalle}. Tocar para ver la grilla completa de horarios.`}
               >
                 {estado.estaAbierto ? (
-                  /* Badge ABIERTO AHORA (Verde, sin efecto pulsante) */
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300/80 hover:bg-emerald-100 transition-colors shadow-2xs">
-                    <span className="inline-block w-2 h-2 rounded-full bg-emerald-600 shrink-0"></span>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-full text-[11px] sm:text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300/90 hover:bg-emerald-100 transition-colors shadow-xs">
+                    <span className="relative flex h-2 w-2 shrink-0">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600" />
+                    </span>
                     <span className="whitespace-nowrap font-bold">Abierto ahora</span>
-                    <ChevronDown className={`w-3 h-3 text-emerald-600 transition-transform duration-200 ${mostrarTooltipHorarios ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`w-3.5 h-3.5 text-emerald-600 transition-transform duration-200 ${mostrarTooltipHorarios ? 'rotate-180' : ''}`} />
                   </span>
                 ) : (
-                  /* Badge CERRADO (Rojo) */
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-semibold bg-rose-50 text-rose-800 border border-rose-300/80 hover:bg-rose-100 transition-colors shadow-2xs">
-                    <span className="inline-block w-2 h-2 rounded-full bg-rose-500 shrink-0"></span>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-full text-[11px] sm:text-xs font-semibold bg-white/95 text-[#9f3f50] border border-[#f0c5ce] hover:bg-[#fef2f4] transition-colors shadow-xs">
+                    <span className="inline-block w-2 h-2 rounded-full bg-[#d97786] shrink-0" />
                     <span className="whitespace-nowrap font-bold">Cerrado</span>
-                    <ChevronDown className={`w-3 h-3 text-rose-600 transition-transform duration-200 ${mostrarTooltipHorarios ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`w-3.5 h-3.5 text-[#d97786] transition-transform duration-200 ${mostrarTooltipHorarios ? 'rotate-180' : ''}`} />
                   </span>
                 )}
               </button>
