@@ -33,7 +33,7 @@ export function buildWhatsAppLink(telefono: string, mensaje: string): string {
 export function getGeneralWhatsAppLink(telefono: string): string {
   return buildWhatsAppLink(
     telefono,
-    '¡Hola Librería Motivos! 👋 Visité su vitrina web y quisiera hacerles una consulta.'
+    '¡Hola Librería Motivos! Visité su vitrina web y quisiera hacerles una consulta.'
   );
 }
 
@@ -44,6 +44,32 @@ export function getProductWhatsAppLink(producto: Producto, telefono: string): st
 
 export function getPromoWhatsAppLink(promo: Promocion, telefono: string): string {
   const temporada = promo.temporadaPromocion || promo.temporada || 'Especial Primavera 2026';
-  const mensaje = `¡Hola Librería Motivos! 👋 Me interesa la promoción: *${promo.nombre}* (Temporada: ${temporada}). ¿Me podrían brindar más información sobre cómo aprovecharla?`;
+  const mensaje = `¡Hola Librería Motivos! Me interesa la promoción: *${promo.nombre}* (Temporada: ${temporada}). ¿Me podrían brindar más información sobre cómo aprovecharla?`;
+  return buildWhatsAppLink(telefono, mensaje);
+}
+
+export function getMultiProductWhatsAppLink(
+  items: { producto: Producto; cantidad: number }[],
+  telefono: string
+): string {
+  const lineas = items.map(({ producto, cantidad }) => {
+    const precio = producto.precio.toLocaleString('es-AR');
+    return `• ${cantidad}x *${producto.nombre}* (Ref: $${precio})`;
+  });
+
+  const mensaje = [
+    '¡Hola Librería Motivos! Quisiera consultar stock y disponibilidad de los siguientes artículos:',
+    '',
+    ...lineas,
+    '',
+    '¿Tienen disponibilidad para pasar a retirar? ¡Muchas gracias!',
+  ].join('\n');
+
+  return buildWhatsAppLink(telefono, mensaje);
+}
+
+export function getBroadcastWhatsAppLink(telefono: string): string {
+  const mensaje =
+    '¡Hola Librería Motivos! Quisiera sumarme para enterarme de las promociones escolares, ofertas y novedades del local.';
   return buildWhatsAppLink(telefono, mensaje);
 }

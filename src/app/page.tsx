@@ -8,6 +8,7 @@ import { ProductGrid } from '@/components/modules/ProductGrid';
 import { ScheduleWidget } from '@/components/modules/ScheduleWidget';
 import { LocationSection } from '@/components/modules/LocationSection';
 import { WhatsAppFloatingCTA } from '@/components/layout/WhatsAppFloatingCTA';
+import { ConsultaListaBar } from '@/components/modules/ConsultaListaBar';
 import { DATOS_LIBRERIA_MOTIVOS } from '@/lib/mock-data';
 import { getGeneralWhatsAppLink } from '@/lib/whatsapp';
 import { useAdmin } from '@/context/AdminContext';
@@ -120,16 +121,52 @@ export default function Home() {
         {/* 2. Hero de Promociones de Temporada (Conectado a la BD / AdminContext) */}
         <PromoHero promociones={promocionesActivas.length > 0 ? promocionesActivas : undefined} />
 
-        {/* 3. Catálogo Interactivo de Productos (Conectado en vivo a la BD / AdminContext) */}
+        {/* 3. Barra Compacta de Confianza Vecinal (Entre Hero y Catálogo) */}
+        <section 
+          aria-label="Ventajas del comercio local"
+          className="w-full my-4 sm:my-5 grid grid-cols-1 sm:grid-cols-3 gap-3"
+        >
+          <div className="bg-white rounded-2xl px-4 py-3 border border-slate-200/90 shadow-2xs flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-900 border border-purple-200/60 flex items-center justify-center shrink-0">
+              <ShieldCheck className="w-5 h-5" />
+            </div>
+            <div className="min-w-0">
+              <h4 className="font-heading text-xs font-bold text-slate-900 leading-tight">Atención Personalizada</h4>
+              <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">Asesoramiento directo y presupuestos por WhatsApp.</p>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl px-4 py-3 border border-slate-200/90 shadow-2xs flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+              <CreditCard className="w-5 h-5" />
+            </div>
+            <div className="min-w-0">
+              <h4 className="font-heading text-xs font-bold text-slate-900 leading-tight">Medios de Pago en Local</h4>
+              <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">Precios web en efectivo, débito o transf. Crédito en local.</p>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl px-4 py-3 border border-slate-200/90 shadow-2xs flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+              <MapPin className="w-5 h-5" />
+            </div>
+            <div className="min-w-0">
+              <h4 className="font-heading text-xs font-bold text-slate-900 leading-tight">Retiro en Guaymallén</h4>
+              <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">Reservás tu lista y retirás en el día sin espera.</p>
+            </div>
+          </div>
+        </section>
+
+        {/* 4. Catálogo Interactivo de Productos (Conectado en vivo a la BD / AdminContext) */}
         <ProductGrid 
           productosIniciales={productosActivos.length > 0 ? productosActivos : undefined} 
           categorias={categoriasActivas.length > 0 ? categoriasActivas : undefined} 
         />
 
-        {/* 4. Banner de Propuesta de Valor y Atención de Barrio */}
+        {/* 5. Banner de Propuesta de Valor y Atención de Barrio */}
         <section 
           aria-label="Valores del negocio"
-          className="my-8 sm:my-10 p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-slate-900 via-purple-950/70 to-slate-900 text-white shadow-md border border-purple-900/40 flex flex-col md:flex-row items-center justify-between gap-6"
+          className="w-full my-8 sm:my-10 p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-slate-900 via-purple-950/70 to-slate-900 text-white shadow-md border border-purple-900/40 flex flex-col md:flex-row items-center justify-between gap-6"
         >
           <div className="space-y-2 text-center md:text-left">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-white/10 text-purple-200 border border-white/15">
@@ -155,54 +192,19 @@ export default function Home() {
           </a>
         </section>
 
-        {/* 5. Información del Local: Horarios por Turnos Independientes (Conectado en vivo) */}
+        {/* 6. Información del Local: Horarios por Turnos Independientes (Conectado en vivo) */}
         <ScheduleWidget horarios={horarios} />
 
-        {/* 6. Sección de Ubicación: ¿Dónde encontrarnos? (Layout 2 columnas, minimapa Google Maps, animación al scroll) */}
+        {/* 7. Sección de Ubicación: ¿Dónde encontrarnos? */}
         <LocationSection />
-
-        {/* 7. Beneficios de Compra Vecinal */}
-        <section 
-          aria-label="Ventajas del comercio local"
-          className="my-8 grid grid-cols-1 sm:grid-cols-3 gap-4"
-        >
-          <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-2xl bg-purple-50 text-purple-900 border border-purple-200/60 flex items-center justify-center shrink-0">
-              <ShieldCheck className="w-6 h-6" />
-            </div>
-            <div>
-              <h4 className="font-heading text-xs sm:text-sm font-bold text-slate-900">Atención Personalizada</h4>
-              <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5">Asesoramiento directo y presupuestos a medida por WhatsApp.</p>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-              <CreditCard className="w-6 h-6" />
-            </div>
-            <div>
-              <h4 className="font-heading text-xs sm:text-sm font-bold text-slate-900">Medios de Pago en Local</h4>
-              <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5">Efectivo, tarjetas de débito/crédito y transferencias bancarias.</p>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-2xs flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
-              <MapPin className="w-6 h-6" />
-            </div>
-            <div>
-              <h4 className="font-heading text-xs sm:text-sm font-bold text-slate-900">Retiro en Guaymallén</h4>
-              <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5">Reservás desde la vitrina y retirás en el día en el local.</p>
-            </div>
-          </div>
-        </section>
 
       </main>
 
-      {/* 7. Botón Flotante Fijo de WhatsApp (Siempre accesible en el Thumb Zone) */}
+      {/* 8. Barra Flotante de Lista Multi-Producto o CTA General de WhatsApp */}
+      <ConsultaListaBar />
       <WhatsAppFloatingCTA />
 
-      {/* 8. Pie de Página Institucional Completo */}
+      {/* 9. Pie de Página Institucional Completo */}
       <Footer />
 
     </div>

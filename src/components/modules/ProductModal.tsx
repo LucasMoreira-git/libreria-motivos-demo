@@ -4,7 +4,8 @@ import React, { useEffect } from 'react';
 import { Producto } from '@/types/catalogo';
 import { DATOS_LIBRERIA_MOTIVOS } from '@/lib/mock-data';
 import { getProductWhatsAppLink } from '@/lib/whatsapp';
-import { X, Tag, BookOpen, PenTool, Palette, Briefcase, Ruler, Gift, ShieldCheck, Info, Star, AlertTriangle, Sparkles } from 'lucide-react';
+import { useConsulta } from '@/context/ConsultaContext';
+import { X, Tag, BookOpen, PenTool, Palette, Briefcase, Ruler, Gift, ShieldCheck, Info, Star, AlertTriangle, Sparkles, CreditCard, Plus, Check } from 'lucide-react';
 import { AppIcon } from '@/lib/icon-registry';
 
 interface ProductModalProps {
@@ -13,6 +14,8 @@ interface ProductModalProps {
 }
 
 export function ProductModal({ producto, onCerrar }: ProductModalProps) {
+  const { estaEnLista, toggleProducto } = useConsulta();
+
   // Manejo de tecla Escape y bloqueo de scroll de fondo
   useEffect(() => {
     if (!producto) return;
@@ -31,6 +34,8 @@ export function ProductModal({ producto, onCerrar }: ProductModalProps) {
   }, [producto, onCerrar]);
 
   if (!producto) return null;
+
+  const enLista = estaEnLista(producto.id);
 
   const whatsappUrl = getProductWhatsAppLink(
     producto,
@@ -152,11 +157,11 @@ export function ProductModal({ producto, onCerrar }: ProductModalProps) {
           <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100 space-y-1.5 text-xs text-slate-600">
             <div className="flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>Stock confirmado y retiro inmediato en Guaymallén.</span>
+              <span>Stock confirmado y retiro en el día en Guaymallén.</span>
             </div>
             <div className="flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>Podés pagar en el local con efectivo, débito o transferencia.</span>
+              <CreditCard className="w-4 h-4 text-amber-600 shrink-0" />
+              <span>Efectivo, débito y transferencia sin recargo. Crédito en local (consultar cuotas).</span>
             </div>
           </div>
 
@@ -183,26 +188,48 @@ export function ProductModal({ producto, onCerrar }: ProductModalProps) {
               </div>
             </div>
 
-            {/* Aclaración de Precio contado / transferencia */}
+            {/* Aclaración unificada de Precio contado / transferencia y crédito */}
             <div className="p-2.5 rounded-xl bg-[#fbf0f2] border border-[#eed0d5] text-[11px] sm:text-xs text-[#6e2e38] flex items-start gap-2">
               <Info className="w-4 h-4 text-[#b34f60] shrink-0 mt-0.5" />
               <span className="leading-relaxed">
-                <strong>«Precio contado/transf.»</strong>: valor especial abonando en efectivo, tarjeta de débito o transferencia bancaria directa en nuestro local de Guaymallén.
+                El precio publicado corresponde a pago <strong>contado/transf.</strong> (efectivo, débito o transferencia bancaria). Con tarjeta de crédito, consultá cuotas o recargo por WhatsApp.
               </span>
             </div>
           </div>
 
-          {/* Botón CTA sin icono de WhatsApp, texto estricto 'Consultar producto' y fondo rosado suave natural */}
-          <div className="pt-2">
+          {/* Botones CTA: Consultar directo o Sumar a lista multi-producto */}
+          <div className="pt-2 flex flex-col xs:flex-row gap-2.5">
             <a
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`Consultar disponibilidad de ${producto.nombre}`}
-              className="w-full inline-flex items-center justify-center py-3.5 px-4 rounded-2xl bg-[#fbf0f2] hover:bg-[#f5dde2] text-[#6e2e38] font-extrabold text-sm sm:text-base border border-[#eed0d5] shadow-sm hover:shadow-md active:scale-95 transition-all duration-200 min-h-[48px] cursor-pointer select-none"
+              className="flex-1 inline-flex items-center justify-center py-3 px-4 rounded-2xl bg-[#fbf0f2] hover:bg-[#f5dde2] text-[#6e2e38] font-extrabold text-sm border border-[#eed0d5] shadow-sm hover:shadow-md active:scale-95 transition-all duration-200 min-h-[48px] cursor-pointer select-none"
             >
               <span>Consultar producto</span>
             </a>
+
+            <button
+              type="button"
+              onClick={() => toggleProducto(producto)}
+              className={`inline-flex items-center justify-center gap-2 py-3 px-4 rounded-2xl font-extrabold text-sm border shadow-sm hover:shadow-md active:scale-95 transition-all duration-200 min-h-[48px] cursor-pointer select-none ${
+                enLista
+                  ? 'bg-[#6e2e38] text-white border-[#6e2e38]'
+                  : 'bg-slate-900 hover:bg-slate-800 text-white border-slate-900'
+              }`}
+            >
+              {enLista ? (
+                <>
+                  <Check className="w-4 h-4 shrink-0" />
+                  <span>En tu lista</span>
+                </>
+              ) : (
+                <>
+                  <Plus className="w-4 h-4 shrink-0" />
+                  <span>Sumar a lista</span>
+                </>
+              )}
+            </button>
           </div>
         </div>
 

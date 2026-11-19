@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { DATOS_LIBRERIA_MOTIVOS, type DatosNegocio } from '@/lib/mock-data';
-import { MapPin, Navigation, ExternalLink, Compass } from 'lucide-react';
+import { MapPin, Navigation, ExternalLink, Compass, Copy, Check } from 'lucide-react';
 
 interface LocationSectionProps {
   datos?: DatosNegocio;
@@ -10,7 +10,33 @@ interface LocationSectionProps {
 
 export function LocationSection({ datos = DATOS_LIBRERIA_MOTIVOS }: LocationSectionProps) {
   const [haSidoVisto, setHaSidoVisto] = useState<boolean>(false);
+  const [copiada, setCopiada] = useState<boolean>(false);
   const sectionRef = useRef<HTMLElement>(null);
+
+  const direccionVisible = datos.direccionCompleta || datos.direccion;
+
+  const handleCopiarDireccion = async () => {
+    try {
+      await navigator.clipboard.writeText(direccionVisible);
+      setCopiada(true);
+      setTimeout(() => setCopiada(false), 2500);
+    } catch {
+      // Fallback para navegadores sin permisos de clipboard API
+      const textarea = document.createElement('textarea');
+      textarea.value = direccionVisible;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        setCopiada(true);
+        setTimeout(() => setCopiada(false), 2500);
+      } finally {
+        document.body.removeChild(textarea);
+      }
+    }
+  };
 
   // Intersection Observer para detonar la animación secuencial una sola vez al llegar a la sección
   useEffect(() => {
@@ -98,9 +124,33 @@ export function LocationSection({ datos = DATOS_LIBRERIA_MOTIVOS }: LocationSect
                     <span className="block text-[11px] font-bold uppercase tracking-wider text-slate-400">
                       Dirección Completa
                     </span>
-                    <p className="font-heading font-bold text-slate-900 mt-0.5 leading-snug">
-                      {datos.direccionCompleta || datos.direccion}
-                    </p>
+                    <div className="mt-1 flex flex-wrap items-center justify-between gap-2">
+                      <p className="font-heading font-bold text-slate-900 leading-snug">
+                        {direccionVisible}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={handleCopiarDireccion}
+                        aria-label="Copiar dirección al portapapeles"
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold border transition-all duration-200 active:scale-95 cursor-pointer touch-manipulation shrink-0 min-h-[36px] ${
+                          copiada
+                            ? 'bg-emerald-50 text-emerald-800 border-emerald-300 shadow-2xs'
+                            : 'bg-white hover:bg-blue-50 text-blue-900 border-slate-200 hover:border-blue-300 shadow-2xs'
+                        }`}
+                      >
+                        {copiada ? (
+                          <>
+                            <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                            <span>¡Copiada!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-3.5 h-3.5 text-blue-800 shrink-0" />
+                            <span>Copiar dirección</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
 

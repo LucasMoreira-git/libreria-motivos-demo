@@ -5,7 +5,7 @@ import { Promocion } from '@/types/catalogo';
 import { PROMOCIONES_MOCK } from '@/lib/mock-catalogo';
 import { DATOS_LIBRERIA_MOTIVOS } from '@/lib/mock-data';
 import { getPromoWhatsAppLink } from '@/lib/whatsapp';
-import { Sparkles, Calendar, Tag, ArrowRight } from 'lucide-react';
+import { Sparkles, Calendar, Tag, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface PromoHeroProps {
   promociones?: Promocion[];
@@ -25,6 +25,14 @@ export function PromoHero({ promociones = PROMOCIONES_MOCK }: PromoHeroProps) {
   const fotoCombo =
     promoActual.fotoCombo ||
     'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=900&q=80';
+
+  const irAnterior = () => {
+    setPromoActivaIndex((prev) => (prev - 1 + promociones.length) % promociones.length);
+  };
+
+  const irSiguiente = () => {
+    setPromoActivaIndex((prev) => (prev + 1) % promociones.length);
+  };
 
   return (
     <section 
@@ -102,22 +110,44 @@ export function PromoHero({ promociones = PROMOCIONES_MOCK }: PromoHeroProps) {
                 <ArrowRight className="w-4 h-4 text-white" />
               </a>
 
-              {/* Selector si hay más de una promoción */}
+              {/* Selector con flechas visibles y puntos indicadores si hay más de una promoción */}
               {promociones.length > 1 && (
-                <div className="flex items-center gap-1.5 px-2 py-1">
-                  {promociones.map((p, idx) => (
-                    <button
-                      key={p.id}
-                      type="button"
-                      onClick={() => setPromoActivaIndex(idx)}
-                      aria-label={`Ver promoción ${p.nombre}`}
-                      className={`h-2.5 rounded-full transition-all duration-200 touch-manipulation cursor-pointer ${
-                        idx === promoActivaIndex 
-                          ? 'w-7 bg-[#d97786] shadow-xs' 
-                          : 'w-2.5 bg-[#f4d0d6] hover:bg-[#e89ba6]'
-                      }`}
-                    />
-                  ))}
+                <div className="flex items-center justify-center sm:justify-start gap-2 px-1 py-1">
+                  <button
+                    type="button"
+                    onClick={irAnterior}
+                    aria-label="Promoción anterior"
+                    title="Anterior"
+                    className="w-10 h-10 rounded-full bg-white/90 hover:bg-white text-[#6e2e38] border border-[#f3cad2] shadow-2xs flex items-center justify-center active:scale-95 transition-all duration-150 cursor-pointer touch-manipulation shrink-0"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+
+                  <div className="flex items-center gap-1.5 px-1">
+                    {promociones.map((p, idx) => (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => setPromoActivaIndex(idx)}
+                        aria-label={`Ver promoción ${p.nombre}`}
+                        className={`h-2.5 rounded-full transition-all duration-200 touch-manipulation cursor-pointer ${
+                          idx === promoActivaIndex 
+                            ? 'w-7 bg-[#d97786] shadow-xs' 
+                            : 'w-2.5 bg-[#f4d0d6] hover:bg-[#e89ba6]'
+                        }`}
+                      />
+                    ))}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={irSiguiente}
+                    aria-label="Siguiente promoción"
+                    title="Siguiente"
+                    className="w-10 h-10 rounded-full bg-white/90 hover:bg-white text-[#6e2e38] border border-[#f3cad2] shadow-2xs flex items-center justify-center active:scale-95 transition-all duration-150 cursor-pointer touch-manipulation shrink-0"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
                 </div>
               )}
             </div>

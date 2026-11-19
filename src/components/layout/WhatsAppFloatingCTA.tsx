@@ -3,9 +3,14 @@
 import React from 'react';
 import { DATOS_LIBRERIA_MOTIVOS } from '@/lib/mock-data';
 import { getGeneralWhatsAppLink } from '@/lib/whatsapp';
+import { useConsulta } from '@/context/ConsultaContext';
 
 export function WhatsAppFloatingCTA() {
+  const { items } = useConsulta();
   const whatsappUrl = getGeneralWhatsAppLink(DATOS_LIBRERIA_MOTIVOS.telefonoWhatsApp);
+
+  // Evita superposición en móviles cuando la barra de lista multi-producto está activa
+  if (items.length > 0) return null;
 
   return (
     <aside 

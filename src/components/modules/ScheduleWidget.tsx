@@ -1,13 +1,22 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { gestorHorarios, DATOS_LIBRERIA_MOTIVOS, TURNOS_MOCK } from '@/lib/mock-data';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { gestorHorarios } from '@/lib/mock-data';
 import { EstadoAtencion } from '@/types/horario';
 import { HorarioAtencionAdmin } from '@/types/admin';
-import { Clock, MapPin, ExternalLink, Calendar, Phone, Sparkles } from 'lucide-react';
+import { Clock, MapPin, Sparkles, CreditCard, CheckCircle2 } from 'lucide-react';
 
 interface ScheduleWidgetProps {
   horarios?: HorarioAtencionAdmin[];
+}
+
+interface GrupoHorario {
+  clave: string;
+  diasTexto: string;
+  diasSemana: number[];
+  subtitulo: string;
+  franjas: { inicio: string; fin: string }[];
+  esCerrado: boolean;
 }
 
 const ESTADO_FALLBACK: EstadoAtencion = {
@@ -17,24 +26,108 @@ const ESTADO_FALLBACK: EstadoAtencion = {
   badgeVariant: 'success',
 };
 
+const GRUPOS_DEFAULT: GrupoHorario[] = [
+  {
+    clave: 'lunes-viernes',
+    diasTexto: 'Lunes a Viernes',
+    diasSemana: [1, 2, 3, 4, 5],
+    subtitulo: 'Turno mañana y turno tarde',
+    franjas: [
+      { inicio: '09:30', fin: '13:30' },
+      { inicio: '17:00', fin: '20:30' },
+    ],
+    esCerrado: false,
+  },
+  {
+    clave: 'sabados',
+    diasTexto: 'Sábados',
+    diasSemana: [6],
+    subtitulo: 'Turno mañana',
+    franjas: [{ inicio: '10:00', fin: '13:30' }],
+    esCerrado: false,
+  },
+  {
+    clave: 'domingos-feriados',
+    diasTexto: 'Domingos y Feriados',
+    diasSemana: [0],
+    subtitulo: 'Sin atención presencial',
+    franjas: [],
+    esCerrado: true,
+  },
+];
+
+function inferirDiasSemana(diasTexto: string, fallback?: number[]): number[] {
+  if (fallback && fallback.length > 0) return fallback;
+  const t = diasTexto.toLowerCase();
+  if (t.includes('lunes') && t.includes('viernes')) return [1, 2, 3, 4, 5];
+  if (t.includes('sábado') || t.includes('sabado')) return [6];
+  if (t.includes('domingo')) return [0];
+  return [];
+}
+
+function agruparTurnosPorDia(turnos: HorarioAtencionAdmin[]): GrupoHorario[] {
+  const mapa = new Map<string, GrupoHorario>();
+
+  for (const t of turnos) {
+    const clave = t.diasTextoHA.trim().toLowerCase();
+    const dias = inferirDiasSemana(t.diasTextoHA, t.diasSemanaHA);
+    const existente = mapa.get(clave);
+
+    if (!existente) {
+      mapa.set(clave, {
+        clave,
+        diasTexto: t.diasTextoHA,
+        diasSemana: dias,
+        subtitulo: t.esCerradoHA ? 'Sin atención presencial' : t.nombreTurnoHA,
+        franjas: t.esCerradoHA
+          ? []
+          : [{ inicio: t.horaInicioHA?.slice(0, 5) || '', fin: t.horaFinHA?.slice(0, 5) || '' }],
+        esCerrado: t.esCerradoHA,
+      });
+    } else {
+      const diasCombinados = Array.from(new Set([...existente.diasSemana, ...dias]));
+      existente.diasSemana = diasCombinados;
+
+      if (!t.esCerradoHA) {
+        existente.esCerrado = false;
+        existente.franjas.push({
+          inicio: t.horaInicioHA?.slice(0, 5) || '',
+          fin: t.horaFinHA?.slice(0, 5) || '',
+        });
+        if (existente.franjas.length > 1) {
+          existente.subtitulo = 'Turno mañana y turno tarde';
+        }
+      }
+    }
+  }
+
+  return Array.from(mapa.values());
+}
+
 export function ScheduleWidget({ horarios }: ScheduleWidgetProps = {}) {
   const [estado, setEstado] = useState<EstadoAtencion>(ESTADO_FALLBACK);
+  const [diaActual, setDiaActual] = useState<number | null>(null);
   const [turnosVisibles, setTurnosVisibles] = useState<boolean>(false);
   const turnosRef = useRef<HTMLDivElement>(null);
 
-  // Turnos activos: filtramos bajas lógicas
-  const turnosActivos = horarios ? horarios.filter((h) => !h.fechaHoraBajaHA) : null;
+  const gruposHorarios = useMemo(() => {
+    if (!horarios) return GRUPOS_DEFAULT;
+    const activos = horarios.filter((h) => !h.fechaHoraBajaHA);
+    if (activos.length === 0) return GRUPOS_DEFAULT;
+    return agruparTurnosPorDia(activos);
+  }, [horarios]);
 
   useEffect(() => {
     const actualizar = () => {
-      setEstado(gestorHorarios.evaluarEstado(new Date()));
+      const ahora = new Date();
+      setEstado(gestorHorarios.evaluarEstado(ahora));
+      setDiaActual(ahora.getDay());
     };
     actualizar();
     const interval = setInterval(actualizar, 60000);
     return () => clearInterval(interval);
   }, []);
 
-  // Intersection Observer para detonar suavemente la entrada escalonada de las filas de turnos
   useEffect(() => {
     if (typeof window === 'undefined' || !('IntersectionObserver' in window)) {
       setTurnosVisibles(true);
@@ -62,12 +155,12 @@ export function ScheduleWidget({ horarios }: ScheduleWidgetProps = {}) {
   }, []);
 
   return (
-    <section 
+    <section
       id="horarios"
       aria-label="Horarios de atención y ubicación"
-      className="w-full my-8 sm:my-12 scroll-mt-24"
+      className="w-full my-8 sm:my-10 scroll-mt-24"
     >
-      <div className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-8 shadow-sm overflow-hidden relative">
+      <div className="w-full bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-8 shadow-sm overflow-hidden relative">
         {/* Encabezado */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-slate-100 gap-4">
           <div className="space-y-1">
@@ -83,7 +176,7 @@ export function ScheduleWidget({ horarios }: ScheduleWidgetProps = {}) {
             </p>
           </div>
 
-          {/* Badge en Vivo (sin efectos pulsantes ni rebotes) */}
+          {/* Badge en Vivo */}
           <div className="shrink-0">
             {estado.estaAbierto ? (
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300 shadow-2xs">
@@ -105,121 +198,125 @@ export function ScheduleWidget({ horarios }: ScheduleWidgetProps = {}) {
           </div>
         </div>
 
-        {/* Cuadrícula de Turnos + Ubicación */}
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 items-start">
-          
-          {/* Columna Izquierda: Desglose de Turnos Independientes */}
-          <div className="space-y-3">
+        {/* Cuadrícula Equilibrada de 2 Columnas */}
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 items-stretch">
+          {/* Columna Izquierda: Turnos Agrupados + Resaltado del Día Actual */}
+          <div className="flex flex-col space-y-3">
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
               <Clock className="w-3.5 h-3.5 text-slate-500" />
               Turnos Semanales
             </h4>
 
-            <div ref={turnosRef} className="space-y-2 text-xs sm:text-sm">
-              {turnosActivos && turnosActivos.length > 0 ? (
-                turnosActivos.map((t, idx) => (
+            <div ref={turnosRef} className="flex-1 flex flex-col justify-between gap-2.5 text-xs sm:text-sm">
+              {gruposHorarios.map((grupo, idx) => {
+                const esHoy = diaActual !== null && grupo.diasSemana.includes(diaActual);
+
+                return (
                   <div
-                    key={t.idHorarioAtencion}
-                    className={`p-3 rounded-2xl ${
-                      t.esCerradoHA 
-                        ? 'bg-slate-50/50 border border-slate-100/60 text-slate-400' 
-                        : 'bg-slate-50 border border-slate-100'
-                    } flex justify-between items-center transition-all duration-400 ease-out`}
+                    key={grupo.clave}
+                    style={{ transitionDelay: `${Math.min(idx * 100, 300)}ms` }}
+                    className={`p-3.5 sm:p-4 rounded-2xl border flex justify-between items-center gap-3 transition-all duration-400 ease-out flex-1 ${
+                      turnosVisibles ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
+                    } ${
+                      esHoy
+                        ? 'bg-[#fef5f6]/80 border-[#d97786] ring-1 ring-[#d97786]/25 shadow-2xs'
+                        : grupo.esCerrado
+                          ? 'bg-slate-50/60 border-slate-100 text-slate-400'
+                          : 'bg-slate-50 border-slate-100'
+                    }`}
                   >
-                    <div>
-                      <span className="font-heading font-bold text-slate-900">{t.diasTextoHA}</span>
-                      <span className="block text-[11px] text-slate-500 mt-0.5">{t.nombreTurnoHA}</span>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span
+                          className={`font-heading font-bold ${
+                            grupo.esCerrado && !esHoy ? 'text-slate-500' : 'text-slate-900'
+                          }`}
+                        >
+                          {grupo.diasTexto}
+                        </span>
+                        {esHoy && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#d97786] text-white shadow-2xs">
+                            Hoy
+                          </span>
+                        )}
+                      </div>
+                      <span className="block text-[11px] text-slate-500 mt-0.5">
+                        {grupo.subtitulo}
+                      </span>
                     </div>
-                    <div className="text-right font-medium text-slate-700">
-                      {t.esCerradoHA ? (
+
+                    <div className="text-right font-medium text-slate-700 shrink-0">
+                      {grupo.esCerrado || grupo.franjas.length === 0 ? (
                         <span className="text-xs italic text-slate-400">Cerrado</span>
                       ) : (
-                        <span>{t.horaInicioHA?.slice(0, 5)} a {t.horaFinHA?.slice(0, 5)} hs</span>
+                        <div className="space-y-0.5 font-mono text-xs sm:text-sm font-semibold text-slate-800">
+                          {grupo.franjas.map((f, fIdx) => (
+                            <p key={fIdx}>
+                              {f.inicio} a {f.fin} hs
+                            </p>
+                          ))}
+                        </div>
                       )}
                     </div>
                   </div>
-                ))
-              ) : (
-                <>
-                  {/* Fila 1: Lunes a Viernes (Slide-up escalonado 1) */}
-                  <div
-                    className={`p-3 rounded-2xl bg-slate-50 border border-slate-100 flex justify-between items-start transition-all duration-400 ease-out delay-[100ms] ${
-                      turnosVisibles ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
-                    }`}
-                  >
-                    <div>
-                      <span className="font-heading font-bold text-slate-900">Lunes a Viernes</span>
-                      <span className="block text-[11px] text-slate-500 mt-0.5">Turno mañana y turno tarde</span>
-                    </div>
-                    <div className="text-right font-medium text-slate-700">
-                      <p>09:30 a 13:30 hs</p>
-                      <p>17:00 a 20:30 hs</p>
-                    </div>
-                  </div>
-
-                  {/* Fila 2: Sábados (Slide-up escalonado 2) */}
-                  <div
-                    className={`p-3 rounded-2xl bg-slate-50 border border-slate-100 flex justify-between items-center transition-all duration-400 ease-out delay-[220ms] ${
-                      turnosVisibles ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
-                    }`}
-                  >
-                    <div>
-                      <span className="font-heading font-bold text-slate-900">Sábados</span>
-                      <span className="block text-[11px] text-slate-500 mt-0.5">Turno mañana</span>
-                    </div>
-                    <span className="font-medium text-slate-700">10:00 a 13:30 hs</span>
-                  </div>
-
-                  {/* Fila 3: Domingos y Feriados (Slide-up escalonado 3) */}
-                  <div
-                    className={`p-3 rounded-2xl bg-slate-50/50 border border-slate-100/60 flex justify-between items-center text-slate-400 transition-all duration-400 ease-out delay-[340ms] ${
-                      turnosVisibles ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
-                    }`}
-                  >
-                    <span className="font-medium">Domingos y Feriados</span>
-                    <span className="text-xs italic">Cerrado</span>
-                  </div>
-                </>
-              )}
+                );
+              })}
             </div>
           </div>
 
-          {/* Columna Derecha: Modalidad de Atención y Retiro en Local */}
-          <div className="space-y-4">
+          {/* Columna Derecha Equilibrada: 2 Tarjetas (Retiro + Medios de Pago Clarificados) */}
+          <div className="flex flex-col space-y-3">
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
               <Sparkles className="w-3.5 h-3.5 text-slate-500" />
-              Retiro y Atención en Local
+              Modalidad de Retiro & Pagos
             </h4>
 
-            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-3 text-xs sm:text-sm">
-              <div>
-                <p className="font-heading font-bold text-slate-900">
-                  Retiro Inmediato de Pedidos
+            <div className="flex-1 flex flex-col justify-between gap-3 text-xs sm:text-sm">
+              {/* Tarjeta 1: Retiro de Pedidos */}
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-2.5">
+                <div className="flex items-start justify-between gap-2">
+                  <p className="font-heading font-bold text-slate-900">
+                    Retiro Inmediato de Pedidos
+                  </p>
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
+                    <CheckCircle2 className="w-3 h-3" />
+                    Armado en el turno
+                  </span>
+                </div>
+                <p className="text-slate-600 leading-relaxed text-xs">
+                  Enviá tu lista de útiles o pedido de oficina por WhatsApp y retiralo preparado dentro del mismo turno comercial sin hacer fila.
                 </p>
-                <p className="text-slate-600 mt-1 leading-relaxed">
-                  Podés enviar tu lista de útiles o pedido de oficina por WhatsApp y pasar a retirarlo preparado durante cualquiera de nuestros turnos de atención.
-                </p>
-                <p className="text-slate-500 text-[11px] mt-1">
-                  Aceptamos efectivo, tarjetas de débito/crédito y transferencias bancarias directas.
-                </p>
+
+                <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between gap-3">
+                  <a
+                    href="#ubicacion"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs hover:-translate-y-0.5 active:scale-95 transition-all duration-200 min-h-[40px]"
+                  >
+                    <MapPin className="w-3.5 h-3.5 text-amber-300" />
+                    <span>Ver mapa y cómo llegar</span>
+                  </a>
+
+                  <span className="text-[11px] text-slate-500 font-medium hidden sm:inline">
+                    Guaymallén, Mendoza
+                  </span>
+                </div>
               </div>
 
-              <div className="pt-3 border-t border-slate-200/60 flex items-center justify-between gap-3">
-                <a
-                  href="#ubicacion"
-                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs hover:-translate-y-0.5 active:scale-95 transition-all duration-200"
-                >
-                  <MapPin className="w-3.5 h-3.5 text-amber-300" />
-                  <span>Ver mapa y cómo llegar</span>
-                </a>
-
-                <span className="text-[11px] text-slate-500 font-medium hidden sm:inline">
-                  Guaymallén, Mendoza
-                </span>
+              {/* Tarjeta 2: Aclaración Unificada de Medios de Pago y Crédito */}
+              <div className="p-4 rounded-2xl bg-amber-50/50 border border-amber-200/70 space-y-1.5">
+                <div className="flex items-center gap-2 font-heading font-bold text-slate-900">
+                  <CreditCard className="w-4 h-4 text-amber-600 shrink-0" />
+                  <span>Medios de Pago Aceptados</span>
+                </div>
+                <p className="text-slate-700 text-xs leading-relaxed">
+                  Los precios publicados en la web son de <strong>pago contado/transf.</strong> (efectivo, débito o transferencia bancaria en el local, sin recargo).
+                </p>
+                <p className="text-slate-600 text-[11px] leading-relaxed">
+                  <strong>Tarjetas de crédito:</strong> también aceptamos en el local (consultanos cuotas o recargo vigente por WhatsApp antes de retirar).
+                </p>
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </section>

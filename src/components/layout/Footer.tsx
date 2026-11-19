@@ -1,16 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { DATOS_LIBRERIA_MOTIVOS } from '@/lib/mock-data';
-import { getGeneralWhatsAppLink } from '@/lib/whatsapp';
+import { getGeneralWhatsAppLink, getBroadcastWhatsAppLink } from '@/lib/whatsapp';
 import { 
   ArrowRight, 
   MapPin, 
   Phone, 
-  Mail, 
   ExternalLink, 
-  Sparkles,
-  CheckCircle2,
   Star
 } from 'lucide-react';
 
@@ -71,19 +68,8 @@ function FacebookIcon({ className = "w-4 h-4", ...props }: React.SVGProps<SVGSVG
 }
 
 export function Footer() {
-  const [email, setEmail] = useState('');
-  const [suscrito, setSuscrito] = useState(false);
   const whatsappUrl = getGeneralWhatsAppLink(DATOS_LIBRERIA_MOTIVOS.telefonoWhatsApp);
-
-  const handleNewsletterSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (email.trim() && email.includes('@')) {
-      setSuscrito(true);
-      setTimeout(() => {
-        setEmail('');
-      }, 3000);
-    }
-  };
+  const broadcastWhatsappUrl = getBroadcastWhatsAppLink(DATOS_LIBRERIA_MOTIVOS.telefonoWhatsApp);
 
   return (
     <footer 
@@ -190,8 +176,8 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <a href="#ubicacion" className="text-slate-600 hover:text-purple-950 transition-colors">
-                  Medios de Pago: Efectivo / Débito / Transf.
+                <a href="#horarios" className="text-slate-600 hover:text-purple-950 transition-colors">
+                  Medios de Pago: Efectivo, Débito, Transf. y Crédito en local
                 </a>
               </li>
               <li>
@@ -209,43 +195,42 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* COLUMNA 4: Novedades & Presupuestos (Good Emails) */}
+          {/* COLUMNA 4: Novedades & Promos por Redes y WhatsApp */}
           <div className="space-y-4">
             <h4 className="font-heading text-sm font-bold uppercase tracking-wider text-purple-950">
-              Novedades & Listas
+              Novedades & Promos
             </h4>
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-              Ingresá tu email para enterarte antes que nadie de nuevas promociones de temporada, ofertas escolares y lanzamientos.
+              Enterate al instante de las promos escolares, ingresos de temporada y sorteos del barrio sin llenar tu correo.
             </p>
 
-            {/* Input pill estilizado con flecha idéntico a la referencia visual */}
-            <form onSubmit={handleNewsletterSubmit} className="pt-1">
-              <div className="relative flex items-center">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="ejemplo@correo.com"
-                  required
-                  aria-label="Dirección de correo electrónico para novedades"
-                  className="w-full bg-white text-slate-900 placeholder:text-slate-400 text-xs sm:text-sm rounded-full pl-4 pr-12 py-2.5 border border-purple-200/90 shadow-2xs focus:outline-hidden focus:ring-2 focus:ring-purple-400 transition-all"
-                />
-                <button
-                  type="submit"
-                  aria-label="Suscribirme a las novedades"
-                  className="absolute right-1 w-8 h-8 rounded-full bg-purple-900 hover:bg-purple-950 text-white flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer shadow-2xs"
-                >
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </div>
+            <div className="flex flex-col gap-2.5 pt-1">
+              <a
+                href={broadcastWhatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-between gap-2 px-4 py-2.5 rounded-xl bg-[#25D366] hover:bg-[#1EBE5D] text-white font-bold text-xs shadow-2xs hover:shadow-sm active:scale-95 transition-all duration-200 min-h-[44px]"
+              >
+                <span className="inline-flex items-center gap-2">
+                  <WhatsAppIcon className="w-4 h-4 shrink-0" />
+                  <span>Recibir promos por WhatsApp</span>
+                </span>
+                <ArrowRight className="w-3.5 h-3.5 shrink-0" />
+              </a>
 
-              {suscrito && (
-                <p className="flex items-center gap-1.5 text-xs text-emerald-700 font-bold mt-2 animate-fade-in">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>¡Gracias! Te avisaremos de las próximas novedades.</span>
-                </p>
-              )}
-            </form>
+              <a
+                href={DATOS_LIBRERIA_MOTIVOS.instagramUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-between gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-purple-50 text-purple-950 font-bold text-xs border border-purple-200 shadow-2xs hover:shadow-sm active:scale-95 transition-all duration-200 min-h-[44px]"
+              >
+                <span className="inline-flex items-center gap-2">
+                  <InstagramIcon className="w-4 h-4 text-pink-600 shrink-0" />
+                  <span>Seguir en @motivos.regalos_</span>
+                </span>
+                <ExternalLink className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+              </a>
+            </div>
           </div>
 
         </div>
