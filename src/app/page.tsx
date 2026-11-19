@@ -116,7 +116,7 @@ export default function Home() {
       <Header />
 
       {/* Contenedor Principal de la Vitrina Web */}
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 sm:pb-8 relative z-0">
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 sm:pb-8">
         
         {/* 2. Hero de Promociones de Temporada (Conectado a la BD / AdminContext) */}
         <PromoHero promociones={promocionesActivas.length > 0 ? promocionesActivas : undefined} />
