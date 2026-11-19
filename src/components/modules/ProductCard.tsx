@@ -201,13 +201,6 @@ export function ProductCard({
             }`}
           />
 
-          {/* Badge de Categoría en la esquina superior izquierda */}
-          {producto.categoriaNombre && (
-            <span className="absolute top-2.5 left-2.5 z-10 bg-slate-900/75 backdrop-blur-md text-white text-[10px] sm:text-xs font-semibold px-2.5 py-0.5 rounded-full shadow-xs max-w-[55%] truncate">
-              {producto.categoriaNombre}
-            </span>
-          )}
-
           {/* Única etiqueta destacada en esquina superior derecha */}
           <div className="absolute top-2.5 right-2.5 z-10">
             {renderHighlightBadge()}

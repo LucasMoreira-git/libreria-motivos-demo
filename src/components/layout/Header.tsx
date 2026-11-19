@@ -4,8 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { 
   Clock, 
   MapPin, 
-  ChevronDown, 
-  Sparkles, 
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   ExternalLink, 
   Search, 
   Star, 
@@ -17,6 +18,12 @@ import {
 } from 'lucide-react';
 import { gestorHorarios, DATOS_LIBRERIA_MOTIVOS } from '@/lib/mock-data';
 import { EstadoAtencion } from '@/types/horario';
+
+const ANUNCIOS_BARRIALES = [
+  'Retiro en el día en Guaymallén • Mandanos tu lista escolar por WhatsApp',
+  'Efectivo, débito y transferencia sin recargo • Crédito disponible en local',
+  'Cerca del Átomo de Elpidio González y Urquiza • Atención personalizada',
+];
 
 // Ícono SVG de Instagram estilizado según la estética de Lucide (stroke 2, sin dependencias externas)
 function InstagramIcon({ className = "w-4 h-4", ...props }: React.SVGProps<SVGSVGElement>) {
@@ -51,6 +58,7 @@ export function Header() {
   const [mostrarTooltipHorarios, setMostrarTooltipHorarios] = useState(false);
   const [menuMovilAbierto, setMenuMovilAbierto] = useState(false);
   const [estado, setEstado] = useState<EstadoAtencion>(ESTADO_FALLBACK);
+  const [indiceAnuncio, setIndiceAnuncio] = useState(0);
 
   // La evaluación corre en background con la hora real del cliente
   useEffect(() => {
@@ -62,6 +70,22 @@ export function Header() {
     const interval = setInterval(actualizar, 60000);
     return () => clearInterval(interval);
   }, []);
+
+  // Rotación automática suave de los mensajes barriales en la franja superior
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setIndiceAnuncio((prev) => (prev + 1) % ANUNCIOS_BARRIALES.length);
+    }, 5500);
+    return () => clearInterval(timer);
+  }, []);
+
+  const irAnuncioAnterior = () => {
+    setIndiceAnuncio((prev) => (prev - 1 + ANUNCIOS_BARRIALES.length) % ANUNCIOS_BARRIALES.length);
+  };
+
+  const irAnuncioSiguiente = () => {
+    setIndiceAnuncio((prev) => (prev + 1) % ANUNCIOS_BARRIALES.length);
+  };
 
   // Función para enfocar el buscador global
   const handleScrollToSearch = () => {
@@ -81,41 +105,74 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-30 w-full bg-gradient-to-r from-[#fdf5f7]/95 via-[#f4ebfb]/95 to-[#fdf5f7]/95 backdrop-blur-md border-b border-[#e5d2ee] shadow-md shadow-purple-950/5 transition-all">
-      {/* Cinta decorativa superior con los colores de marca */}
-      <div className="h-1 w-full bg-gradient-to-r from-[#d97786] via-[#a779cf] to-[#d97786]" />
+    <header className="sticky top-0 z-30 w-full bg-gradient-to-r from-[#f6dce3]/95 via-[#eee0f7]/95 to-[#f6dce3]/95 backdrop-blur-md border-b border-[#e2c2d6] shadow-md shadow-purple-950/8 transition-all">
+      {/* Mini barra superior de anuncios barriales con flechas y rotación */}
+      <div className="w-full bg-[#c96f80] text-white border-b border-[#b95e70]/60">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-8 sm:h-9 flex items-center justify-between gap-2">
+          <button
+            type="button"
+            onClick={irAnuncioAnterior}
+            aria-label="Mensaje anterior"
+            className="p-1 rounded-full text-white/85 hover:text-white hover:bg-white/15 transition-colors cursor-pointer shrink-0"
+          >
+            <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          </button>
+
+          <p
+            key={indiceAnuncio}
+            className="text-[11px] sm:text-xs font-bold tracking-wide text-center truncate animate-in fade-in duration-300"
+          >
+            {ANUNCIOS_BARRIALES[indiceAnuncio]}
+          </p>
+
+          <button
+            type="button"
+            onClick={irAnuncioSiguiente}
+            aria-label="Siguiente mensaje"
+            className="p-1 rounded-full text-white/85 hover:text-white hover:bg-white/15 transition-colors cursor-pointer shrink-0"
+          >
+            <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          </button>
+        </div>
+      </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-18 sm:h-22 gap-3">
           
-          {/* 1. IZQUIERDA: Logo Oficial Protagonista (sin texto redundante al lado) */}
+          {/* 1. IZQUIERDA: Logo Floral + Nombre de Marca con Tipografía Elegante */}
           <div className="flex items-center min-w-0">
             <a 
               href="/" 
-              className="group inline-flex items-center gap-3 focus:outline-hidden"
+              className="group inline-flex items-center gap-2.5 sm:gap-3.5 min-w-0 focus:outline-hidden"
               aria-label="Ir a página de inicio de Librería Motivos"
             >
-              <div className="relative">
+              <div className="relative shrink-0">
                 <div
                   aria-hidden="true"
-                  className="absolute -inset-1 rounded-full bg-gradient-to-tr from-[#d97786]/35 via-[#b88ce2]/30 to-[#f5b7c2]/40 blur-xs opacity-75 group-hover:opacity-100 transition-opacity duration-300"
+                  className="absolute -inset-1 rounded-full bg-gradient-to-tr from-[#d97786]/40 via-[#b88ce2]/35 to-[#f5b7c2]/45 blur-xs opacity-75 group-hover:opacity-100 transition-opacity duration-300"
                 />
                 <img
                   src="/images/logo-motivos.jpg"
                   alt="Motivos - Regalos y Mimos"
-                  className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover shadow-md border-2 border-white ring-2 ring-[#f1cbd3] shrink-0 bg-[#fdfbf7] group-hover:scale-105 transition-transform duration-300"
+                  className="relative w-12 h-12 sm:w-15 sm:h-15 rounded-full object-cover shadow-md border-2 border-white ring-2 ring-[#e8b8c4] bg-[#fdfbf7] group-hover:scale-105 transition-transform duration-300"
                 />
               </div>
-              <h1 className="sr-only">
-                {DATOS_LIBRERIA_MOTIVOS.nombre}
-              </h1>
+
+              <div className="min-w-0">
+                <h1 className="font-brand text-lg sm:text-2xl lg:text-[26px] font-bold tracking-tight text-[#4c1c54] group-hover:text-[#b34f60] leading-none transition-colors truncate">
+                  {DATOS_LIBRERIA_MOTIVOS.nombre}
+                </h1>
+                <span className="hidden xs:block text-[10px] sm:text-[11px] font-semibold tracking-wider text-[#7f4658] mt-1 truncate">
+                  Escolar • Regalería • Guaymallén
+                </span>
+              </div>
             </a>
           </div>
 
-          {/* 2. CENTRO: Barra de Navegación Elevada con Píldoras Luminosas */}
+          {/* 2. CENTRO: Barra de Navegación Elevada Blanca que resalta sobre el navbar rosado/lila */}
           <nav 
             aria-label="Navegación rápida de secciones"
-            className="hidden md:flex items-center gap-1 lg:gap-1.5 px-2.5 py-1.5 rounded-full bg-white/90 border border-[#e7d4ee] shadow-sm shadow-purple-950/5 backdrop-blur-sm"
+            className="hidden md:flex items-center gap-1 lg:gap-1.5 px-2.5 py-1.5 rounded-full bg-white border border-[#e5c9dc] shadow-sm shadow-purple-950/8"
           >
             <a 
               href="#catalogo" 

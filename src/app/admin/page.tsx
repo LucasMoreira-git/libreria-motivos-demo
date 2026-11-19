@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { AdminSimulationToolbar } from '@/components/admin/AdminSimulationToolbar';
+import { CajaDiariaWidget } from '@/components/admin/CajaDiariaWidget';
 import { evaluarAlertasNegocio } from '@/lib/admin-alertas';
 
 export default function AdminDashboardPage() {
@@ -70,7 +71,10 @@ export default function AdminDashboardPage() {
       {/* Herramienta de Sincronización */}
       <AdminSimulationToolbar />
 
-      {/* 2. Acceso a la Sección de Avisos del Local */}
+      {/* 2. Ventas del Día y Conteo Rápido de Caja */}
+      <CajaDiariaWidget />
+
+      {/* 3. Acceso a la Sección de Avisos del Local */}
       {resumenAlertas && (
         <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">

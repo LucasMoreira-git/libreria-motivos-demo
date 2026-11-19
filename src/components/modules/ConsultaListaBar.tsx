@@ -42,6 +42,11 @@ export function ConsultaListaBar() {
 
   if (items.length === 0) return null;
 
+  const totalEstimado = items.reduce(
+    (acc, { producto, cantidad }) => acc + producto.precio * cantidad,
+    0
+  );
+
   const whatsappUrl = getMultiProductWhatsAppLink(
     items,
     DATOS_LIBRERIA_MOTIVOS.telefonoWhatsApp
@@ -125,6 +130,11 @@ export function ConsultaListaBar() {
                     </p>
                     <p className="text-[11px] text-[#8b4f58] font-mono font-semibold">
                       $ {producto.precio.toLocaleString('es-AR')}
+                      {cantidad > 1 && (
+                        <span className="text-slate-400 font-normal ml-1">
+                          × {cantidad} = $ {(producto.precio * cantidad).toLocaleString('es-AR')}
+                        </span>
+                      )}
                     </p>
                   </div>
 
@@ -164,8 +174,18 @@ export function ConsultaListaBar() {
           </div>
         )}
 
-        {/* Acción Principal de Envío por WhatsApp */}
-        <div className="p-3 bg-slate-50/70 border-t border-slate-100">
+        {/* Total Estimado + Acción Principal de Envío por WhatsApp */}
+        <div className="p-3 bg-slate-50/80 border-t border-slate-100 space-y-2.5">
+          <div className="flex items-baseline justify-between px-1">
+            <span className="text-xs font-semibold text-slate-600">
+              Total estimado{' '}
+              <span className="text-[10px] font-normal text-slate-400">(contado / transf.)</span>
+            </span>
+            <span className="font-heading text-sm sm:text-base font-black text-purple-950 tracking-tight">
+              $ {totalEstimado.toLocaleString('es-AR')}
+            </span>
+          </div>
+
           <a
             href={whatsappUrl}
             target="_blank"
