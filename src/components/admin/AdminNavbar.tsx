@@ -12,6 +12,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
+import { useAdminFeedback } from '@/context/AdminFeedbackContext';
 
 interface AdminNavbarProps {
   onToggleSidebarMovil: () => void;
@@ -20,27 +21,41 @@ interface AdminNavbarProps {
 export function AdminNavbar({ onToggleSidebarMovil }: AdminNavbarProps) {
   const pathname = usePathname();
   const { restablecerDatos, logout, adminUser } = useAdmin();
+  const { confirmar, notificar } = useAdminFeedback();
 
   const obtenerTituloModulo = () => {
     switch (pathname) {
       case '/admin':
-        return 'Panel de Control Principal';
+        return 'Panel Principal';
       case '/admin/productos':
-        return 'Gestión de Productos (ABM)';
+        return 'Productos del Catálogo';
       case '/admin/categorias':
-        return 'Gestión de Categorías (ABM)';
+        return 'Categorías y Rubros';
       case '/admin/promociones':
-        return 'Gestión de Promociones (ABM)';
+        return 'Promociones de Temporada';
       case '/admin/horarios':
-        return 'Gestión de Horarios y Turnos (ABM)';
+        return 'Horarios de Atención';
+      case '/admin/alertas':
+        return 'Avisos del Local';
       default:
-        return 'Administración del Sistema';
+        return 'Administración de la Librería';
     }
   };
 
-  const handleRestablecer = () => {
-    if (confirm('¿Deseas restablecer todos los datos iniciales de prueba? Se restaurarán los productos, promociones y horarios.')) {
+  const handleRestablecer = async () => {
+    const ok = await confirmar({
+      titulo: '¿Restablecer los datos de prueba?',
+      mensaje: 'Se restaurarán los productos, categorías, promociones y horarios iniciales de ejemplo.',
+      textoConfirmar: 'Sí, restablecer',
+      variante: 'advertencia',
+    });
+    if (ok) {
       restablecerDatos();
+      notificar({
+        tipo: 'info',
+        titulo: 'Datos restablecidos',
+        mensaje: 'Se restauró el catálogo inicial de ejemplo.',
+      });
     }
   };
 

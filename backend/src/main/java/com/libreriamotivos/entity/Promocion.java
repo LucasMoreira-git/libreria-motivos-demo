@@ -61,7 +61,7 @@ public class Promocion {
     @Column(name = "descuento_texto", length = 50)
     private String descuentoTexto;
 
-    @Column(name = "foto_combo", length = 500)
+    @Column(name = "foto_combo", columnDefinition = "LONGTEXT")
     private String fotoCombo;
 
     @Column(name = "condicion_promocion", length = 200)

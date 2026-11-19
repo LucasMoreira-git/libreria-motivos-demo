@@ -1,11 +1,22 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Promocion } from '@/types/catalogo';
 import { PROMOCIONES_MOCK } from '@/lib/mock-catalogo';
-import { DATOS_LIBRERIA_MOTIVOS, DEFAULT_BRAND_IMAGE } from '@/lib/mock-data';
+import {
+  DATOS_LIBRERIA_MOTIVOS,
+  DEFAULT_BRAND_IMAGE,
+  formatearFechaLegible,
+} from '@/lib/mock-data';
 import { getPromoWhatsAppLink } from '@/lib/whatsapp';
-import { Sparkles, Calendar, Tag, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import {
+  Sparkles,
+  Calendar,
+  Tag,
+  ArrowRight,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react';
 
 interface PromoHeroProps {
   promociones?: Promocion[];
@@ -13,7 +24,22 @@ interface PromoHeroProps {
 
 export function PromoHero({ promociones = PROMOCIONES_MOCK }: PromoHeroProps) {
   const [promoActivaIndex, setPromoActivaIndex] = useState(0);
-  const promoActual = promociones[promoActivaIndex] || promociones[0];
+  const [direccion, setDireccion] = useState<'next' | 'prev'>('next');
+  const [pausado, setPausado] = useState(false);
+
+  const total = promociones.length;
+  const indiceSeguro = total > 0 ? promoActivaIndex % total : 0;
+  const promoActual = promociones[indiceSeguro] || promociones[0];
+
+  // Bucle automático cada 5 segundos avanzando suavemente hacia la izquierda
+  useEffect(() => {
+    if (total <= 1 || pausado) return;
+    const timer = setTimeout(() => {
+      setDireccion('next');
+      setPromoActivaIndex((prev) => (prev + 1) % total);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [indiceSeguro, total, pausado]);
 
   if (!promoActual) return null;
 
@@ -22,39 +48,50 @@ export function PromoHero({ promociones = PROMOCIONES_MOCK }: PromoHeroProps) {
     DATOS_LIBRERIA_MOTIVOS.telefonoWhatsApp
   );
 
-  const fotoCombo =
-    promoActual.fotoCombo ||
-    DEFAULT_BRAND_IMAGE;
+  const fotoCombo = promoActual.fotoCombo || DEFAULT_BRAND_IMAGE;
   const esLogoPorDefecto = fotoCombo === DEFAULT_BRAND_IMAGE;
 
   const irAnterior = () => {
-    setPromoActivaIndex((prev) => (prev - 1 + promociones.length) % promociones.length);
+    setDireccion('prev');
+    setPromoActivaIndex((prev) => (prev - 1 + total) % total);
   };
 
   const irSiguiente = () => {
-    setPromoActivaIndex((prev) => (prev + 1) % promociones.length);
+    setDireccion('next');
+    setPromoActivaIndex((prev) => (prev + 1) % total);
   };
 
+  const irAIndice = (idx: number) => {
+    setDireccion(idx >= indiceSeguro ? 'next' : 'prev');
+    setPromoActivaIndex(idx);
+  };
+
+  const animacionSlide =
+    direccion === 'next' ? 'promo-slide-next' : 'promo-slide-prev';
+
   return (
-    <section 
+    <section
       id="promociones"
       aria-label="Promociones de Temporada"
       className="w-full my-4 sm:my-6 scroll-mt-24"
     >
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#fef5f6] via-[#fbf0f2] to-[#f7e6e9] text-slate-900 shadow-sm border border-[#f2d3d8] p-6 sm:p-8 lg:p-10 transition-all hero-stagger-container">
-        
-        {/* Decoraciones de fondo sutiles en tono pastel suave y natural */}
+      <div
+        onMouseEnter={() => setPausado(true)}
+        onMouseLeave={() => setPausado(false)}
+        className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#fef5f6] via-[#fbf0f2] to-[#f7e6e9] text-slate-900 shadow-sm border border-[#f2d3d8] p-6 sm:p-8 lg:p-10 transition-all"
+      >
+        {/* Decoraciones de fondo sutiles */}
         <div className="absolute -top-12 -right-12 w-56 h-56 rounded-full bg-white/70 blur-2xl pointer-events-none" />
         <div className="absolute -bottom-10 -left-10 w-48 h-48 rounded-full bg-[#f4d0d6]/40 blur-xl pointer-events-none" />
 
-        {/* Grid de 2 Columnas: Texto y CTA a la izquierda, Foto representativa a la derecha */}
-        <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-10 items-center">
-          
+        {/* Contenido animado por cada cambio de promoción */}
+        <div
+          key={`${promoActual.id}-${indiceSeguro}`}
+          className={`relative z-10 grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-10 items-center ${animacionSlide}`}
+        >
           {/* COLUMNA IZQUIERDA: Textos, Vigencia y CTA */}
           <div className="space-y-4">
-            
-            {/* Badges de Temporada y Descuento en rosado suave natural */}
-            <div className="flex flex-wrap items-center gap-2 hero-stagger-desc">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] sm:text-xs font-black tracking-wide uppercase bg-white/90 backdrop-blur-md text-[#6e2e38] border border-[#f3cad2] shadow-2xs">
                 <Sparkles className="w-3 h-3 text-[#d97786]" />
                 {promoActual.temporadaPromocion || promoActual.temporada}
@@ -66,31 +103,32 @@ export function PromoHero({ promociones = PROMOCIONES_MOCK }: PromoHeroProps) {
               </span>
             </div>
 
-            {/* Título Principal con Poppins y tono oscuro contrastado sobre fondo pastel */}
-            <h2 className="font-heading text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight text-slate-900 hero-stagger-title">
+            <h2 className="font-heading text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight leading-tight text-slate-900">
               {promoActual.nombre}
             </h2>
 
-            {/* Detalle descriptivo */}
-            <p className="text-xs sm:text-sm lg:text-base text-slate-700 leading-relaxed hero-stagger-desc">
+            <p className="text-xs sm:text-sm lg:text-base text-slate-700 leading-relaxed">
               {promoActual.detalle}
             </p>
 
             {/* Vigencia y Condiciones */}
-            <div className="flex flex-wrap items-center gap-2.5 pt-1 text-[11px] sm:text-xs text-slate-600 font-medium hero-stagger-desc">
-              <div className="inline-flex items-center gap-1.5 bg-white/85 px-3 py-1 rounded-lg backdrop-blur-xs border border-[#f3cad2] text-slate-700 shadow-2xs">
-                <Calendar className="w-3.5 h-3.5 text-[#d97786]" />
-                <span>Válido: {promoActual.fechaInicio} al {promoActual.fechaFin}</span>
-              </div>
+            <div className="flex flex-wrap items-center gap-2.5 pt-1 text-[11px] sm:text-xs text-slate-600 font-medium">
+              {(promoActual.fechaInicio || promoActual.fechaFin) && (
+                <div className="inline-flex items-center gap-1.5 bg-white/85 px-3 py-1 rounded-lg backdrop-blur-xs border border-[#f3cad2] text-slate-700 shadow-2xs">
+                  <Calendar className="w-3.5 h-3.5 text-[#d97786]" />
+                  <span>
+                    Válido: {formatearFechaLegible(promoActual.fechaInicio)} al{' '}
+                    {formatearFechaLegible(promoActual.fechaFin)}
+                  </span>
+                </div>
+              )}
               {promoActual.condicion && (
-                <span className="text-slate-500 italic">
-                  • {promoActual.condicion}
-                </span>
+                <span className="text-slate-500 italic">• {promoActual.condicion}</span>
               )}
             </div>
 
-            {/* CTA de WhatsApp para la Promoción con entrada escalonada y respuesta táctil interactiva */}
-            <div className="pt-2 flex flex-col xs:flex-row items-stretch xs:items-center gap-3 hero-stagger-button">
+            {/* CTA de WhatsApp + Controles de Carrusel */}
+            <div className="pt-2 flex flex-col xs:flex-row items-stretch xs:items-center gap-3">
               <a
                 href={whatsappPromoUrl}
                 target="_blank"
@@ -98,9 +136,8 @@ export function PromoHero({ promociones = PROMOCIONES_MOCK }: PromoHeroProps) {
                 aria-label={`Pedir por WhatsApp la promoción ${promoActual.nombre}`}
                 className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-[#d97786] hover:bg-[#c46372] text-white font-extrabold text-sm sm:text-base shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-95 transition-all duration-200 ease-out min-h-[48px] touch-manipulation cursor-pointer select-none"
               >
-                {/* Ícono de WhatsApp SVG oficial */}
-                <svg 
-                  className="w-5 h-5 fill-[#25D366] shrink-0" 
+                <svg
+                  className="w-5 h-5 fill-[#25D366] shrink-0"
                   viewBox="0 0 24 24"
                   aria-hidden="true"
                 >
@@ -111,8 +148,7 @@ export function PromoHero({ promociones = PROMOCIONES_MOCK }: PromoHeroProps) {
                 <ArrowRight className="w-4 h-4 text-white" />
               </a>
 
-              {/* Selector con flechas visibles y puntos indicadores si hay más de una promoción */}
-              {promociones.length > 1 && (
+              {total > 1 && (
                 <div className="flex items-center justify-center sm:justify-start gap-2 px-1 py-1">
                   <button
                     type="button"
@@ -129,11 +165,11 @@ export function PromoHero({ promociones = PROMOCIONES_MOCK }: PromoHeroProps) {
                       <button
                         key={p.id}
                         type="button"
-                        onClick={() => setPromoActivaIndex(idx)}
+                        onClick={() => irAIndice(idx)}
                         aria-label={`Ver promoción ${p.nombre}`}
-                        className={`h-2.5 rounded-full transition-all duration-200 touch-manipulation cursor-pointer ${
-                          idx === promoActivaIndex 
-                            ? 'w-7 bg-[#d97786] shadow-xs' 
+                        className={`h-2.5 rounded-full transition-all duration-300 touch-manipulation cursor-pointer ${
+                          idx === indiceSeguro
+                            ? 'w-7 bg-[#d97786] shadow-xs'
                             : 'w-2.5 bg-[#f4d0d6] hover:bg-[#e89ba6]'
                         }`}
                       />
@@ -152,12 +188,11 @@ export function PromoHero({ promociones = PROMOCIONES_MOCK }: PromoHeroProps) {
                 </div>
               )}
             </div>
-
           </div>
 
-          {/* COLUMNA DERECHA: Foto Representativa del Combo con entrada desde la derecha */}
+          {/* COLUMNA DERECHA: Foto Representativa del Combo */}
           <div
-            className={`relative w-full h-[220px] sm:h-[280px] md:h-[320px] lg:h-[350px] rounded-2xl lg:rounded-3xl overflow-hidden shadow-md border-2 border-white/80 group hero-stagger-image ${
+            className={`relative w-full h-[220px] sm:h-[280px] md:h-[320px] lg:h-[350px] rounded-2xl lg:rounded-3xl overflow-hidden shadow-md border-2 border-white/80 group ${
               esLogoPorDefecto ? 'bg-[#fdfbf7]' : ''
             }`}
           >
@@ -169,7 +204,6 @@ export function PromoHero({ promociones = PROMOCIONES_MOCK }: PromoHeroProps) {
                 esLogoPorDefecto ? 'object-contain p-5' : 'object-cover'
               }`}
             />
-            {/* Overlay sutil inferior con badge */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent flex items-end p-4">
               <span className="bg-white/95 backdrop-blur-md text-slate-900 text-xs font-black px-3 py-1 rounded-full shadow-md inline-flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-[#d97786]" />
@@ -177,9 +211,7 @@ export function PromoHero({ promociones = PROMOCIONES_MOCK }: PromoHeroProps) {
               </span>
             </div>
           </div>
-
         </div>
-
       </div>
     </section>
   );

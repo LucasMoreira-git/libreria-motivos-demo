@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { gestorHorarios, parsearDiasSemanaDesdeTexto } from '@/lib/mock-data';
 import { EstadoAtencion } from '@/types/horario';
 import { HorarioAtencionAdmin } from '@/types/admin';
-import { Clock, MapPin, Sparkles, CreditCard, CheckCircle2 } from 'lucide-react';
+import { Clock, Sparkles, Sun, CalendarDays, Moon } from 'lucide-react';
 
 interface ScheduleWidgetProps {
   horarios?: HorarioAtencionAdmin[];
@@ -79,7 +79,12 @@ function agruparTurnosPorDia(turnos: HorarioAtencionAdmin[]): GrupoHorario[] {
         subtitulo: t.esCerradoHA ? 'Sin atención presencial' : t.nombreTurnoHA,
         franjas: t.esCerradoHA
           ? []
-          : [{ inicio: t.horaInicioHA?.slice(0, 5) || '', fin: t.horaFinHA?.slice(0, 5) || '' }],
+          : [
+              {
+                inicio: t.horaInicioHA?.slice(0, 5) || '',
+                fin: t.horaFinHA?.slice(0, 5) || '',
+              },
+            ],
         esCerrado: t.esCerradoHA,
       });
     } else {
@@ -152,169 +157,170 @@ export function ScheduleWidget({ horarios }: ScheduleWidgetProps = {}) {
     return () => observer.disconnect();
   }, []);
 
+  const obtenerIconoGrupo = (grupo: GrupoHorario, esHoy: boolean) => {
+    if (grupo.esCerrado) {
+      return <Moon className={`w-5 h-5 ${esHoy ? 'text-[#d97786]' : 'text-slate-400'}`} />;
+    }
+    if (grupo.diasSemana.includes(6) && grupo.diasSemana.length === 1) {
+      return <CalendarDays className={`w-5 h-5 ${esHoy ? 'text-white' : 'text-purple-700'}`} />;
+    }
+    return <Sun className={`w-5 h-5 ${esHoy ? 'text-white' : 'text-amber-500'}`} />;
+  };
+
   return (
     <section
       id="horarios"
-      aria-label="Horarios de atención y ubicación"
-      className="w-full my-8 sm:my-10 scroll-mt-24"
+      aria-label="Horarios de atención"
+      className="w-full my-8 sm:my-12 scroll-mt-24"
     >
-      <div className="w-full bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-8 shadow-sm overflow-hidden relative">
-        {/* Encabezado */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-slate-100 gap-4">
+      <div className="w-full bg-gradient-to-br from-white via-[#fffafc] to-[#f8f4fd] rounded-3xl border border-[#eed8e2] p-6 sm:p-8 lg:p-10 shadow-sm overflow-hidden relative">
+        {/* Decoración ambiental sutil */}
+        <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-[#f4d0d6]/30 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-16 -left-16 w-56 h-56 rounded-full bg-[#ded0f2]/35 blur-3xl pointer-events-none" />
+
+        {/* Encabezado Llamativo con Estado en Vivo */}
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-purple-100/90 gap-4">
           <div className="space-y-1">
             <span className="text-xs font-bold text-[#d97786] uppercase tracking-wider flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-[#d97786]" />
               Atención Presencial en Guaymallén
             </span>
-            <h3 className="font-heading text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-              Horarios de Atención & Local
+            <h3 className="font-heading text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+              Horarios de Atención
             </h3>
-            <p className="text-xs sm:text-sm text-slate-500">
-              Atención personalizada con turnos independientes adaptados al barrio.
+            <p className="text-xs sm:text-sm text-slate-600">
+              Te esperamos en nuestro local durante nuestros turnos semanales de atención.
             </p>
           </div>
 
-          {/* Badge en Vivo */}
+          {/* Badge en Vivo Destacado */}
           <div className="shrink-0">
             {estado.estaAbierto ? (
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300 shadow-2xs">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 shrink-0" />
-                <span className="font-heading text-xs font-bold">Abierto ahora</span>
-                <span className="text-[11px] text-emerald-700 font-medium hidden sm:inline">
-                  • {estado.mensajeDetalle}
+              <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-2xl bg-emerald-50 text-emerald-800 border border-emerald-300 shadow-xs">
+                <span className="relative flex h-2.5 w-2.5 shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-600" />
                 </span>
+                <div className="text-left">
+                  <span className="font-heading text-xs sm:text-sm font-extrabold block leading-none">
+                    Abierto ahora
+                  </span>
+                  <span className="text-[11px] text-emerald-700 font-medium block mt-0.5">
+                    {estado.mensajeDetalle}
+                  </span>
+                </div>
               </div>
             ) : (
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-rose-50 text-rose-800 border border-rose-300 shadow-2xs">
+              <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-2xl bg-rose-50 text-rose-800 border border-rose-300 shadow-xs">
                 <span className="w-2.5 h-2.5 rounded-full bg-rose-500 shrink-0" />
-                <span className="font-heading text-xs font-bold">Cerrado</span>
-                <span className="text-[11px] text-rose-700 font-medium hidden sm:inline">
-                  • {estado.mensajeDetalle}
-                </span>
+                <div className="text-left">
+                  <span className="font-heading text-xs sm:text-sm font-extrabold block leading-none">
+                    Cerrado ahora
+                  </span>
+                  <span className="text-[11px] text-rose-700 font-medium block mt-0.5">
+                    {estado.mensajeDetalle}
+                  </span>
+                </div>
               </div>
             )}
           </div>
         </div>
 
-        {/* Cuadrícula Equilibrada de 2 Columnas */}
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 items-stretch">
-          {/* Columna Izquierda: Turnos Agrupados + Resaltado del Día Actual */}
-          <div className="flex flex-col space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-              <Clock className="w-3.5 h-3.5 text-slate-500" />
-              Turnos Semanales
-            </h4>
+        {/* Grilla Protagonista a Ancho Completo */}
+        <div
+          ref={turnosRef}
+          className="relative z-10 mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5"
+        >
+          {gruposHorarios.map((grupo, idx) => {
+            const esHoy = diaActual !== null && grupo.diasSemana.includes(diaActual);
 
-            <div ref={turnosRef} className="flex-1 flex flex-col justify-between gap-2.5 text-xs sm:text-sm">
-              {gruposHorarios.map((grupo, idx) => {
-                const esHoy = diaActual !== null && grupo.diasSemana.includes(diaActual);
+            return (
+              <div
+                key={grupo.clave}
+                style={{ transitionDelay: `${Math.min(idx * 110, 330)}ms` }}
+                className={`rounded-2xl p-5 sm:p-6 border flex flex-col justify-between gap-4 transition-all duration-500 ease-out ${
+                  turnosVisibles
+                    ? 'opacity-100 translate-y-0'
+                    : 'opacity-0 translate-y-4'
+                } ${
+                  esHoy
+                    ? 'bg-gradient-to-br from-[#fef5f6] via-white to-[#fdf0f3] border-2 border-[#d97786] shadow-md ring-4 ring-[#d97786]/10'
+                    : grupo.esCerrado
+                      ? 'bg-slate-50/80 border-slate-200/80 text-slate-500'
+                      : 'bg-white border-slate-200/90 shadow-2xs hover:shadow-md hover:border-purple-200'
+                }`}
+              >
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <div
+                      className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 ${
+                        esHoy && !grupo.esCerrado
+                          ? 'bg-[#d97786] shadow-sm'
+                          : esHoy && grupo.esCerrado
+                            ? 'bg-rose-100 border border-rose-200'
+                            : grupo.esCerrado
+                              ? 'bg-slate-100 border border-slate-200'
+                              : 'bg-[#f4eefb] border border-[#e5d9f5]'
+                      }`}
+                    >
+                      {obtenerIconoGrupo(grupo, esHoy)}
+                    </div>
 
-                return (
-                  <div
-                    key={grupo.clave}
-                    style={{ transitionDelay: `${Math.min(idx * 100, 300)}ms` }}
-                    className={`p-3.5 sm:p-4 rounded-2xl border flex justify-between items-center gap-3 transition-all duration-400 ease-out flex-1 ${
-                      turnosVisibles ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
-                    } ${
-                      esHoy
-                        ? 'bg-[#fef5f6]/80 border-[#d97786] ring-1 ring-[#d97786]/25 shadow-2xs'
-                        : grupo.esCerrado
-                          ? 'bg-slate-50/60 border-slate-100 text-slate-400'
-                          : 'bg-slate-50 border-slate-100'
-                    }`}
-                  >
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span
-                          className={`font-heading font-bold ${
-                            grupo.esCerrado && !esHoy ? 'text-slate-500' : 'text-slate-900'
+                    {esHoy && (
+                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-[#d97786] text-white shadow-xs">
+                        Hoy
+                      </span>
+                    )}
+                  </div>
+
+                  <div>
+                    <h4
+                      className={`font-heading text-lg font-extrabold tracking-tight ${
+                        grupo.esCerrado && !esHoy ? 'text-slate-600' : 'text-slate-900'
+                      }`}
+                    >
+                      {grupo.diasTexto}
+                    </h4>
+                    <p className="text-xs text-slate-500 mt-0.5">{grupo.subtitulo}</p>
+                  </div>
+                </div>
+
+                {/* Franjas Horarias Destacadas */}
+                <div className="pt-3 border-t border-slate-100/90">
+                  {grupo.esCerrado || grupo.franjas.length === 0 ? (
+                    <div className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-100/90 text-slate-500 text-xs font-semibold">
+                      <Clock className="w-3.5 h-3.5 shrink-0" />
+                      <span>Local cerrado</span>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-2">
+                      {grupo.franjas.map((f, fIdx) => (
+                        <div
+                          key={fIdx}
+                          className={`inline-flex items-center justify-between gap-2 px-3.5 py-2 rounded-xl font-mono text-xs sm:text-sm font-bold ${
+                            esHoy
+                              ? 'bg-[#fef5f6] text-[#6e2e38] border border-[#f2d3d8]'
+                              : 'bg-slate-50 text-slate-800 border border-slate-200/70'
                           }`}
                         >
-                          {grupo.diasTexto}
-                        </span>
-                        {esHoy && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#d97786] text-white shadow-2xs">
-                            Hoy
-                          </span>
-                        )}
-                      </div>
-                      <span className="block text-[11px] text-slate-500 mt-0.5">
-                        {grupo.subtitulo}
-                      </span>
-                    </div>
-
-                    <div className="text-right font-medium text-slate-700 shrink-0">
-                      {grupo.esCerrado || grupo.franjas.length === 0 ? (
-                        <span className="text-xs italic text-slate-400">Cerrado</span>
-                      ) : (
-                        <div className="space-y-0.5 font-mono text-xs sm:text-sm font-semibold text-slate-800">
-                          {grupo.franjas.map((f, fIdx) => (
-                            <p key={fIdx}>
+                          <span className="inline-flex items-center gap-1.5">
+                            <Clock
+                              className={`w-3.5 h-3.5 shrink-0 ${
+                                esHoy ? 'text-[#d97786]' : 'text-slate-400'
+                              }`}
+                            />
+                            <span>
                               {f.inicio} a {f.fin} hs
-                            </p>
-                          ))}
+                            </span>
+                          </span>
                         </div>
-                      )}
+                      ))}
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Columna Derecha Equilibrada: 2 Tarjetas (Retiro + Medios de Pago Clarificados) */}
-          <div className="flex flex-col space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-              <Sparkles className="w-3.5 h-3.5 text-slate-500" />
-              Modalidad de Retiro & Pagos
-            </h4>
-
-            <div className="flex-1 flex flex-col justify-between gap-3 text-xs sm:text-sm">
-              {/* Tarjeta 1: Retiro de Pedidos */}
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-2.5">
-                <div className="flex items-start justify-between gap-2">
-                  <p className="font-heading font-bold text-slate-900">
-                    Retiro Inmediato de Pedidos
-                  </p>
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
-                    <CheckCircle2 className="w-3 h-3" />
-                    Armado en el turno
-                  </span>
-                </div>
-                <p className="text-slate-600 leading-relaxed text-xs">
-                  Enviá tu lista de útiles o pedido de oficina por WhatsApp y retiralo preparado dentro del mismo turno comercial sin hacer fila.
-                </p>
-
-                <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between gap-3">
-                  <a
-                    href="#ubicacion"
-                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs hover:-translate-y-0.5 active:scale-95 transition-all duration-200 min-h-[40px]"
-                  >
-                    <MapPin className="w-3.5 h-3.5 text-amber-300" />
-                    <span>Ver mapa y cómo llegar</span>
-                  </a>
-
-                  <span className="text-[11px] text-slate-500 font-medium hidden sm:inline">
-                    Guaymallén, Mendoza
-                  </span>
+                  )}
                 </div>
               </div>
-
-              {/* Tarjeta 2: Aclaración Unificada de Medios de Pago y Crédito */}
-              <div className="p-4 rounded-2xl bg-amber-50/50 border border-amber-200/70 space-y-1.5">
-                <div className="flex items-center gap-2 font-heading font-bold text-slate-900">
-                  <CreditCard className="w-4 h-4 text-amber-600 shrink-0" />
-                  <span>Medios de Pago Aceptados</span>
-                </div>
-                <p className="text-slate-700 text-xs leading-relaxed">
-                  Los precios publicados en la web son de <strong>pago contado/transf.</strong> (efectivo, débito o transferencia bancaria en el local, sin recargo).
-                </p>
-                <p className="text-slate-600 text-[11px] leading-relaxed">
-                  <strong>Tarjetas de crédito:</strong> también aceptamos en el local (consultanos cuotas o recargo vigente por WhatsApp antes de retirar).
-                </p>
-              </div>
-            </div>
-          </div>
+            );
+          })}
         </div>
       </div>
     </section>

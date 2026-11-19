@@ -6,7 +6,7 @@ import {
   Plus, 
   Search, 
   Pencil, 
-  Trash2, 
+  EyeOff,
   RotateCcw, 
   X, 
   CheckCircle2, 
@@ -26,6 +26,7 @@ import {
   Info
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
+import { useAdminFeedback } from '@/context/AdminFeedbackContext';
 import { ProductoAdmin } from '@/types/admin';
 import { DATOS_LIBRERIA_MOTIVOS, DEFAULT_BRAND_IMAGE } from '@/lib/mock-data';
 import { AppIcon, VisualIconPicker, PRODUCT_ICON_OPTIONS } from '@/lib/icon-registry';
@@ -77,13 +78,14 @@ function obtenerEstiloBadge(textoBadge: string): string {
   return 'bg-slate-900/90 text-white';
 }
 
-export default function ABMProductosPage() {
+export default function ProductosAdminPage() {
   const { productos, categorias, crearProducto, editarProducto, bajaLogicaProducto, reactivarProducto } = useAdmin();
+  const { notificar, confirmar } = useAdminFeedback();
 
   // Estados de filtrado
   const [busqueda, setBusqueda] = useState('');
   const [categoriaFiltro, setCategoriaFiltro] = useState('todas');
-  const [estadoFiltro, setEstadoFiltro] = useState<'todos' | 'activos' | 'bajas'>('todos');
+  const [estadoFiltro, setEstadoFiltro] = useState<'todos' | 'visibles' | 'ocultos'>('todos');
 
   // Estados del Formulario (Alta / Modificación)
   const [modalAbierto, setModalAbierto] = useState(false);
@@ -113,27 +115,21 @@ export default function ABMProductosPage() {
   const [precioDescuentoProducto, setPrecioDescuentoProducto] = useState<number | ''>('');
   const [fechaFinDescuento, setFechaFinDescuento] = useState('');
 
-  // Referencia para upload de archivo
+  // Referencia para upload de archivo y aviso de formato
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Mensaje de feedback
-  const [mensajeExito, setMensajeExito] = useState<string | null>(null);
+  const [avisoFormatoFoto, setAvisoFormatoFoto] = useState<{ tipo: 'optimo' | 'advertencia'; mensaje: string } | null>(null);
   const [errorValidacion, setErrorValidacion] = useState<string | null>(null);
-
-  const mostrarExito = (msg: string) => {
-    setMensajeExito(msg);
-    setTimeout(() => setMensajeExito(null), 3500);
-  };
 
   const abrirModalCrear = () => {
     setModoEdicion(false);
     setProductoSeleccionadoId(null);
     setNombreProducto('');
     setDetalleProducto('');
-    setPrecioProducto(''); // Casilla vacía por defecto sin el molesto 0 inicial
+    setPrecioProducto('');
     setCategoriaId(categorias[0]?.idCategoria || '1');
     setFotoProducto('');
     setMostrarUrlExterna(false);
+    setAvisoFormatoFoto(null);
     setDestacadoProducto(false);
     setEnOfertaProducto(false);
     setUltimasUnidadesProducto(false);
@@ -155,7 +151,8 @@ export default function ABMProductosPage() {
     setPrecioProducto(prod.precioProducto || '');
     setCategoriaId(prod.categoriaId);
     setFotoProducto(prod.fotoProducto || '');
-    setMostrarUrlExterna(prod.fotoProducto?.startsWith('http') && !prod.fotoProducto?.startsWith('data:image'));
+    setMostrarUrlExterna(Boolean(prod.fotoProducto?.startsWith('http') && !prod.fotoProducto?.startsWith('data:image')));
+    setAvisoFormatoFoto(null);
     setDestacadoProducto(!!prod.destacadoProducto);
     setEnOfertaProducto(!!prod.enOfertaProducto);
     setUltimasUnidadesProducto(!!prod.ultimasUnidadesProducto);
@@ -171,7 +168,7 @@ export default function ABMProductosPage() {
     setModalAbierto(true);
   };
 
-  // Manejo de carga de foto real con compresión automática en cliente
+  // Manejo de carga de foto real con compresión automática y aviso no bloqueante de formato
   const handleCargarFoto = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -186,10 +183,31 @@ export default function ABMProductosPage() {
       const rawData = event.target?.result as string;
       const img = new Image();
       img.onload = () => {
+        const naturalW = img.naturalWidth || img.width;
+        const naturalH = img.naturalHeight || img.height;
+        const ratio = naturalW / Math.max(naturalH, 1);
+
+        if (naturalW < 400 || naturalH < 300) {
+          setAvisoFormatoFoto({
+            tipo: 'advertencia',
+            mensaje: `Aviso (${naturalW}×${naturalH} px): la foto es pequeña y podría verse poco nítida. Podés subirla igual o elegir una más grande (ideal: 800×800 px o horizontal).`,
+          });
+        } else if (ratio < 0.65 || ratio > 2.2) {
+          setAvisoFormatoFoto({
+            tipo: 'advertencia',
+            mensaje: `Aviso (${naturalW}×${naturalH} px): esta foto es muy alargada y podría recortarse un poco en la tarjeta. Podés usarla igual si te gusta la vista previa.`,
+          });
+        } else {
+          setAvisoFormatoFoto({
+            tipo: 'optimo',
+            mensaje: `Formato óptimo para el catálogo (${naturalW}×${naturalH} px).`,
+          });
+        }
+
         const canvas = document.createElement('canvas');
         const maxDim = 1200;
-        let width = img.width;
-        let height = img.height;
+        let width = naturalW;
+        let height = naturalH;
 
         if (width > maxDim || height > maxDim) {
           if (width > height) {
@@ -271,7 +289,11 @@ export default function ABMProductosPage() {
         badgeProducto: badgeProducto.trim() || null,
         fechaHoraBajaProducto: prodOriginal?.fechaHoraBajaProducto || null,
       });
-      mostrarExito('¡Producto actualizado correctamente con sus opciones de vitrina!');
+      notificar({
+        tipo: 'exito',
+        titulo: 'Producto actualizado',
+        mensaje: `Se guardaron los cambios de "${nombreProducto.trim()}".`,
+      });
     } else {
       crearProducto({
         nombreProducto: nombreProducto.trim(),
@@ -288,10 +310,31 @@ export default function ABMProductosPage() {
         iconoProducto: iconoProducto.trim() || null,
         badgeProducto: badgeProducto.trim() || null,
       });
-      mostrarExito('¡Nuevo producto registrado exitosamente!');
+      notificar({
+        tipo: 'exito',
+        titulo: 'Producto publicado',
+        mensaje: `"${nombreProducto.trim()}" ya aparece en el catálogo de tu página.`,
+      });
     }
 
     setModalAbierto(false);
+  };
+
+  const handleOcultar = async (prod: ProductoAdmin) => {
+    const ok = await confirmar({
+      titulo: '¿Ocultar este producto?',
+      mensaje: `"${prod.nombreProducto}" dejará de mostrarse en tu tienda, pero quedará guardado para volver a mostrarlo cuando quieras.`,
+      textoConfirmar: 'Sí, ocultar',
+      variante: 'peligro',
+    });
+    if (ok) {
+      bajaLogicaProducto(prod.idProducto);
+      notificar({
+        tipo: 'advertencia',
+        titulo: 'Producto oculto',
+        mensaje: `"${prod.nombreProducto}" ya no aparece en la web.`,
+      });
+    }
   };
 
   // Cálculos para la vista previa en vivo
@@ -313,10 +356,10 @@ export default function ABMProductosPage() {
     ? Math.round(((precioOriginalNum - precioDescNum) / precioOriginalNum) * 100)
     : null;
 
-  // Filtrado de la tabla DataGrid
+  // Filtrado de la tabla
   const productosFiltrados = productos.filter((p) => {
-    if (estadoFiltro === 'activos' && p.fechaHoraBajaProducto) return false;
-    if (estadoFiltro === 'bajas' && !p.fechaHoraBajaProducto) return false;
+    if (estadoFiltro === 'visibles' && p.fechaHoraBajaProducto) return false;
+    if (estadoFiltro === 'ocultos' && !p.fechaHoraBajaProducto) return false;
     if (categoriaFiltro !== 'todas' && p.categoriaId !== categoriaFiltro) return false;
 
     const q = busqueda.toLowerCase().trim();
@@ -331,38 +374,30 @@ export default function ABMProductosPage() {
   return (
     <div className="space-y-6">
       
-      {/* 1. Encabezado del Módulo y Botón de Alta */}
+      {/* 1. Encabezado */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="font-heading text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
             <Package className="w-6 h-6 text-blue-900" />
-            <span>ABM Productos</span>
+            <span>Productos</span>
             <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-200/80 text-slate-700">
-              {productosFiltrados.length} registros
+              {productosFiltrados.length}
             </span>
           </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Mapeo de atributos: <code className="font-mono text-blue-900 font-semibold">precioProducto</code>, <code className="font-mono text-blue-900 font-semibold">precioDescuentoProducto</code>, opciones visuales, fotos reales y bajas lógicas.
+          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+            Cargá nuevos artículos, actualizá precios, descuentos especiales y fotos del catálogo.
           </p>
         </div>
 
         <button
           type="button"
           onClick={abrirModalCrear}
-          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs sm:text-sm shadow-md transition-all active:scale-95 touch-manipulation cursor-pointer shrink-0"
+          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs sm:text-sm shadow-md transition-all active:scale-95 touch-manipulation cursor-pointer shrink-0 min-h-[44px]"
         >
           <Plus className="w-4 h-4" />
           <span>Nuevo Producto</span>
         </button>
       </div>
-
-      {/* Banner de Feedback */}
-      {mensajeExito && (
-        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2 animate-in fade-in duration-200 shadow-2xs">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-          <span>{mensajeExito}</span>
-        </div>
-      )}
 
       {/* 2. Barra de Filtros y Búsqueda */}
       <div className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-2xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
@@ -403,12 +438,12 @@ export default function ABMProductosPage() {
             ))}
           </select>
 
-          {/* Selector de Estado (Bajas Lógicas) */}
+          {/* Selector de Visibilidad */}
           <div className="inline-flex rounded-xl bg-slate-100 p-1 border border-slate-200/80 text-xs">
             <button
               type="button"
               onClick={() => setEstadoFiltro('todos')}
-              className={`px-2.5 py-1 rounded-lg font-semibold transition-all ${
+              className={`px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
                 estadoFiltro === 'todos' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-500 hover:text-slate-900'
               }`}
             >
@@ -416,27 +451,27 @@ export default function ABMProductosPage() {
             </button>
             <button
               type="button"
-              onClick={() => setEstadoFiltro('activos')}
-              className={`px-2.5 py-1 rounded-lg font-semibold transition-all ${
-                estadoFiltro === 'activos' ? 'bg-white text-emerald-700 shadow-2xs' : 'text-slate-500 hover:text-slate-900'
+              onClick={() => setEstadoFiltro('visibles')}
+              className={`px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
+                estadoFiltro === 'visibles' ? 'bg-white text-emerald-700 shadow-2xs' : 'text-slate-500 hover:text-slate-900'
               }`}
             >
-              Activos
+              Visibles
             </button>
             <button
               type="button"
-              onClick={() => setEstadoFiltro('bajas')}
-              className={`px-2.5 py-1 rounded-lg font-semibold transition-all ${
-                estadoFiltro === 'bajas' ? 'bg-white text-rose-700 shadow-2xs' : 'text-slate-500 hover:text-slate-900'
+              onClick={() => setEstadoFiltro('ocultos')}
+              className={`px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
+                estadoFiltro === 'ocultos' ? 'bg-white text-rose-700 shadow-2xs' : 'text-slate-500 hover:text-slate-900'
               }`}
             >
-              Bajas
+              Ocultos
             </button>
           </div>
         </div>
       </div>
 
-      {/* 3. Tabla DataGrid de Productos */}
+      {/* 3. Tabla de Productos */}
       <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden">
         <div className="overflow-x-auto no-scrollbar">
           <table className="w-full text-left text-xs sm:text-sm">
@@ -444,9 +479,9 @@ export default function ABMProductosPage() {
               <tr>
                 <th className="py-3 px-4">Artículo</th>
                 <th className="py-3 px-4">Categoría</th>
-                <th className="py-3 px-4">Precio (ARS)</th>
-                <th className="py-3 px-4">Opciones Vitrina & Badges</th>
-                <th className="py-3 px-4">Estado</th>
+                <th className="py-3 px-4">Precio</th>
+                <th className="py-3 px-4">Destacados y Etiquetas</th>
+                <th className="py-3 px-4">Visibilidad</th>
                 <th className="py-3 px-4 text-right">Acciones</th>
               </tr>
             </thead>
@@ -557,17 +592,12 @@ export default function ABMProductosPage() {
                       {/* Estado con Marca Temporal de Baja Lógica */}
                       <td className="py-3 px-4">
                         {estaDadoDeBaja ? (
-                          <div className="space-y-0.5">
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-200">
-                              Baja Lógica
-                            </span>
-                            <p className="text-[10px] font-mono text-slate-500">
-                              {prod.fechaHoraBajaProducto}
-                            </p>
-                          </div>
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                            Oculto
+                          </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                            Activo
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                            Visible en web
                           </span>
                         )}
                       </td>
@@ -578,7 +608,7 @@ export default function ABMProductosPage() {
                           <button
                             type="button"
                             onClick={() => abrirModalEditar(prod)}
-                            className="p-1.5 rounded-lg text-slate-600 hover:text-blue-900 hover:bg-slate-100 transition-colors cursor-pointer"
+                            className="p-2 rounded-lg text-slate-600 hover:text-blue-900 hover:bg-slate-100 transition-colors cursor-pointer"
                             title="Editar producto"
                           >
                             <Pencil className="w-4 h-4" />
@@ -589,26 +619,25 @@ export default function ABMProductosPage() {
                               type="button"
                               onClick={() => {
                                 reactivarProducto(prod.idProducto);
-                                mostrarExito(`¡Producto "${prod.nombreProducto}" reactivado exitosamente!`);
+                                notificar({
+                                  tipo: 'exito',
+                                  titulo: 'Producto visible nuevamente',
+                                  mensaje: `"${prod.nombreProducto}" volvió a aparecer en la tienda.`,
+                                });
                               }}
-                              className="p-1.5 rounded-lg text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 transition-colors cursor-pointer"
-                              title="Reactivar producto (quitar baja lógica)"
+                              className="p-2 rounded-lg text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 transition-colors cursor-pointer"
+                              title="Volver a mostrar en la web"
                             >
                               <RotateCcw className="w-4 h-4" />
                             </button>
                           ) : (
                             <button
                               type="button"
-                              onClick={() => {
-                                if (confirm(`¿Dar de baja lógica al producto "${prod.nombreProducto}"? No se destruirá de la base de datos.`)) {
-                                  bajaLogicaProducto(prod.idProducto);
-                                  mostrarExito(`Producto "${prod.nombreProducto}" marcado con baja lógica.`);
-                                }
-                              }}
-                              className="p-1.5 rounded-lg text-rose-500 hover:text-rose-700 hover:bg-rose-50 transition-colors cursor-pointer"
-                              title="Dar de baja lógica"
+                              onClick={() => handleOcultar(prod)}
+                              className="p-2 rounded-lg text-rose-500 hover:text-rose-700 hover:bg-rose-50 transition-colors cursor-pointer"
+                              title="Ocultar de la web"
                             >
-                              <Trash2 className="w-4 h-4" />
+                              <EyeOff className="w-4 h-4" />
                             </button>
                           )}
                         </div>
@@ -637,7 +666,7 @@ export default function ABMProductosPage() {
               <div className="flex items-center gap-2">
                 <Package className="w-5 h-5 text-blue-900" />
                 <h3 className="font-heading font-bold text-base text-slate-900">
-                  {modoEdicion ? 'Modificar Producto' : 'Alta de Nuevo Producto'}
+                  {modoEdicion ? 'Editar Producto' : 'Nuevo Producto'}
                 </h3>
               </div>
               <button
@@ -666,7 +695,7 @@ export default function ABMProductosPage() {
                 {/* Nombre */}
                 <div>
                   <label className="block font-bold text-slate-700 mb-1">
-                    Nombre del Producto (nombreProducto) *
+                    Nombre del Producto *
                   </label>
                   <input
                     type="text"
@@ -681,7 +710,7 @@ export default function ABMProductosPage() {
                 {/* Detalle */}
                 <div>
                   <label className="block font-bold text-slate-700 mb-1">
-                    Detalle / Descripción (detalleProducto) *
+                    Descripción del Producto *
                   </label>
                   <textarea
                     required
@@ -697,7 +726,7 @@ export default function ABMProductosPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block font-bold text-slate-700 mb-1">
-                      Precio en ARS (precioProducto) *
+                      Precio en Pesos (ARS) *
                     </label>
                     <div className="relative">
                       <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-bold text-slate-400 text-sm">$</span>
@@ -721,7 +750,7 @@ export default function ABMProductosPage() {
 
                   <div>
                     <label className="block font-bold text-slate-700 mb-1">
-                      Categoría (categoriaId) *
+                      Categoría *
                     </label>
                     <select
                       value={categoriaId}
@@ -834,6 +863,23 @@ export default function ABMProductosPage() {
                         className="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-slate-900 focus:outline-hidden focus:border-blue-900 transition-all text-xs font-mono"
                       />
                       <p className="text-[11px] text-slate-400 mt-1">Si se omite, se asignará automáticamente el logo oficial de Librería Motivos.</p>
+                    </div>
+                  )}
+
+                  {avisoFormatoFoto && (
+                    <div
+                      className={`p-3 rounded-xl border text-[11px] leading-relaxed flex items-start gap-2 animate-in fade-in duration-200 ${
+                        avisoFormatoFoto.tipo === 'optimo'
+                          ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                          : 'bg-amber-50 border-amber-200 text-amber-900'
+                      }`}
+                    >
+                      {avisoFormatoFoto.tipo === 'optimo' ? (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                      ) : (
+                        <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                      )}
+                      <span>{avisoFormatoFoto.mensaje}</span>
                     </div>
                   )}
                 </div>
@@ -989,14 +1035,14 @@ export default function ABMProductosPage() {
                       selectedIcon={iconoProducto}
                       onSelect={setIconoProducto}
                       options={PRODUCT_ICON_OPTIONS}
-                      titulo="Icono Vectorial de Vitrina (Lucide React)"
+                      titulo="Ícono decorativo para destacar"
                     />
                   </div>
 
-                  {/* Selector Extenso de Badges */}
+                  {/* Selector de Etiquetas */}
                   <div className="pt-2 border-t border-slate-200/80">
                     <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Badge Superpuesto en Tarjeta
+                      Etiqueta destacada sobre la foto
                     </label>
                     <select
                       value={badgeProducto}

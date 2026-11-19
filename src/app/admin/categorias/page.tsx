@@ -6,45 +6,36 @@ import {
   Plus, 
   Search, 
   Pencil, 
-  Trash2, 
+  EyeOff,
   RotateCcw, 
   X, 
-  CheckCircle2,
   AlertCircle,
-  Eye,
-  Hash,
-  Layers,
-  ArrowRight
+  Eye
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
+import { useAdminFeedback } from '@/context/AdminFeedbackContext';
 import { CategoriaAdmin } from '@/types/admin';
-import { AppIcon, VisualIconPicker, CATEGORY_ICON_OPTIONS, getLucideIcon } from '@/lib/icon-registry';
+import { AppIcon, VisualIconPicker, CATEGORY_ICON_OPTIONS } from '@/lib/icon-registry';
 
-export default function ABMCategoriasPage() {
+export default function CategoriasAdminPage() {
   const { categorias, crearCategoria, editarCategoria, bajaLogicaCategoria, reactivarCategoria } = useAdmin();
+  const { notificar, confirmar } = useAdminFeedback();
 
   const [busqueda, setBusqueda] = useState('');
-  const [estadoFiltro, setEstadoFiltro] = useState<'todos' | 'activos' | 'bajas'>('todos');
+  const [estadoFiltro, setEstadoFiltro] = useState<'todos' | 'visibles' | 'ocultas'>('todos');
 
   // Modal Formulario
   const [modalAbierto, setModalAbierto] = useState(false);
   const [modoEdicion, setModoEdicion] = useState(false);
   const [categoriaSeleccionadaId, setCategoriaSeleccionadaId] = useState<string | null>(null);
 
-  // Campos del Modelo de Dominio
   const [nombreCategoria, setNombreCategoria] = useState('');
   const [slugCategoria, setSlugCategoria] = useState('');
   const [iconoCategoria, setIconoCategoria] = useState('backpack');
   const [descripcionCategoria, setDescripcionCategoria] = useState('');
   const [ordenCategoria, setOrdenCategoria] = useState<number>(0);
 
-  const [mensajeExito, setMensajeExito] = useState<string | null>(null);
   const [errorValidacion, setErrorValidacion] = useState<string | null>(null);
-
-  const mostrarExito = (msg: string) => {
-    setMensajeExito(msg);
-    setTimeout(() => setMensajeExito(null), 3500);
-  };
 
   const abrirModalCrear = () => {
     setModoEdicion(false);
@@ -92,7 +83,11 @@ export default function ABMCategoriasPage() {
         ordenCategoria: Number(ordenCategoria),
         fechaHoraBajaCategoria: catOriginal?.fechaHoraBajaCategoria || null,
       });
-      mostrarExito('¡Categoría actualizada correctamente!');
+      notificar({
+        tipo: 'exito',
+        titulo: 'Categoría actualizada',
+        mensaje: `Se guardaron los cambios de "${nombreCategoria.trim()}".`,
+      });
     } else {
       crearCategoria({
         nombreCategoria: nombreCategoria.trim(),
@@ -101,15 +96,36 @@ export default function ABMCategoriasPage() {
         descripcionCategoria: descripcionCategoria.trim(),
         ordenCategoria: Number(ordenCategoria),
       });
-      mostrarExito('¡Categoría registrada exitosamente!');
+      notificar({
+        tipo: 'exito',
+        titulo: 'Nueva categoría creada',
+        mensaje: `"${nombreCategoria.trim()}" ya aparece en los rubros de la web.`,
+      });
     }
 
     setModalAbierto(false);
   };
 
+  const handleOcultar = async (cat: CategoriaAdmin) => {
+    const ok = await confirmar({
+      titulo: '¿Ocultar esta categoría?',
+      mensaje: `La categoría "${cat.nombreCategoria}" dejará de mostrarse en la web. Sus productos no se borran y podrás volver a mostrarla cuando quieras.`,
+      textoConfirmar: 'Sí, ocultar',
+      variante: 'peligro',
+    });
+    if (ok) {
+      bajaLogicaCategoria(cat.idCategoria);
+      notificar({
+        tipo: 'advertencia',
+        titulo: 'Categoría oculta',
+        mensaje: `"${cat.nombreCategoria}" ya no aparece en el menú del catálogo.`,
+      });
+    }
+  };
+
   const categoriasFiltradas = categorias.filter((c) => {
-    if (estadoFiltro === 'activos' && c.fechaHoraBajaCategoria) return false;
-    if (estadoFiltro === 'bajas' && !c.fechaHoraBajaCategoria) return false;
+    if (estadoFiltro === 'visibles' && c.fechaHoraBajaCategoria) return false;
+    if (estadoFiltro === 'ocultas' && !c.fechaHoraBajaCategoria) return false;
 
     const q = busqueda.toLowerCase().trim();
     if (!q) return true;
@@ -128,33 +144,25 @@ export default function ABMCategoriasPage() {
         <div>
           <h2 className="font-heading text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
             <FolderTree className="w-6 h-6 text-indigo-900" />
-            <span>ABM Categorías</span>
+            <span>Categorías</span>
             <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-200/80 text-slate-700">
-              {categoriasFiltradas.length} registros
+              {categoriasFiltradas.length}
             </span>
           </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Mapeo de atributos: <code className="font-mono text-indigo-900 font-semibold">nombreCategoria</code>, <code className="font-mono text-indigo-900 font-semibold">slugCategoria</code>, <code className="font-mono text-indigo-900 font-semibold">iconoCategoria</code> y orden visual.
+          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+            Organizá los rubros, íconos y el orden en que aparecen en la barra de tu tienda.
           </p>
         </div>
 
         <button
           type="button"
           onClick={abrirModalCrear}
-          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-900 hover:bg-indigo-800 text-white font-bold text-xs sm:text-sm shadow-md transition-all active:scale-95 touch-manipulation cursor-pointer shrink-0"
+          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-900 hover:bg-indigo-800 text-white font-bold text-xs sm:text-sm shadow-md transition-all active:scale-95 touch-manipulation cursor-pointer shrink-0 min-h-[44px]"
         >
           <Plus className="w-4 h-4" />
           <span>Nueva Categoría</span>
         </button>
       </div>
-
-      {/* Banner de Feedback */}
-      {mensajeExito && (
-        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2 animate-in fade-in duration-200 shadow-2xs">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-          <span>{mensajeExito}</span>
-        </div>
-      )}
 
       {/* 2. Filtros y Búsqueda */}
       <div className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-2xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
@@ -164,7 +172,7 @@ export default function ABMCategoriasPage() {
             type="text"
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
-            placeholder="Buscar por nombre, slug o descripción..."
+            placeholder="Buscar categoría por nombre o descripción..."
             className="w-full pl-9 pr-8 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-900 transition-all"
           />
           {busqueda && (
@@ -178,7 +186,7 @@ export default function ABMCategoriasPage() {
           )}
         </div>
 
-        {/* Selector de Estado */}
+        {/* Selector de Visibilidad */}
         <div className="inline-flex rounded-xl bg-slate-100 p-1 border border-slate-200/80 text-xs shrink-0">
           <button
             type="button"
@@ -187,30 +195,30 @@ export default function ABMCategoriasPage() {
               estadoFiltro === 'todos' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-500 hover:text-slate-900'
             }`}
           >
-            Todos
+            Todas
           </button>
           <button
             type="button"
-            onClick={() => setEstadoFiltro('activos')}
+            onClick={() => setEstadoFiltro('visibles')}
             className={`px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
-              estadoFiltro === 'activos' ? 'bg-white text-emerald-700 shadow-2xs' : 'text-slate-500 hover:text-slate-900'
+              estadoFiltro === 'visibles' ? 'bg-white text-emerald-700 shadow-2xs' : 'text-slate-500 hover:text-slate-900'
             }`}
           >
-            Activos
+            Visibles
           </button>
           <button
             type="button"
-            onClick={() => setEstadoFiltro('bajas')}
+            onClick={() => setEstadoFiltro('ocultas')}
             className={`px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
-              estadoFiltro === 'bajas' ? 'bg-white text-rose-700 shadow-2xs' : 'text-slate-500 hover:text-slate-900'
+              estadoFiltro === 'ocultas' ? 'bg-white text-rose-700 shadow-2xs' : 'text-slate-500 hover:text-slate-900'
             }`}
           >
-            Bajas
+            Ocultas
           </button>
         </div>
       </div>
 
-      {/* 3. Tabla DataGrid */}
+      {/* 3. Tabla */}
       <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden">
         <div className="overflow-x-auto no-scrollbar">
           <table className="w-full text-left text-xs sm:text-sm">
@@ -218,22 +226,21 @@ export default function ABMCategoriasPage() {
               <tr>
                 <th className="py-3 px-4">Orden</th>
                 <th className="py-3 px-4">Categoría & Ícono</th>
-                <th className="py-3 px-4">Slug URL</th>
                 <th className="py-3 px-4">Descripción</th>
-                <th className="py-3 px-4">Estado</th>
+                <th className="py-3 px-4">Visibilidad</th>
                 <th className="py-3 px-4 text-right">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {categoriasFiltradas.length > 0 ? (
                 categoriasFiltradas.map((cat) => {
-                  const estaDadaDeBaja = !!cat.fechaHoraBajaCategoria;
+                  const estaOculta = !!cat.fechaHoraBajaCategoria;
 
                   return (
                     <tr 
                       key={cat.idCategoria}
                       className={`hover:bg-slate-50/60 transition-colors ${
-                        estaDadaDeBaja ? 'bg-rose-50/20 text-slate-500' : 'text-slate-800'
+                        estaOculta ? 'bg-rose-50/20 text-slate-500' : 'text-slate-800'
                       }`}
                     >
                       <td className="py-3 px-4 font-mono font-bold text-slate-400 text-xs">
@@ -245,17 +252,8 @@ export default function ABMCategoriasPage() {
                           <div className="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-200/60 flex items-center justify-center shrink-0">
                             <AppIcon name={cat.iconoCategoria || 'backpack'} size={15} className="text-indigo-900" />
                           </div>
-                          <div>
-                            <span className="block">{cat.nombreCategoria}</span>
-                            <span className="text-[10px] text-slate-400 font-mono font-normal">
-                              Ícono: {cat.iconoCategoria}
-                            </span>
-                          </div>
+                          <span className="block">{cat.nombreCategoria}</span>
                         </div>
-                      </td>
-
-                      <td className="py-3 px-4 font-mono text-xs text-slate-500">
-                        /{cat.slugCategoria}
                       </td>
 
                       <td className="py-3 px-4 text-slate-500 text-xs max-w-xs truncate">
@@ -263,18 +261,13 @@ export default function ABMCategoriasPage() {
                       </td>
 
                       <td className="py-3 px-4">
-                        {estaDadaDeBaja ? (
-                          <div className="space-y-0.5">
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-200">
-                              Baja Lógica
-                            </span>
-                            <p className="text-[10px] font-mono text-slate-500">
-                              {cat.fechaHoraBajaCategoria}
-                            </p>
-                          </div>
+                        {estaOculta ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                            Oculta
+                          </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                            Activo
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                            Visible en web
                           </span>
                         )}
                       </td>
@@ -284,37 +277,36 @@ export default function ABMCategoriasPage() {
                           <button
                             type="button"
                             onClick={() => abrirModalEditar(cat)}
-                            className="p-1.5 rounded-lg text-slate-600 hover:text-indigo-900 hover:bg-slate-100 transition-colors cursor-pointer"
+                            className="p-2 rounded-lg text-slate-600 hover:text-indigo-900 hover:bg-slate-100 transition-colors cursor-pointer"
                             title="Editar categoría"
                           >
                             <Pencil className="w-4 h-4" />
                           </button>
 
-                          {estaDadaDeBaja ? (
+                          {estaOculta ? (
                             <button
                               type="button"
                               onClick={() => {
                                 reactivarCategoria(cat.idCategoria);
-                                mostrarExito(`¡Categoría "${cat.nombreCategoria}" reactivada con éxito!`);
+                                notificar({
+                                  tipo: 'exito',
+                                  titulo: 'Categoría visible nuevamente',
+                                  mensaje: `"${cat.nombreCategoria}" volvió a aparecer en la web.`,
+                                });
                               }}
-                              className="p-1.5 rounded-lg text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 transition-colors cursor-pointer"
-                              title="Reactivar categoría"
+                              className="p-2 rounded-lg text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 transition-colors cursor-pointer"
+                              title="Volver a mostrar en la web"
                             >
                               <RotateCcw className="w-4 h-4" />
                             </button>
                           ) : (
                             <button
                               type="button"
-                              onClick={() => {
-                                if (confirm(`¿Dar de baja lógica a la categoría "${cat.nombreCategoria}"? Sus productos asociados no se eliminarán.`)) {
-                                  bajaLogicaCategoria(cat.idCategoria);
-                                  mostrarExito(`Categoría "${cat.nombreCategoria}" marcada con baja lógica.`);
-                                }
-                              }}
-                              className="p-1.5 rounded-lg text-rose-500 hover:text-rose-700 hover:bg-rose-50 transition-colors cursor-pointer"
-                              title="Dar de baja lógica"
+                              onClick={() => handleOcultar(cat)}
+                              className="p-2 rounded-lg text-rose-500 hover:text-rose-700 hover:bg-rose-50 transition-colors cursor-pointer"
+                              title="Ocultar de la web"
                             >
-                              <Trash2 className="w-4 h-4" />
+                              <EyeOff className="w-4 h-4" />
                             </button>
                           )}
                         </div>
@@ -324,7 +316,7 @@ export default function ABMCategoriasPage() {
                 })
               ) : (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-slate-400 text-xs">
+                  <td colSpan={5} className="py-8 text-center text-slate-400 text-xs">
                     No se encontraron categorías con los filtros seleccionados.
                   </td>
                 </tr>
@@ -344,7 +336,7 @@ export default function ABMCategoriasPage() {
               <div className="flex items-center gap-2">
                 <FolderTree className="w-5 h-5 text-indigo-900" />
                 <h3 className="font-heading font-bold text-base text-slate-900">
-                  {modoEdicion ? 'Modificar Categoría' : 'Alta de Nueva Categoría'}
+                  {modoEdicion ? 'Editar Categoría' : 'Nueva Categoría'}
                 </h3>
               </div>
               <button
@@ -370,7 +362,7 @@ export default function ABMCategoriasPage() {
               <form onSubmit={handleGuardar} id="form-categoria" className="lg:col-span-7 p-6 space-y-4 text-xs sm:text-sm">
                 <div>
                   <label className="block font-bold text-slate-700 mb-1">
-                    Nombre de Categoría (nombreCategoria) *
+                    Nombre de la Categoría *
                   </label>
                   <input
                     type="text"
@@ -387,48 +379,33 @@ export default function ABMCategoriasPage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block font-bold text-slate-700 mb-1">
-                      Slug URL (slugCategoria)
-                    </label>
-                    <input
-                      type="text"
-                      value={slugCategoria}
-                      onChange={(e) => setSlugCategoria(e.target.value)}
-                      placeholder="articulos-de-oficina"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 font-mono text-xs focus:outline-hidden focus:border-indigo-900 focus:bg-white transition-all"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold text-slate-700 mb-1">
-                      Orden Visual (ordenCategoria)
-                    </label>
-                    <input
-                      type="number"
-                      min={0}
-                      value={ordenCategoria}
-                      onChange={(e) => setOrdenCategoria(Number(e.target.value))}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 font-mono focus:outline-hidden focus:border-indigo-900 focus:bg-white transition-all"
-                    />
-                  </div>
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">
+                    Orden en el menú de la web
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={ordenCategoria}
+                    onChange={(e) => setOrdenCategoria(Number(e.target.value))}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 font-mono focus:outline-hidden focus:border-indigo-900 focus:bg-white transition-all"
+                  />
                 </div>
 
-                {/* Selector Visual de Icono Lucide */}
+                {/* Selector Visual de Icono */}
                 <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
                   <VisualIconPicker
                     selectedIcon={iconoCategoria}
                     onSelect={setIconoCategoria}
                     options={CATEGORY_ICON_OPTIONS}
-                    titulo="Ícono Vectorial Representativo (Lucide React)"
+                    titulo="Ícono de la categoría"
                     permiteDesmarcar={false}
                   />
                 </div>
 
                 <div>
                   <label className="block font-bold text-slate-700 mb-1">
-                    Descripción Informativa (descripcionCategoria)
+                    Descripción breve (opcional)
                   </label>
                   <textarea
                     rows={2}

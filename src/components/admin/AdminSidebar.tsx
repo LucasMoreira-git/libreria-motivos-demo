@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
@@ -9,13 +9,14 @@ import {
   FolderTree, 
   Tag, 
   Clock, 
+  Bell,
   ExternalLink, 
   ShieldCheck,
   Store,
-  LogOut,
-  Sparkles
+  LogOut
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
+import { evaluarAlertasNegocio } from '@/lib/admin-alertas';
 
 interface AdminSidebarProps {
   onCerrarMovil?: () => void;
@@ -24,6 +25,11 @@ interface AdminSidebarProps {
 export function AdminSidebar({ onCerrarMovil }: AdminSidebarProps) {
   const pathname = usePathname();
   const { productos, categorias, promociones, horarios, logout, adminUser } = useAdmin();
+  const [fechaHoy, setFechaHoy] = useState<Date | null>(null);
+
+  useEffect(() => {
+    setFechaHoy(new Date());
+  }, []);
 
   // Contadores activos para badges en el menú
   const totalCatActivas = categorias.filter((c) => !c.fechaHoraBajaCategoria).length;
@@ -31,36 +37,59 @@ export function AdminSidebar({ onCerrarMovil }: AdminSidebarProps) {
   const totalProdActivos = productos.filter((p) => !p.fechaHoraBajaProducto).length;
   const totalHorariosActivos = horarios.filter((h) => !h.fechaHoraBajaHA).length;
 
+  const totalAlertas = useMemo(() => {
+    if (!fechaHoy) return 0;
+    return evaluarAlertasNegocio({
+      productos,
+      categorias,
+      promociones,
+      horarios,
+      fechaReferencia: fechaHoy,
+    }).totalAlertas;
+  }, [productos, categorias, promociones, horarios, fechaHoy]);
+
   const NAV_ITEMS = [
     {
-      titulo: 'Dashboard',
+      titulo: 'Inicio',
       href: '/admin',
       icono: LayoutDashboard,
-      badge: null,
+      badge: null as number | null,
+      esAlerta: false,
     },
     {
-      titulo: 'ABM Categorías',
+      titulo: 'Categorías',
       href: '/admin/categorias',
       icono: FolderTree,
       badge: totalCatActivas,
+      esAlerta: false,
     },
     {
-      titulo: 'ABM Promociones',
+      titulo: 'Promociones',
       href: '/admin/promociones',
       icono: Tag,
       badge: totalPromoActivas,
+      esAlerta: false,
     },
     {
-      titulo: 'ABM Producto',
+      titulo: 'Productos',
       href: '/admin/productos',
       icono: Package,
       badge: totalProdActivos,
+      esAlerta: false,
     },
     {
-      titulo: 'ABM Horarios',
+      titulo: 'Horarios',
       href: '/admin/horarios',
       icono: Clock,
       badge: totalHorariosActivos,
+      esAlerta: false,
+    },
+    {
+      titulo: 'Avisos del Local',
+      href: '/admin/alertas',
+      icono: Bell,
+      badge: totalAlertas,
+      esAlerta: true,
     },
   ];
 
@@ -103,7 +132,7 @@ export function AdminSidebar({ onCerrarMovil }: AdminSidebarProps) {
       {/* 2. Enlaces de Navegación del Dashboard */}
       <div className="flex-1 py-4 px-3 space-y-1 overflow-y-auto no-scrollbar">
         <span className="text-[10px] font-bold uppercase tracking-wider text-purple-900/60 px-3 block mb-2">
-          Módulos de Gestión
+          Menú Principal
         </span>
 
         {NAV_ITEMS.map((item) => {
@@ -123,16 +152,24 @@ export function AdminSidebar({ onCerrarMovil }: AdminSidebarProps) {
             >
               <div className="flex items-center gap-3">
                 <Icono className={`w-4 h-4 shrink-0 transition-colors ${
-                  esActivo ? 'text-[#d97786]' : 'text-slate-400 group-hover:text-purple-700'
+                  esActivo
+                    ? 'text-[#d97786]'
+                    : item.esAlerta && (item.badge ?? 0) > 0
+                      ? 'text-amber-500'
+                      : 'text-slate-400 group-hover:text-purple-700'
                 }`} />
                 <span>{item.titulo}</span>
               </div>
 
               {item.badge !== null && (
                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                  esActivo 
-                    ? 'bg-[#d97786] text-white' 
-                    : 'bg-[#fef5f6] text-[#6e2e38] border border-[#f4d0d6]'
+                  item.esAlerta
+                    ? (item.badge > 0
+                        ? 'bg-amber-500 text-white shadow-2xs'
+                        : 'bg-emerald-50 text-emerald-700 border border-emerald-200')
+                    : esActivo 
+                      ? 'bg-[#d97786] text-white' 
+                      : 'bg-[#fef5f6] text-[#6e2e38] border border-[#f4d0d6]'
                 }`}>
                   {item.badge}
                 </span>

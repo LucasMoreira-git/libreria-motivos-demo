@@ -5,6 +5,7 @@ import { AdminProvider, useAdmin } from '@/context/AdminContext';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { AdminNavbar } from '@/components/admin/AdminNavbar';
 import { AdminLoginForm } from '@/components/admin/AdminLoginForm';
+import { AdminFeedbackProvider } from '@/context/AdminFeedbackContext';
 import { X } from 'lucide-react';
 
 function AdminLayoutContent({ children }: { children: React.ReactNode }) {
@@ -70,5 +71,9 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <AdminLayoutContent>{children}</AdminLayoutContent>;
+  return (
+    <AdminFeedbackProvider>
+      <AdminLayoutContent>{children}</AdminLayoutContent>
+    </AdminFeedbackProvider>
+  );
 }

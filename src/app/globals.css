@@ -284,3 +284,72 @@
 .catalog-grid-fluid {
   transition: opacity 250ms ease-out, transform 250ms ease-out;
 }
+
+/* Barra de cuenta regresiva para notificaciones Toast */
+@keyframes toastProgress {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+.toast-progress-bar {
+  animation: toastProgress 4s linear forwards;
+}
+
+/* Transición fluida del carrusel de promociones (bucle automático hacia la izquierda) */
+@keyframes promoSlideNext {
+  from {
+    opacity: 0;
+    transform: translateX(26px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes promoSlidePrev {
+  from {
+    opacity: 0;
+    transform: translateX(-26px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.promo-slide-next {
+  animation: promoSlideNext 380ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.promo-slide-prev {
+  animation: promoSlidePrev 380ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Microanimación al sumar un producto a la lista de consulta */
+@keyframes addedPop {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.9);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(0) scale(1.03);
+  }
+  80% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.96);
+  }
+}
+
+.animate-added-pop {
+  animation: addedPop 1.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

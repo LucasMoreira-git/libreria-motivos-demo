@@ -17,6 +17,44 @@ export interface DatosNegocio {
 
 export const DEFAULT_BRAND_IMAGE = '/images/logo-motivos.jpg';
 
+/**
+ * Normaliza fechas tipo "DD/MM/YYYY", "YYYY-MM-DD" o ISO a "YYYY-MM-DD"
+ * para inputs <input type="date"> y envío al backend Spring Boot.
+ */
+export function aFormatoFechaInput(fecha?: string | null): string {
+  if (!fecha) return '';
+  const limpia = fecha.trim();
+  if (/^\d{4}-\d{2}-\d{2}/.test(limpia)) {
+    return limpia.slice(0, 10);
+  }
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(limpia)) {
+    const [d, m, y] = limpia.split('/');
+    return `${y}-${m}-${d}`;
+  }
+  const parsed = new Date(limpia);
+  if (!isNaN(parsed.getTime())) {
+    const y = parsed.getFullYear();
+    const m = String(parsed.getMonth() + 1).padStart(2, '0');
+    const d = String(parsed.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+  return '';
+}
+
+/**
+ * Formatea una fecha "YYYY-MM-DD" o ISO al formato argentino legible "DD/MM/YYYY".
+ */
+export function formatearFechaLegible(fecha?: string | null): string {
+  if (!fecha) return '';
+  const limpia = fecha.trim();
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(limpia)) return limpia;
+  if (/^\d{4}-\d{2}-\d{2}/.test(limpia)) {
+    const [y, m, d] = limpia.slice(0, 10).split('-');
+    return `${d}/${m}/${y}`;
+  }
+  return limpia;
+}
+
 export function parsearDiasSemanaDesdeTexto(texto: string): number[] {
   const t = texto
     .toLowerCase()

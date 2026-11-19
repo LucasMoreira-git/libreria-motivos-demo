@@ -8,7 +8,7 @@ import {
   HorarioAtencionAdmin 
 } from '@/types/admin';
 import { CATEGORIAS_MOCK, PRODUCTOS_MOCK, PROMOCIONES_MOCK } from '@/lib/mock-catalogo';
-import { TURNOS_MOCK, parsearDiasSemanaDesdeTexto } from '@/lib/mock-data';
+import { TURNOS_MOCK, parsearDiasSemanaDesdeTexto, aFormatoFechaInput } from '@/lib/mock-data';
 
 // Seeds iniciales adaptados al modelo de dominio estricto
 const CATEGORIAS_INICIALES: CategoriaAdmin[] = CATEGORIAS_MOCK.map((c) => ({
@@ -203,21 +203,25 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (resProm && Array.isArray(resProm) && resProm.length > 0) {
-        const promMapeadas: PromocionAdmin[] = resProm.map((pr: any) => ({
-          idPromocion: String(pr.id || pr.idPromocion),
-          nombrePromocion: pr.nombrePromocion,
-          detallePromocion: pr.detallePromocion || '',
-          temporadaPromocion: pr.temporadaPromocion || 'Especial Primavera 2026',
-          fechaInicioPromocion: pr.fechaInicioPromocion || '',
-          fechaFinPromocion: pr.fechaFinPromocion || '',
-          fechaHoraFinPromocion: pr.fechaFinPromocion || '',
-          descuentoTextoPromocion: pr.descuentoTexto || '',
-          condicionPromocion: pr.condicionPromocion || '',
-          fotoComboPromocion: pr.fotoCombo || '',
-          fechaHoraBajaPromocion: pr.fechaHoraBajaPromocion 
-            ? formatearTimestampBaja(pr.fechaHoraBajaPromocion) 
-            : (pr.activo === false ? 'Baja lógica' : null),
-        }));
+        const promMapeadas: PromocionAdmin[] = resProm.map((pr: any) => {
+          const inicioIso = aFormatoFechaInput(pr.fechaInicioPromocion);
+          const finIso = aFormatoFechaInput(pr.fechaFinPromocion);
+          return {
+            idPromocion: String(pr.id || pr.idPromocion),
+            nombrePromocion: pr.nombrePromocion,
+            detallePromocion: pr.detallePromocion || '',
+            temporadaPromocion: pr.temporadaPromocion || 'Especial Primavera 2026',
+            fechaInicioPromocion: inicioIso,
+            fechaFinPromocion: finIso,
+            fechaHoraFinPromocion: finIso,
+            descuentoTextoPromocion: pr.descuentoTexto || '',
+            condicionPromocion: pr.condicionPromocion || '',
+            fotoComboPromocion: pr.fotoCombo || '',
+            fechaHoraBajaPromocion: pr.fechaHoraBajaPromocion 
+              ? formatearTimestampBaja(pr.fechaHoraBajaPromocion) 
+              : (pr.activo === false ? 'Oculta' : null),
+          };
+        });
         setPromociones(promMapeadas);
       }
 
@@ -545,12 +549,17 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // ABM Promociones
+  // Gestión de Promociones
   const crearPromocion = (data: Omit<PromocionAdmin, 'idPromocion' | 'fechaHoraBajaPromocion'>) => {
+    const fechaInicioIso = aFormatoFechaInput(data.fechaInicioPromocion);
+    const fechaFinIso = aFormatoFechaInput(data.fechaFinPromocion);
+
     const nueva: PromocionAdmin = {
       ...data,
+      fechaInicioPromocion: fechaInicioIso || data.fechaInicioPromocion,
+      fechaFinPromocion: fechaFinIso || data.fechaFinPromocion,
       idPromocion: `promo-${Date.now()}`,
-      fechaHoraFinPromocion: data.fechaHoraFinPromocion || data.fechaFinPromocion,
+      fechaHoraFinPromocion: fechaFinIso || data.fechaHoraFinPromocion || data.fechaFinPromocion,
       fechaHoraBajaPromocion: null,
     };
     setPromociones((prev) => [nueva, ...prev]);
@@ -564,23 +573,32 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           nombrePromocion: data.nombrePromocion,
           detallePromocion: data.detallePromocion,
           temporadaPromocion: data.temporadaPromocion || 'Especial Primavera 2026',
+          fechaInicioPromocion: fechaInicioIso ? `${fechaInicioIso}T12:00:00.000Z` : null,
+          fechaFinPromocion: fechaFinIso ? `${fechaFinIso}T12:00:00.000Z` : null,
           descuentoTexto: data.descuentoTextoPromocion,
           condicionPromocion: data.condicionPromocion,
           fotoCombo: data.fotoComboPromocion,
         }),
       })
-        .then(() => sincronizarConBackend())
+        .then((res) => {
+          if (res.ok) sincronizarConBackend();
+        })
         .catch(() => {});
     }
   };
 
   const editarPromocion = (promocion: PromocionAdmin) => {
+    const fechaInicioIso = aFormatoFechaInput(promocion.fechaInicioPromocion);
+    const fechaFinIso = aFormatoFechaInput(promocion.fechaFinPromocion);
+
     setPromociones((prev) =>
       prev.map((pr) =>
         pr.idPromocion === promocion.idPromocion
           ? {
               ...promocion,
-              fechaHoraFinPromocion: promocion.fechaHoraFinPromocion || promocion.fechaFinPromocion,
+              fechaInicioPromocion: fechaInicioIso || promocion.fechaInicioPromocion,
+              fechaFinPromocion: fechaFinIso || promocion.fechaFinPromocion,
+              fechaHoraFinPromocion: fechaFinIso || promocion.fechaHoraFinPromocion || promocion.fechaFinPromocion,
             }
           : pr
       )
@@ -596,12 +614,16 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
             nombrePromocion: promocion.nombrePromocion,
             detallePromocion: promocion.detallePromocion,
             temporadaPromocion: promocion.temporadaPromocion,
+            fechaInicioPromocion: fechaInicioIso ? `${fechaInicioIso}T12:00:00.000Z` : null,
+            fechaFinPromocion: fechaFinIso ? `${fechaFinIso}T12:00:00.000Z` : null,
             descuentoTexto: promocion.descuentoTextoPromocion,
             condicionPromocion: promocion.condicionPromocion,
             fotoCombo: promocion.fotoComboPromocion,
           }),
         })
-          .then(() => sincronizarConBackend())
+          .then((res) => {
+            if (res.ok) sincronizarConBackend();
+          })
           .catch(() => {});
       }
     }

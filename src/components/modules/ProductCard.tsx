@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Producto } from '@/types/catalogo';
 import { DATOS_LIBRERIA_MOTIVOS, DEFAULT_BRAND_IMAGE } from '@/lib/mock-data';
 import { getProductWhatsAppLink } from '@/lib/whatsapp';
@@ -51,6 +51,16 @@ export function ProductCard({
 }: ProductCardProps) {
   const { estaEnLista, toggleProducto } = useConsulta();
   const enLista = !ocultarAccionLista && estaEnLista(producto.id);
+  const [animacionSumado, setAnimacionSumado] = useState(false);
+
+  const handleToggleLista = () => {
+    const yaEstaba = enLista;
+    toggleProducto(producto);
+    if (!yaEstaba) {
+      setAnimacionSumado(true);
+      setTimeout(() => setAnimacionSumado(false), 1300);
+    }
+  };
 
   const urlFoto =
     producto.fotoProducto ||
@@ -203,6 +213,16 @@ export function ProductCard({
             {renderHighlightBadge()}
           </div>
 
+          {/* Animación flotante de confirmación al sumar a la lista */}
+          {animacionSumado && (
+            <div className="absolute inset-x-3 bottom-3 z-20 flex justify-center pointer-events-none">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-600 text-white text-[11px] font-bold shadow-lg animate-added-pop">
+                <Check className="w-3.5 h-3.5 shrink-0" />
+                <span>¡Sumado a tu lista!</span>
+              </span>
+            </div>
+          )}
+
           {/* Indicador sutil de vista rápida en hover para pantallas de escritorio */}
           <div className="absolute inset-0 bg-slate-900/20 opacity-0 group-hover:opacity-100 transition-opacity hidden sm:flex items-center justify-center pointer-events-none">
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur-sm text-slate-900 text-xs font-bold shadow-md">
@@ -264,7 +284,7 @@ export function ProductCard({
             {!ocultarAccionLista && (
               <button
                 type="button"
-                onClick={() => toggleProducto(producto)}
+                onClick={handleToggleLista}
                 aria-pressed={enLista}
                 aria-label={
                   enLista
@@ -274,9 +294,9 @@ export function ProductCard({
                 title={enLista ? 'En tu lista de consulta' : 'Sumar a lista de consulta'}
                 className={`inline-flex items-center justify-center gap-1 px-2.5 sm:px-3 py-2 rounded-xl font-bold text-[11px] sm:text-xs min-h-[40px] min-w-[40px] active:scale-95 transition-all duration-200 ease-out touch-manipulation cursor-pointer select-none shrink-0 border ${
                   enLista
-                    ? 'bg-[#6e2e38] text-white border-[#6e2e38] shadow-xs'
+                    ? 'bg-[#d97786] text-white border-[#d97786] shadow-xs'
                     : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
-                }`}
+                } ${animacionSumado ? 'scale-105 ring-2 ring-emerald-400/50' : ''}`}
               >
                 {enLista ? (
                   <>

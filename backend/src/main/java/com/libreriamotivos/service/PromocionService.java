@@ -56,6 +56,21 @@ public class PromocionService {
     }
 
     public PromocionDTO guardar(Promocion promocion) {
+        if (promocion.getId() != null) {
+            Optional<Promocion> existente = promocionRepository.findById(promocion.getId());
+            if (existente.isPresent()) {
+                Promocion ex = existente.get();
+                if (promocion.getCodPromocion() == null || promocion.getCodPromocion().isBlank()) {
+                    promocion.setCodPromocion(ex.getCodPromocion());
+                }
+                if (promocion.getFechaHoraAltaPromocion() == null) {
+                    promocion.setFechaHoraAltaPromocion(ex.getFechaHoraAltaPromocion());
+                }
+                if (promocion.getFechaHoraBajaPromocion() == null) {
+                    promocion.setFechaHoraBajaPromocion(ex.getFechaHoraBajaPromocion());
+                }
+            }
+        }
         Promocion guardada = promocionRepository.save(promocion);
         return convertirADTO(guardada);
     }
