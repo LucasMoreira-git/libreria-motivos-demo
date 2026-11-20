@@ -121,7 +121,7 @@ export const PRODUCTOS_MOCK: Producto[] = [
     categoriaId: 'escolar',
     categoriaNombre: 'Útiles Escolares',
     destacado: true,
-    badge: 'ESCOLAR 2026',
+    badge: 'ESCOLAR 2027',
     visibleEnVitrina: true,
   },
   {

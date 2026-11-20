@@ -38,7 +38,7 @@ const BADGES_DISPONIBLES = [
   { valor: 'NUEVO INGRESO', etiqueta: 'NUEVO INGRESO' },
   { valor: 'NOVEDAD', etiqueta: 'NOVEDAD' },
   { valor: 'ÚLTIMAS UNIDADES', etiqueta: 'ÚLTIMAS UNIDADES' },
-  { valor: 'ESCOLAR 2026', etiqueta: 'ESCOLAR 2026' },
+  { valor: 'ESCOLAR 2027', etiqueta: 'ESCOLAR 2027' },
   { valor: 'DIBUJO TÉCNICO', etiqueta: 'DIBUJO TÉCNICO' },
   { valor: 'LÍNEA PREMIUM', etiqueta: 'LÍNEA PREMIUM' },
   { valor: 'EDICIÓN LIMITADA', etiqueta: 'EDICIÓN LIMITADA' },

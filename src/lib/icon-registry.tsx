@@ -171,7 +171,7 @@ export const PRODUCT_ICON_OPTIONS: VisualIconOption[] = [
   { id: 'percent', label: 'Porcentaje', descripcion: 'Liquidación / Ahorro', Icon: Percent, colorClase: 'text-emerald-600' },
   { id: 'zap', label: 'Rayo', descripcion: 'Oportunidad Relámpago', Icon: Zap, colorClase: 'text-amber-600' },
   { id: 'gift', label: 'Regalo', descripcion: 'Ideal para Regalar', Icon: Gift, colorClase: 'text-pink-500' },
-  { id: 'backpack', label: 'Mochila', descripcion: 'Línea Escolar 2026', Icon: Backpack, colorClase: 'text-blue-600' },
+  { id: 'backpack', label: 'Mochila', descripcion: 'Línea Escolar 2027', Icon: Backpack, colorClase: 'text-blue-600' },
   { id: 'package', label: 'Caja', descripcion: 'Combo / Pack Ahorro', Icon: Package, colorClase: 'text-slate-700' },
 ];
 
