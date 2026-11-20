@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { DATOS_LIBRERIA_MOTIVOS, type DatosNegocio } from '@/lib/mock-data';
-import { MapPin, Navigation, ExternalLink, Compass, Copy, Check } from 'lucide-react';
+import { MapPin, Navigation, Compass, Copy, Check } from 'lucide-react';
 
 interface LocationSectionProps {
   datos?: DatosNegocio;
@@ -79,8 +79,8 @@ export function LocationSection({ datos = DATOS_LIBRERIA_MOTIVOS }: LocationSect
         {/* Contenedor Responsive: 2 columnas en Desktop / 1 columna apilada en Mobile */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 items-stretch">
           
-          {/* COLUMNA IZQUIERDA: Información y CTA */}
-          <div className="flex flex-col justify-between space-y-6">
+          {/* COLUMNA IZQUIERDA: Información de Ubicación */}
+          <div className="flex flex-col justify-center space-y-6">
             
             {/* Secuencia 1: Título introductorio (Fade in + translate-y, 400ms) */}
             <div
@@ -173,22 +173,6 @@ export function LocationSection({ datos = DATOS_LIBRERIA_MOTIVOS }: LocationSect
                 </div>
 
               </div>
-
-              {/* Botón CTA Principal en Azul Corporativo con feedback visual interactivo */}
-              <div className="pt-1">
-                <a
-                  href={datos.googleMapsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={`Ver ubicación de ${datos.nombre} en Google Maps`}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-2xl bg-blue-900 hover:bg-blue-800 text-white font-extrabold text-xs sm:text-sm shadow-sm hover:shadow-md hover:-translate-y-1 active:scale-95 transition-all duration-300 ease-out min-h-[48px] touch-manipulation cursor-pointer select-none"
-                >
-                  <MapPin className="w-4 h-4 text-amber-300 shrink-0" />
-                  <span>Ver en Google Maps</span>
-                  <ExternalLink className="w-3.5 h-3.5 text-blue-200 shrink-0" />
-                </a>
-              </div>
-
             </div>
 
           </div>
