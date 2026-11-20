@@ -92,6 +92,35 @@ export interface ResumenCajaEnVivo {
 export const STORAGE_KEY_CAJA_ABIERTA = 'motivos_caja_abierta_v2';
 export const STORAGE_KEY_HISTORIAL = 'motivos_caja_historial_v2';
 const LEGACY_STORAGE_KEY_V1 = 'motivos_caja_diaria_v1';
+const API_CAJA_BASE = 'http://localhost:8080/api/caja';
+
+/**
+ * Parsea importes escritos por usuarios en Argentina:
+ * - "1000" -> 1000
+ * - "1.000" -> 1000 (separador de miles)
+ * - "1.500,50" -> 1500.5
+ * - "1500.50" -> 1500.5
+ */
+export function parsearMontoAR(valor: string): number {
+  const limpio = valor.trim().replace(/\$/g, '').replace(/\s+/g, '');
+  if (!limpio) return 0;
+
+  // Caso con coma decimal (ej: "1.500,50" o "1500,5")
+  if (limpio.includes(',')) {
+    const normalizado = limpio.replace(/\./g, '').replace(',', '.');
+    const n = Number(normalizado);
+    return isNaN(n) ? 0 : n;
+  }
+
+  // Caso con puntos de miles argentinos (ej: "1.000" o "12.500")
+  if (/^\d{1,3}(\.\d{3})+$/.test(limpio)) {
+    const n = Number(limpio.replace(/\./g, ''));
+    return isNaN(n) ? 0 : n;
+  }
+
+  const n = Number(limpio);
+  return isNaN(n) ? 0 : n;
+}
 
 export const ETIQUETAS_MEDIO_PAGO: Record<
   MedioPagoCaja,
@@ -614,4 +643,253 @@ export function imprimirResumenCierrePDF(cierre: CierreCaja): void {
     </body>
   </html>`);
   ventana.document.close();
+}
+
+
+// =====================================================================
+// Integración con Backend Spring Boot + MySQL (/api/caja)
+// Si el backend no está activo (ej. demo estática), se usa localStorage.
+// =====================================================================
+
+interface CajaDiariaApiDTO {
+  id: string;
+  fechaClave: string;
+  fechaLegible: string;
+  estado: string;
+  horaCierre?: string | null;
+  fondoInicial: number;
+  ventasEfectivo: number;
+  ventasTransferencia: number;
+  ventasDebito: number;
+  ventasCredito: number;
+  totalVentas: number;
+  egresosEfectivo: number;
+  ingresosExtraEfectivo: number;
+  efectivoEsperadoEnCajon: number;
+  efectivoContadoReal: number;
+  diferenciaArqueo: number;
+  cantidadVentas: number;
+  cantidadAnuladas: number;
+  cantidadArticulos: number;
+  observaciones?: string | null;
+  ventas: VentaTicket[];
+  movimientosEfectivo: MovimientoEfectivo[];
+}
+
+export function dtoACajaAbierta(dto: CajaDiariaApiDTO): CajaAbiertaState {
+  return {
+    fechaClave: dto.fechaClave || obtenerFechaClave(),
+    fondoInicial: Number(dto.fondoInicial || 0),
+    ventas: Array.isArray(dto.ventas) ? dto.ventas : [],
+    movimientosEfectivo: Array.isArray(dto.movimientosEfectivo)
+      ? dto.movimientosEfectivo
+      : [],
+  };
+}
+
+export function dtoACierreCaja(dto: CajaDiariaApiDTO): CierreCaja {
+  return {
+    id: String(dto.id),
+    fechaClave: dto.fechaClave || obtenerFechaClave(),
+    fechaLegible: dto.fechaLegible || formatearFechaClaveLegible(dto.fechaClave || ''),
+    horaCierre: dto.horaCierre || '00:00',
+    fondoInicial: Number(dto.fondoInicial || 0),
+    ventasEfectivo: Number(dto.ventasEfectivo || 0),
+    ventasTransferencia: Number(dto.ventasTransferencia || 0),
+    ventasDebito: Number(dto.ventasDebito || 0),
+    ventasCredito: Number(dto.ventasCredito || 0),
+    totalVentas: Number(dto.totalVentas || 0),
+    egresosEfectivo: Number(dto.egresosEfectivo || 0),
+    ingresosExtraEfectivo: Number(dto.ingresosExtraEfectivo || 0),
+    efectivoEsperadoEnCajon: Number(dto.efectivoEsperadoEnCajon || 0),
+    efectivoContadoReal: Number(dto.efectivoContadoReal ?? dto.efectivoEsperadoEnCajon ?? 0),
+    diferenciaArqueo: Number(dto.diferenciaArqueo || 0),
+    cantidadVentas: Number(dto.cantidadVentas || 0),
+    cantidadAnuladas: Number(dto.cantidadAnuladas || 0),
+    cantidadArticulos: Number(dto.cantidadArticulos || 0),
+    observaciones: dto.observaciones || undefined,
+    ventasSnapshot: Array.isArray(dto.ventas) ? dto.ventas : [],
+    movimientosSnapshot: Array.isArray(dto.movimientosEfectivo)
+      ? dto.movimientosEfectivo
+      : [],
+  };
+}
+
+export async function apiObtenerCajaActual(): Promise<CajaAbiertaState | null> {
+  try {
+    const res = await fetch(`${API_CAJA_BASE}/actual`, { cache: 'no-store' });
+    if (!res.ok) return null;
+    const dto = (await res.json()) as CajaDiariaApiDTO;
+    const caja = dtoACajaAbierta(dto);
+    guardarCajaAbierta(caja);
+    return caja;
+  } catch {
+    return null;
+  }
+}
+
+export async function apiActualizarFondo(fondoInicial: number): Promise<CajaAbiertaState | null> {
+  try {
+    const res = await fetch(`${API_CAJA_BASE}/actual/fondo`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fondoInicial }),
+    });
+    if (!res.ok) return null;
+    const dto = (await res.json()) as CajaDiariaApiDTO;
+    const caja = dtoACajaAbierta(dto);
+    guardarCajaAbierta(caja);
+    return caja;
+  } catch {
+    return null;
+  }
+}
+
+export async function apiRegistrarVenta(venta: Omit<VentaTicket, 'id' | 'numeroTicket' | 'fechaIso'>): Promise<CajaAbiertaState | null> {
+  try {
+    const res = await fetch(`${API_CAJA_BASE}/actual/ventas`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(venta),
+    });
+    if (!res.ok) return null;
+    const dto = (await res.json()) as CajaDiariaApiDTO;
+    const caja = dtoACajaAbierta(dto);
+    guardarCajaAbierta(caja);
+    return caja;
+  } catch {
+    return null;
+  }
+}
+
+export async function apiEditarPagoVenta(
+  ventaId: string,
+  totalCobrado: number,
+  pagos: PagoDetalle[]
+): Promise<CajaAbiertaState | null> {
+  const numericId = Number(ventaId);
+  if (isNaN(numericId) || numericId <= 0) return null;
+  try {
+    const res = await fetch(`${API_CAJA_BASE}/actual/ventas/${numericId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ totalCobrado, pagos }),
+    });
+    if (!res.ok) return null;
+    const dto = (await res.json()) as CajaDiariaApiDTO;
+    const caja = dtoACajaAbierta(dto);
+    guardarCajaAbierta(caja);
+    return caja;
+  } catch {
+    return null;
+  }
+}
+
+export async function apiToggleAnularVenta(
+  ventaId: string,
+  motivo?: string
+): Promise<CajaAbiertaState | null> {
+  const numericId = Number(ventaId);
+  if (isNaN(numericId) || numericId <= 0) return null;
+  try {
+    const res = await fetch(`${API_CAJA_BASE}/actual/ventas/${numericId}/anular`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ motivo: motivo || 'Anulada por operador' }),
+    });
+    if (!res.ok) return null;
+    const dto = (await res.json()) as CajaDiariaApiDTO;
+    const caja = dtoACajaAbierta(dto);
+    guardarCajaAbierta(caja);
+    return caja;
+  } catch {
+    return null;
+  }
+}
+
+export async function apiRegistrarMovimiento(
+  mov: Omit<MovimientoEfectivo, 'id'>
+): Promise<CajaAbiertaState | null> {
+  try {
+    const res = await fetch(`${API_CAJA_BASE}/actual/movimientos`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(mov),
+    });
+    if (!res.ok) return null;
+    const dto = (await res.json()) as CajaDiariaApiDTO;
+    const caja = dtoACajaAbierta(dto);
+    guardarCajaAbierta(caja);
+    return caja;
+  } catch {
+    return null;
+  }
+}
+
+export async function apiEliminarMovimiento(movId: string): Promise<CajaAbiertaState | null> {
+  const numericId = Number(movId);
+  if (isNaN(numericId) || numericId <= 0) return null;
+  try {
+    const res = await fetch(`${API_CAJA_BASE}/actual/movimientos/${numericId}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok) return null;
+    const dto = (await res.json()) as CajaDiariaApiDTO;
+    const caja = dtoACajaAbierta(dto);
+    guardarCajaAbierta(caja);
+    return caja;
+  } catch {
+    return null;
+  }
+}
+
+export async function apiCerrarCaja(payload: {
+  efectivoContadoReal: number;
+  nuevoFondoManiana: number;
+  observaciones?: string;
+}): Promise<{ cierreGuardado: CierreCaja; nuevaCajaAbierta: CajaAbiertaState } | null> {
+  try {
+    const res = await fetch(`${API_CAJA_BASE}/actual/cerrar`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) return null;
+    const data = (await res.json()) as {
+      cierreGuardado: CajaDiariaApiDTO;
+      nuevaCajaAbierta: CajaDiariaApiDTO;
+    };
+    const cierreGuardado = dtoACierreCaja(data.cierreGuardado);
+    const nuevaCajaAbierta = dtoACajaAbierta(data.nuevaCajaAbierta);
+    guardarCajaAbierta(nuevaCajaAbierta);
+    return { cierreGuardado, nuevaCajaAbierta };
+  } catch {
+    return null;
+  }
+}
+
+export async function apiListarHistorialCierres(): Promise<CierreCaja[] | null> {
+  try {
+    const res = await fetch(`${API_CAJA_BASE}/historial`, { cache: 'no-store' });
+    if (!res.ok) return null;
+    const dtos = (await res.json()) as CajaDiariaApiDTO[];
+    const cierres = Array.isArray(dtos) ? dtos.map(dtoACierreCaja) : [];
+    guardarHistorialCierres(cierres);
+    return cierres;
+  } catch {
+    return null;
+  }
+}
+
+export async function apiEliminarCierre(cierreId: string): Promise<boolean> {
+  const numericId = Number(cierreId);
+  if (isNaN(numericId) || numericId <= 0) return false;
+  try {
+    const res = await fetch(`${API_CAJA_BASE}/historial/${numericId}`, {
+      method: 'DELETE',
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
 }

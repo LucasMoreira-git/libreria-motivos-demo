@@ -6,12 +6,26 @@ import { useAdminFeedback } from '@/context/AdminFeedbackContext';
 import {
   CajaAbiertaState,
   CierreCaja,
+  MovimientoEfectivo,
+  PagoDetalle,
+  VentaTicket,
+  apiActualizarFondo,
+  apiCerrarCaja,
+  apiEditarPagoVenta,
+  apiEliminarCierre,
+  apiEliminarMovimiento,
+  apiListarHistorialCierres,
+  apiObtenerCajaActual,
+  apiRegistrarMovimiento,
+  apiRegistrarVenta,
+  apiToggleAnularVenta,
   cargarCajaAbierta,
   cargarHistorialCierres,
   crearCajaVacia,
   guardarCajaAbierta,
   guardarHistorialCierres,
   obtenerFechaClave,
+  obtenerHoraActual,
 } from '@/lib/caja-diaria';
 import { CajaHoyPanel } from '@/components/admin/CajaHoyPanel';
 import { HistorialCierresPanel } from '@/components/admin/HistorialCierresPanel';
@@ -24,29 +38,172 @@ export default function CajaAdminPage() {
   const [hidratado, setHidratado] = useState(false);
 
   useEffect(() => {
+    // 1. Carga inmediata desde caché local para que la pantalla nunca parpadee
     setCaja(cargarCajaAbierta());
     setHistorial(cargarHistorialCierres());
     setHidratado(true);
+
+    // 2. Sincronizar con MySQL (Spring Boot) si el servidor está activo
+    let cancelado = false;
+    (async () => {
+      const [cajaRemota, historialRemoto] = await Promise.all([
+        apiObtenerCajaActual(),
+        apiListarHistorialCierres(),
+      ]);
+      if (cancelado) return;
+      if (cajaRemota) setCaja(cajaRemota);
+      if (historialRemoto) setHistorial(historialRemoto);
+    })();
+
+    return () => {
+      cancelado = true;
+    };
   }, []);
 
-  const handleActualizarCaja = (nuevaCaja: CajaAbiertaState) => {
-    setCaja(nuevaCaja);
-    guardarCajaAbierta(nuevaCaja);
+  const handleActualizarFondo = async (nuevoFondo: number) => {
+    const remota = await apiActualizarFondo(nuevoFondo);
+    if (remota) {
+      setCaja(remota);
+      return;
+    }
+    const localActualizada = { ...caja, fondoInicial: nuevoFondo };
+    setCaja(localActualizada);
+    guardarCajaAbierta(localActualizada);
   };
 
-  const handleGuardarCierre = (cierre: CierreCaja, nuevoFondoManiana: number) => {
-    const nuevoHistorial = [cierre, ...historial];
-    setHistorial(nuevoHistorial);
-    guardarHistorialCierres(nuevoHistorial);
-
-    const nuevaCajaLimpia: CajaAbiertaState = {
-      fechaClave: obtenerFechaClave(),
-      fondoInicial: nuevoFondoManiana,
-      ventas: [],
-      movimientosEfectivo: [],
+  const handleRegistrarVenta = async (
+    ventaInput: Omit<VentaTicket, 'id' | 'numeroTicket' | 'fechaIso'>
+  ) => {
+    const remota = await apiRegistrarVenta(ventaInput);
+    if (remota) {
+      setCaja(remota);
+      return;
+    }
+    const ultimoNum = caja.ventas.reduce((max, v) => Math.max(max, v.numeroTicket), 0);
+    const nuevaVenta: VentaTicket = {
+      ...ventaInput,
+      id: `ticket-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`,
+      numeroTicket: ultimoNum + 1,
+      fechaIso: new Date().toISOString(),
     };
-    setCaja(nuevaCajaLimpia);
-    guardarCajaAbierta(nuevaCajaLimpia);
+    const localActualizada: CajaAbiertaState = {
+      ...caja,
+      ventas: [nuevaVenta, ...caja.ventas],
+    };
+    setCaja(localActualizada);
+    guardarCajaAbierta(localActualizada);
+  };
+
+  const handleEditarPagoVenta = async (
+    ventaId: string,
+    totalCobrado: number,
+    pagos: PagoDetalle[]
+  ) => {
+    const remota = await apiEditarPagoVenta(ventaId, totalCobrado, pagos);
+    if (remota) {
+      setCaja(remota);
+      return;
+    }
+    const localActualizada: CajaAbiertaState = {
+      ...caja,
+      ventas: caja.ventas.map((v) =>
+        v.id === ventaId
+          ? {
+              ...v,
+              totalCobrado,
+              recargoMonto: Math.max(0, totalCobrado - v.subtotalItems),
+              pagos,
+            }
+          : v
+      ),
+    };
+    setCaja(localActualizada);
+    guardarCajaAbierta(localActualizada);
+  };
+
+  const handleToggleAnularVenta = async (venta: VentaTicket) => {
+    const remota = await apiToggleAnularVenta(venta.id);
+    if (remota) {
+      setCaja(remota);
+      return;
+    }
+    const localActualizada: CajaAbiertaState = {
+      ...caja,
+      ventas: caja.ventas.map((v) =>
+        v.id === venta.id
+          ? v.anulada
+            ? { ...v, anulada: false, motivoAnulacion: undefined, fechaAnulacion: undefined }
+            : {
+                ...v,
+                anulada: true,
+                motivoAnulacion: 'Anulada por operador',
+                fechaAnulacion: obtenerHoraActual(),
+              }
+          : v
+      ),
+    };
+    setCaja(localActualizada);
+    guardarCajaAbierta(localActualizada);
+  };
+
+  const handleRegistrarMovimiento = async (mov: Omit<MovimientoEfectivo, 'id'>) => {
+    const remota = await apiRegistrarMovimiento(mov);
+    if (remota) {
+      setCaja(remota);
+      return;
+    }
+    const nuevoMov: MovimientoEfectivo = {
+      ...mov,
+      id: `mov-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`,
+    };
+    const localActualizada: CajaAbiertaState = {
+      ...caja,
+      movimientosEfectivo: [nuevoMov, ...caja.movimientosEfectivo],
+    };
+    setCaja(localActualizada);
+    guardarCajaAbierta(localActualizada);
+  };
+
+  const handleEliminarMovimiento = async (movId: string) => {
+    const remota = await apiEliminarMovimiento(movId);
+    if (remota) {
+      setCaja(remota);
+      return;
+    }
+    const localActualizada: CajaAbiertaState = {
+      ...caja,
+      movimientosEfectivo: caja.movimientosEfectivo.filter((m) => m.id !== movId),
+    };
+    setCaja(localActualizada);
+    guardarCajaAbierta(localActualizada);
+  };
+
+  const handleGuardarCierre = async (cierre: CierreCaja, nuevoFondoManiana: number) => {
+    const resultadoRemoto = await apiCerrarCaja({
+      efectivoContadoReal: cierre.efectivoContadoReal,
+      nuevoFondoManiana,
+      observaciones: cierre.observaciones,
+    });
+
+    if (resultadoRemoto) {
+      setCaja(resultadoRemoto.nuevaCajaAbierta);
+      const historialActualizado = [resultadoRemoto.cierreGuardado, ...historial];
+      setHistorial(historialActualizado);
+      guardarHistorialCierres(historialActualizado);
+    } else {
+      const nuevoHistorial = [cierre, ...historial];
+      setHistorial(nuevoHistorial);
+      guardarHistorialCierres(nuevoHistorial);
+
+      const nuevaCajaLimpia: CajaAbiertaState = {
+        fechaClave: obtenerFechaClave(),
+        fondoInicial: nuevoFondoManiana,
+        ventas: [],
+        movimientosEfectivo: [],
+      };
+      setCaja(nuevaCajaLimpia);
+      guardarCajaAbierta(nuevaCajaLimpia);
+    }
 
     notificar({
       tipo: 'exito',
@@ -56,7 +213,8 @@ export default function CajaAdminPage() {
     setSolapa('historial');
   };
 
-  const handleEliminarCierre = (id: string) => {
+  const handleEliminarCierre = async (id: string) => {
+    await apiEliminarCierre(id);
     const actualizado = historial.filter((c) => c.id !== id);
     setHistorial(actualizado);
     guardarHistorialCierres(actualizado);
@@ -66,7 +224,7 @@ export default function CajaAdminPage() {
 
   return (
     <div className="space-y-5 sm:space-y-6">
-      {/* Encabezado y Selector de Solapas: Caja de Hoy | Historial de Cierres */}
+      {/* Encabezado y Selector de Solapas */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="font-heading text-xl sm:text-2xl font-black text-purple-950 tracking-tight flex items-center gap-2.5">
@@ -129,12 +287,16 @@ export default function CajaAdminPage() {
         </div>
       </div>
 
-      {/* Contenido de la solapa activa */}
       {hidratado &&
         (solapa === 'hoy' ? (
           <CajaHoyPanel
             caja={caja}
-            onActualizarCaja={handleActualizarCaja}
+            onActualizarFondo={handleActualizarFondo}
+            onRegistrarVenta={handleRegistrarVenta}
+            onEditarPagoVenta={handleEditarPagoVenta}
+            onToggleAnularVenta={handleToggleAnularVenta}
+            onRegistrarMovimiento={handleRegistrarMovimiento}
+            onEliminarMovimiento={handleEliminarMovimiento}
             onGuardarCierre={handleGuardarCierre}
           />
         ) : (

@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { evaluarAlertasNegocio } from '@/lib/admin-alertas';
-import { cargarCajaAbierta } from '@/lib/caja-diaria';
+import { apiObtenerCajaActual, cargarCajaAbierta } from '@/lib/caja-diaria';
 
 interface AdminSidebarProps {
   onCerrarMovil?: () => void;
@@ -38,6 +38,13 @@ export function AdminSidebar({ onCerrarMovil }: AdminSidebarProps) {
       setVentasHoyCount(caja.ventas.filter((v) => !v.anulada).length);
     };
     actualizarConteoCaja();
+
+    apiObtenerCajaActual().then((remota) => {
+      if (remota) {
+        setVentasHoyCount(remota.ventas.filter((v) => !v.anulada).length);
+      }
+    });
+
     window.addEventListener('motivos-caja-updated', actualizarConteoCaja);
     window.addEventListener('storage', actualizarConteoCaja);
     return () => {

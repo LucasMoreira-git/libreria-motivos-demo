@@ -17,6 +17,8 @@ import { useAdmin } from '@/context/AdminContext';
 import { evaluarAlertasNegocio } from '@/lib/admin-alertas';
 import {
   ResumenCajaEnVivo,
+  apiListarHistorialCierres,
+  apiObtenerCajaActual,
   calcularResumenCaja,
   cargarCajaAbierta,
   cargarHistorialCierres,
@@ -37,9 +39,23 @@ export default function AdminDashboardPage() {
     };
 
     cargarEstadoCaja();
+
+    // Sincronizar con MySQL si el backend está en línea
+    let cancelado = false;
+    (async () => {
+      const [cajaRemota, historialRemoto] = await Promise.all([
+        apiObtenerCajaActual(),
+        apiListarHistorialCierres(),
+      ]);
+      if (cancelado) return;
+      if (cajaRemota) setResumenCaja(calcularResumenCaja(cajaRemota));
+      if (historialRemoto) setTotalCierresGuardados(historialRemoto.length);
+    })();
+
     window.addEventListener('motivos-caja-updated', cargarEstadoCaja);
     window.addEventListener('storage', cargarEstadoCaja);
     return () => {
+      cancelado = true;
       window.removeEventListener('motivos-caja-updated', cargarEstadoCaja);
       window.removeEventListener('storage', cargarEstadoCaja);
     };
@@ -67,20 +83,20 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* 1. Bienvenida limpia sin botones técnicos */}
+      {/* 1. Bienvenida limpia, breve y cercana */}
       <header className="bg-gradient-to-br from-[#fef5f6] via-[#fbf0f2] to-[#ede4f6] rounded-3xl p-6 sm:p-7 border border-[#f2d3d8] shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="space-y-1.5">
+        <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
             <span className="text-[11px] font-bold uppercase tracking-wider text-purple-900/80 bg-white/80 px-2.5 py-0.5 rounded-full border border-purple-200/70">
-              Librería Motivos • Resumen del Día
+              Librería Motivos
             </span>
           </div>
           <h2 className="font-heading text-xl sm:text-2xl font-black text-purple-950 tracking-tight">
-            ¡Bienvenido al Panel de tu Librería!
+            ¡Hola! Bienvenido a tu librería
           </h2>
-          <p className="text-xs sm:text-sm text-slate-600 max-w-2xl">
-            Acá tenés el pulso diario del local: cómo va tu caja hoy, si hay algún aviso para revisar y accesos rápidos a lo que más usás.
+          <p className="text-xs sm:text-sm text-slate-600">
+            Todo lo que necesitás para el día a día del local, en un solo lugar.
           </p>
         </div>
 
