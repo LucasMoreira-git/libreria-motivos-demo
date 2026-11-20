@@ -275,7 +275,23 @@ export default function ProductosAdminPage() {
       }
     }
 
-    const fotoFinal = fotoProducto.trim() || DEFAULT_BRAND_IMAGE;
+    const fotoTrim = fotoProducto.trim();
+    if (fotoTrim) {
+      const lower = fotoTrim.toLowerCase();
+      const urlSegura =
+        lower.startsWith('https://') ||
+        lower.startsWith('http://') ||
+        lower.startsWith('/images/') ||
+        lower.startsWith('data:image/jpeg;base64,') ||
+        lower.startsWith('data:image/png;base64,') ||
+        lower.startsWith('data:image/webp;base64,');
+      if (!urlSegura) {
+        setErrorValidacion('El enlace de la foto debe comenzar con https:// o cargarse desde tu dispositivo.');
+        return;
+      }
+    }
+
+    const fotoFinal = fotoTrim || DEFAULT_BRAND_IMAGE;
     const precioNumerico = Number(precioProducto);
     const precioDescNumerico = tieneDescuento && precioDescuentoProducto !== '' ? Number(precioDescuentoProducto) : null;
     const fechaFinIso = tieneDescuento && fechaFinDescuento ? new Date(fechaFinDescuento).toISOString() : null;

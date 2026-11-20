@@ -215,7 +215,23 @@ export default function PromocionesAdminPage() {
       return;
     }
 
-    const fotoFinal = fotoComboPromocion.trim() || DEFAULT_BRAND_IMAGE;
+    const fotoTrim = fotoComboPromocion.trim();
+    if (fotoTrim) {
+      const lower = fotoTrim.toLowerCase();
+      const urlSegura =
+        lower.startsWith('https://') ||
+        lower.startsWith('http://') ||
+        lower.startsWith('/images/') ||
+        lower.startsWith('data:image/jpeg;base64,') ||
+        lower.startsWith('data:image/png;base64,') ||
+        lower.startsWith('data:image/webp;base64,');
+      if (!urlSegura) {
+        setErrorValidacion('El enlace de la imagen debe comenzar con https:// o cargarse desde tu dispositivo.');
+        return;
+      }
+    }
+
+    const fotoFinal = fotoTrim || DEFAULT_BRAND_IMAGE;
 
     if (modoEdicion && promocionSeleccionadaId) {
       const promoOriginal = promociones.find((p) => p.idPromocion === promocionSeleccionadaId);

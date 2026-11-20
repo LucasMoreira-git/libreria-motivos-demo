@@ -92,7 +92,27 @@ export interface ResumenCajaEnVivo {
 export const STORAGE_KEY_CAJA_ABIERTA = 'motivos_caja_abierta_v2';
 export const STORAGE_KEY_HISTORIAL = 'motivos_caja_historial_v2';
 const LEGACY_STORAGE_KEY_V1 = 'motivos_caja_diaria_v1';
-const API_CAJA_BASE = 'http://localhost:8080/api/caja';
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080').replace(/\/$/, '');
+const API_CAJA_BASE = `${API_BASE}/api/caja`;
+
+function getAuthHeaders(conJson = false): Record<string, string> {
+  const headers: Record<string, string> = {};
+  if (conJson) headers['Content-Type'] = 'application/json';
+  if (typeof window !== 'undefined') {
+    const token = sessionStorage.getItem('motivos_admin_token');
+    if (token) headers['X-Admin-Token'] = token;
+  }
+  return headers;
+}
+
+function escaparHtml(valor: string | number | undefined | null): string {
+  return String(valor ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 /**
  * Parsea importes escritos por usuarios en Argentina:
@@ -567,11 +587,11 @@ export function imprimirResumenCierrePDF(cierre: CierreCaja): void {
     .map(
       (v) => `
       <tr style="${v.anulada ? 'opacity:0.55;text-decoration:line-through;' : ''}">
-        <td>#${v.numeroTicket}</td>
-        <td>${v.hora}</td>
-        <td>${v.items.map((it) => `${it.cantidad}× ${it.nombre}`).join(', ')}</td>
+        <td>#${escaparHtml(v.numeroTicket)}</td>
+        <td>${escaparHtml(v.hora)}</td>
+        <td>${v.items.map((it) => `${escaparHtml(it.cantidad)}× ${escaparHtml(it.nombre)}`).join(', ')}</td>
         <td>${v.pagos
-          .map((p) => `${ETIQUETAS_MEDIO_PAGO[p.medio].corto} $${p.monto.toLocaleString('es-AR')}`)
+          .map((p) => `${escaparHtml(ETIQUETAS_MEDIO_PAGO[p.medio].corto)} $${p.monto.toLocaleString('es-AR')}`)
           .join(' + ')}</td>
         <td style="text-align:right;font-weight:700;">$ ${v.totalCobrado.toLocaleString('es-AR')}</td>
       </tr>`
@@ -582,7 +602,7 @@ export function imprimirResumenCierrePDF(cierre: CierreCaja): void {
   <html lang="es">
     <head>
       <meta charset="utf-8" />
-      <title>Cierre de Caja ${cierre.fechaLegible} — Librería Motivos</title>
+      <title>Cierre de Caja ${escaparHtml(cierre.fechaLegible)} — Librería Motivos</title>
       <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #1e293b; padding: 28px; max-width: 780px; margin: 0 auto; }
         h1 { margin: 0; font-size: 20px; color: #4c1d52; }
@@ -604,7 +624,7 @@ export function imprimirResumenCierrePDF(cierre: CierreCaja): void {
       <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #d97786;padding-bottom:12px;">
         <div>
           <h1>Librería Motivos — Cierre de Caja</h1>
-          <div class="sub">Fecha: ${cierre.fechaLegible} • Cierre: ${cierre.horaCierre} hs • ${cierre.cantidadVentas} ventas (${cierre.cantidadArticulos} artículos)</div>
+          <div class="sub">Fecha: ${escaparHtml(cierre.fechaLegible)} • Cierre: ${escaparHtml(cierre.horaCierre)} hs • ${cierre.cantidadVentas} ventas (${cierre.cantidadArticulos} artículos)</div>
         </div>
         <div style="text-align:right;">
           <div style="font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;">Total Vendido</div>
@@ -627,8 +647,8 @@ export function imprimirResumenCierrePDF(cierre: CierreCaja): void {
         <div class="row"><span>Salidas / gastos en efectivo</span><span>-$ ${cierre.egresosEfectivo.toLocaleString('es-AR')}</span></div>
         <div class="row total"><span>Efectivo esperado en cajón</span><span>$ ${cierre.efectivoEsperadoEnCajon.toLocaleString('es-AR')}</span></div>
         <div class="row"><span>Efectivo contado físicamente</span><span><strong>$ ${cierre.efectivoContadoReal.toLocaleString('es-AR')}</strong></span></div>
-        <div class="row"><span>Resultado del arqueo</span><span style="font-weight:800;color:${diffColor};">${diffLabel}</span></div>
-        ${cierre.observaciones ? `<div style="margin-top:8px;font-size:12px;color:#475569;"><strong>Observaciones:</strong> ${cierre.observaciones}</div>` : ''}
+        <div class="row"><span>Resultado del arqueo</span><span style="font-weight:800;color:${diffColor};">${escaparHtml(diffLabel)}</span></div>
+        ${cierre.observaciones ? `<div style="margin-top:8px;font-size:12px;color:#475569;"><strong>Observaciones:</strong> ${escaparHtml(cierre.observaciones)}</div>` : ''}
       </div>
 
       <div style="font-size:12px;font-weight:800;text-transform:uppercase;color:#4c1d52;">Detalle de Ventas del Día</div>
@@ -717,7 +737,10 @@ export function dtoACierreCaja(dto: CajaDiariaApiDTO): CierreCaja {
 
 export async function apiObtenerCajaActual(): Promise<CajaAbiertaState | null> {
   try {
-    const res = await fetch(`${API_CAJA_BASE}/actual`, { cache: 'no-store' });
+    const res = await fetch(`${API_CAJA_BASE}/actual`, {
+      cache: 'no-store',
+      headers: getAuthHeaders(false),
+    });
     if (!res.ok) return null;
     const dto = (await res.json()) as CajaDiariaApiDTO;
     const caja = dtoACajaAbierta(dto);
@@ -732,7 +755,7 @@ export async function apiActualizarFondo(fondoInicial: number): Promise<CajaAbie
   try {
     const res = await fetch(`${API_CAJA_BASE}/actual/fondo`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(true),
       body: JSON.stringify({ fondoInicial }),
     });
     if (!res.ok) return null;
@@ -749,7 +772,7 @@ export async function apiRegistrarVenta(venta: Omit<VentaTicket, 'id' | 'numeroT
   try {
     const res = await fetch(`${API_CAJA_BASE}/actual/ventas`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(true),
       body: JSON.stringify(venta),
     });
     if (!res.ok) return null;
@@ -772,7 +795,7 @@ export async function apiEditarPagoVenta(
   try {
     const res = await fetch(`${API_CAJA_BASE}/actual/ventas/${numericId}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(true),
       body: JSON.stringify({ totalCobrado, pagos }),
     });
     if (!res.ok) return null;
@@ -794,7 +817,7 @@ export async function apiToggleAnularVenta(
   try {
     const res = await fetch(`${API_CAJA_BASE}/actual/ventas/${numericId}/anular`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(true),
       body: JSON.stringify({ motivo: motivo || 'Anulada por operador' }),
     });
     if (!res.ok) return null;
@@ -813,7 +836,7 @@ export async function apiRegistrarMovimiento(
   try {
     const res = await fetch(`${API_CAJA_BASE}/actual/movimientos`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(true),
       body: JSON.stringify(mov),
     });
     if (!res.ok) return null;
@@ -832,6 +855,7 @@ export async function apiEliminarMovimiento(movId: string): Promise<CajaAbiertaS
   try {
     const res = await fetch(`${API_CAJA_BASE}/actual/movimientos/${numericId}`, {
       method: 'DELETE',
+      headers: getAuthHeaders(false),
     });
     if (!res.ok) return null;
     const dto = (await res.json()) as CajaDiariaApiDTO;
@@ -851,7 +875,7 @@ export async function apiCerrarCaja(payload: {
   try {
     const res = await fetch(`${API_CAJA_BASE}/actual/cerrar`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(true),
       body: JSON.stringify(payload),
     });
     if (!res.ok) return null;
@@ -870,7 +894,10 @@ export async function apiCerrarCaja(payload: {
 
 export async function apiListarHistorialCierres(): Promise<CierreCaja[] | null> {
   try {
-    const res = await fetch(`${API_CAJA_BASE}/historial`, { cache: 'no-store' });
+    const res = await fetch(`${API_CAJA_BASE}/historial`, {
+      cache: 'no-store',
+      headers: getAuthHeaders(false),
+    });
     if (!res.ok) return null;
     const dtos = (await res.json()) as CajaDiariaApiDTO[];
     const cierres = Array.isArray(dtos) ? dtos.map(dtoACierreCaja) : [];
@@ -887,9 +914,48 @@ export async function apiEliminarCierre(cierreId: string): Promise<boolean> {
   try {
     const res = await fetch(`${API_CAJA_BASE}/historial/${numericId}`, {
       method: 'DELETE',
+      headers: getAuthHeaders(false),
     });
     return res.ok;
   } catch {
     return false;
   }
+}
+
+/**
+ * Descarga una copia de seguridad completa en formato JSON desde el servidor
+ * (o desde los datos locales si se está usando sin servidor).
+ */
+export async function apiDescargarBackup(datosLocales?: Record<string, unknown>): Promise<'servidor' | 'local'> {
+  const fecha = obtenerFechaClave();
+  const nombreArchivo = `respaldo-libreria-motivos-${fecha}.json`;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/backups/descargar`, {
+      method: 'GET',
+      headers: getAuthHeaders(false),
+    });
+    if (res.ok) {
+      const jsonText = await res.text();
+      descargarArchivo(jsonText, nombreArchivo, 'application/json;charset=utf-8;');
+      return 'servidor';
+    }
+  } catch {
+    // Fallback local si el servidor no responde
+  }
+
+  const respaldoLocal = {
+    sistema: 'Librería Motivos',
+    origen: 'Respaldo local del navegador',
+    generadoEn: new Date().toISOString(),
+    cajaAbierta: cargarCajaAbierta(),
+    historialCierres: cargarHistorialCierres(),
+    ...(datosLocales || {}),
+  };
+  descargarArchivo(
+    JSON.stringify(respaldoLocal, null, 2),
+    nombreArchivo,
+    'application/json;charset=utf-8;'
+  );
+  return 'local';
 }

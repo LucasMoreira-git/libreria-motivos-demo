@@ -22,6 +22,7 @@ export function AdminLoginForm({ onSuccess }: AdminLoginFormProps) {
   const { login } = useAdmin();
   const [username, setUsername] = useState('admin');
   const [password, setPassword] = useState('');
+  const [honeypot, setHoneypot] = useState('');
   const [mostrarPassword, setMostrarPassword] = useState(false);
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,16 +31,29 @@ export function AdminLoginForm({ onSuccess }: AdminLoginFormProps) {
     e.preventDefault();
     if (cargando) return;
 
+    // Trampa silenciosa anti-bots (campo oculto que solo completan scripts automatizados)
+    if (honeypot.trim() !== '') {
+      setError('No pudimos validar tu solicitud. Intentá nuevamente.');
+      return;
+    }
+
+    if (!username.trim() || !password.trim()) {
+      setError('Ingresá tu usuario y contraseña para continuar.');
+      return;
+    }
+
     setError(null);
     setCargando(true);
 
     try {
-      const res = await login(username, password);
+      const res = await login(username.trim(), password);
       if (res.success) {
         if (onSuccess) onSuccess();
       } else {
-        // Mensaje natural, claro y sin exponer detalles técnicos
-        setError('No pudimos validar tus credenciales. Revisá los datos e intentá nuevamente.');
+        setError(
+          res.error ||
+            'No pudimos validar tus credenciales. Revisá los datos e intentá nuevamente.'
+        );
       }
     } catch {
       setError('No pudimos validar tus credenciales. Revisá los datos e intentá nuevamente.');
@@ -109,6 +123,20 @@ export function AdminLoginForm({ onSuccess }: AdminLoginFormProps) {
 
           {/* Formulario */}
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Campo oculto trampa para bots (honeypot) */}
+            <div className="sr-only" aria-hidden="true">
+              <label htmlFor="website">Sitio web</label>
+              <input
+                id="website"
+                name="website"
+                type="text"
+                tabIndex={-1}
+                autoComplete="off"
+                value={honeypot}
+                onChange={(e) => setHoneypot(e.target.value)}
+              />
+            </div>
+
             <div>
               <label 
                 htmlFor="username" 

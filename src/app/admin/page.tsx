@@ -12,11 +12,15 @@ import {
   Package,
   Tag,
   Clock,
+  ShieldCheck,
+  Download,
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
+import { useAdminFeedback } from '@/context/AdminFeedbackContext';
 import { evaluarAlertasNegocio } from '@/lib/admin-alertas';
 import {
   ResumenCajaEnVivo,
+  apiDescargarBackup,
   apiListarHistorialCierres,
   apiObtenerCajaActual,
   calcularResumenCaja,
@@ -26,9 +30,34 @@ import {
 
 export default function AdminDashboardPage() {
   const { productos, categorias, promociones, horarios } = useAdmin();
+  const { notificar } = useAdminFeedback();
   const [fechaHoy, setFechaHoy] = useState<Date | null>(null);
   const [resumenCaja, setResumenCaja] = useState<ResumenCajaEnVivo | null>(null);
   const [totalCierresGuardados, setTotalCierresGuardados] = useState<number>(0);
+  const [descargandoBackup, setDescargandoBackup] = useState(false);
+
+  const handleDescargarRespaldo = async () => {
+    if (descargandoBackup) return;
+    setDescargandoBackup(true);
+    try {
+      const origen = await apiDescargarBackup({
+        categorias,
+        productos,
+        promociones,
+        horarios,
+      });
+      notificar({
+        tipo: 'exito',
+        titulo: 'Copia de seguridad descargada',
+        mensaje:
+          origen === 'servidor'
+            ? 'Se bajó el respaldo completo de tu base de datos en un archivo seguro.'
+            : 'Se guardó una copia de seguridad local de tu catálogo y caja.',
+      });
+    } finally {
+      setDescargandoBackup(false);
+    }
+  };
 
   useEffect(() => {
     setFechaHoy(new Date());
@@ -257,6 +286,33 @@ export default function AdminDashboardPage() {
           </div>
           <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-emerald-600 group-hover:translate-x-0.5 transition-all shrink-0" />
         </Link>
+      </section>
+
+      {/* 5. Copias de Seguridad Automáticas y Respaldo Manual */}
+      <section className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-2xl bg-purple-50 text-purple-800 border border-purple-200 flex items-center justify-center shrink-0">
+            <ShieldCheck className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="font-heading text-sm sm:text-base font-bold text-slate-900">
+              Copia de Seguridad de tus Datos
+            </h3>
+            <p className="text-xs text-slate-500 mt-0.5">
+              El sistema guarda un respaldo automático cada noche a las 22:00 hs. También podés bajar una copia a tu computadora cuando quieras.
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleDescargarRespaldo}
+          disabled={descargandoBackup}
+          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-purple-50 border border-purple-200 text-purple-950 text-xs font-bold transition-all active:scale-95 shrink-0 min-h-[42px] cursor-pointer disabled:opacity-60"
+        >
+          <Download className="w-3.5 h-3.5 text-[#d97786]" />
+          <span>{descargandoBackup ? 'Preparando respaldo...' : 'Descargar Copia Ahora'}</span>
+        </button>
       </section>
     </div>
   );

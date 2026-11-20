@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { DATOS_LIBRERIA_MOTIVOS } from '@/lib/mock-data';
 import { getGeneralWhatsAppLink, getBroadcastWhatsAppLink } from '@/lib/whatsapp';
 import { 
@@ -254,11 +255,20 @@ export function Footer() {
             </a>
           </div>
 
-          {/* Centro: Slogan Itálico de Marca y Copyright */}
-          <div className="flex flex-col items-center text-center space-y-1">
+          {/* Centro: Slogan Itálico de Marca, Legales y Copyright */}
+          <div className="flex flex-col items-center text-center space-y-1.5">
             <p className="font-heading italic font-semibold text-xs sm:text-sm text-purple-950 tracking-wide">
               LIBRERÍA MOTIVOS — Tradición, Calidad y Calidez Vecinal en Guaymallén
             </p>
+            <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px] font-semibold text-purple-900/80">
+              <Link href="/privacidad" className="hover:text-[#d97786] underline underline-offset-2 transition-colors">
+                Política de Privacidad
+              </Link>
+              <span aria-hidden="true" className="text-purple-300">•</span>
+              <Link href="/terminos" className="hover:text-[#d97786] underline underline-offset-2 transition-colors">
+                Términos y Condiciones
+              </Link>
+            </div>
             <p className="text-[11px] text-slate-500">
               © 2026 Librería Motivos. Todos los derechos reservados. Mendoza, Argentina.
             </p>

@@ -135,6 +135,24 @@ interface AdminContextType {
   restablecerDatos: () => void;
 }
 
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080').replace(/\/$/, '');
+const ES_MODO_DEMO = process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
+
+function obtenerHeadersAdmin(conJson = false, tokenOverride?: string | null): Record<string, string> {
+  const headers: Record<string, string> = {};
+  if (conJson) headers['Content-Type'] = 'application/json';
+  const activeToken =
+    tokenOverride !== undefined
+      ? tokenOverride
+      : typeof window !== 'undefined'
+        ? sessionStorage.getItem('motivos_admin_token')
+        : null;
+  if (activeToken) {
+    headers['X-Admin-Token'] = activeToken;
+  }
+  return headers;
+}
+
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
 
 export function AdminProvider({ children }: { children: React.ReactNode }) {
@@ -151,15 +169,45 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   const [promociones, setPromociones] = useState<PromocionAdmin[]>(PROMOCIONES_INICIALES);
   const [horarios, setHorarios] = useState<HorarioAtencionAdmin[]>(HORARIOS_INICIALES);
 
-  // Función para sincronizar datos reales desde Spring Boot REST API (incluyendo bajas lógicas para el panel)
-  const sincronizarConBackend = async () => {
+  // Función para sincronizar datos reales desde Spring Boot REST API.
+  // Si el visitante NO es administrador, consulta únicamente los endpoints públicos activos.
+  // Si hay sesión de administrador válida, envía X-Admin-Token para consultar también registros ocultos/inactivos.
+  const sincronizarConBackend = async (tokenOverride?: string | null) => {
     try {
-      const [resCat, resProd, resProm, resHor] = await Promise.all([
-        fetch('http://localhost:8080/api/categorias?incluirInactivas=true').then((r) => (r.ok ? r.json() : null)),
-        fetch('http://localhost:8080/api/productos?incluirInactivos=true').then((r) => (r.ok ? r.json() : null)),
-        fetch('http://localhost:8080/api/promociones?incluirInactivas=true').then((r) => (r.ok ? r.json() : null)),
-        fetch('http://localhost:8080/api/horarios?incluirInactivos=true').then((r) => (r.ok ? r.json() : null)),
+      const activeToken =
+        tokenOverride !== undefined
+          ? tokenOverride
+          : typeof window !== 'undefined'
+            ? sessionStorage.getItem('motivos_admin_token')
+            : null;
+      const esAdmin = Boolean(activeToken);
+      const headers = esAdmin ? obtenerHeadersAdmin(false, activeToken) : undefined;
+
+      const qCat = esAdmin ? '?incluirInactivas=true' : '';
+      const qProd = esAdmin ? '?incluirInactivos=true' : '';
+      const qProm = esAdmin ? '?incluirInactivas=true' : '';
+      const qHor = esAdmin ? '?incluirInactivos=true' : '';
+
+      const responses = await Promise.all([
+        fetch(`${API_BASE}/api/categorias${qCat}`, { headers }),
+        fetch(`${API_BASE}/api/productos${qProd}`, { headers }),
+        fetch(`${API_BASE}/api/promociones${qProm}`, { headers }),
+        fetch(`${API_BASE}/api/horarios${qHor}`, { headers }),
       ]);
+
+      // Si el token venció o fue invalidado (401), limpiar sesión y reintentar lectura pública
+      if (esAdmin && responses.some((r) => r.status === 401)) {
+        sessionStorage.removeItem('motivos_admin_token');
+        sessionStorage.removeItem('motivos_admin_user');
+        setToken(null);
+        setAdminUser(null);
+        setIsAuthenticated(false);
+        return sincronizarConBackend(null);
+      }
+
+      const [resCat, resProd, resProm, resHor] = await Promise.all(
+        responses.map((r) => (r.ok ? r.json() : null))
+      );
 
       if (resCat && Array.isArray(resCat) && resCat.length > 0) {
         const catMapeadas: CategoriaAdmin[] = resCat.map((c: any) => ({
@@ -255,7 +303,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   // Carga inicial de localStorage y sessionStorage en cliente
   useEffect(() => {
     try {
-      // 1. Verificar sesión activa de administrador
+      // 1. Verificar sesión activa de administrador contra el servidor si hay token guardado
       const sesionToken = sessionStorage.getItem('motivos_admin_token');
       const sesionUser = sessionStorage.getItem('motivos_admin_user');
       if (sesionToken) {
@@ -268,6 +316,31 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
             setAdminUser({ username: 'admin', nombre: 'Administrador Librería Motivos' });
           }
         }
+
+        // Validar token real en servidor (si el servidor responde que expiró o no es válido, cerrar sesión)
+        fetch(`${API_BASE}/api/admin/auth/validate`, {
+          method: 'POST',
+          headers: { 'X-Admin-Token': sesionToken },
+        })
+          .then(async (res) => {
+            if (!res.ok) {
+              sessionStorage.removeItem('motivos_admin_token');
+              sessionStorage.removeItem('motivos_admin_user');
+              setToken(null);
+              setAdminUser(null);
+              setIsAuthenticated(false);
+            }
+          })
+          .catch(() => {
+            // Si el backend no responde y NO estamos en modo demo, invalidar sesiones no verificadas
+            if (!ES_MODO_DEMO) {
+              sessionStorage.removeItem('motivos_admin_token');
+              sessionStorage.removeItem('motivos_admin_user');
+              setToken(null);
+              setAdminUser(null);
+              setIsAuthenticated(false);
+            }
+          });
       }
 
       // 2. Entidades desde caché local
@@ -327,9 +400,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     setCategorias((prev) => [...prev, nueva]);
 
     if (backendEnLinea) {
-      fetch('http://localhost:8080/api/categorias', {
+      fetch(`${API_BASE}/api/categorias`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: obtenerHeadersAdmin(true),
         body: JSON.stringify({
           codTC: `CAT-${Date.now().toString().slice(-4)}`,
           nombreTC: data.nombreCategoria,
@@ -352,9 +425,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     if (backendEnLinea) {
       const numId = Number(categoria.idCategoria.replace(/\D/g, ''));
       if (!isNaN(numId) && numId > 0) {
-        fetch(`http://localhost:8080/api/categorias/${numId}`, {
+        fetch(`${API_BASE}/api/categorias/${numId}`, {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers: obtenerHeadersAdmin(true),
           body: JSON.stringify({
             nombreTC: categoria.nombreCategoria,
             slugCategoria: categoria.slugCategoria,
@@ -382,8 +455,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     if (backendEnLinea) {
       const numId = Number(idCategoria.replace(/\D/g, ''));
       if (!isNaN(numId) && numId > 0) {
-        fetch(`http://localhost:8080/api/categorias/${numId}`, {
+        fetch(`${API_BASE}/api/categorias/${numId}`, {
           method: 'DELETE',
+          headers: obtenerHeadersAdmin(false),
         })
           .then(() => sincronizarConBackend())
           .catch(() => {});
@@ -403,8 +477,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     if (backendEnLinea) {
       const numId = Number(idCategoria.replace(/\D/g, ''));
       if (!isNaN(numId) && numId > 0) {
-        fetch(`http://localhost:8080/api/categorias/${numId}/reactivar`, {
+        fetch(`${API_BASE}/api/categorias/${numId}/reactivar`, {
           method: 'PATCH',
+          headers: obtenerHeadersAdmin(false),
         })
           .then(() => sincronizarConBackend())
           .catch(() => {});
@@ -435,12 +510,12 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     if (backendEnLinea) {
       const tipoCatId = Number(data.categoriaId) || (cat ? Number(cat.idCategoria) : 1);
       const urlPost = !isNaN(tipoCatId) && tipoCatId > 0 
-        ? `http://localhost:8080/api/productos?categoriaId=${tipoCatId}` 
-        : 'http://localhost:8080/api/productos';
+        ? `${API_BASE}/api/productos?categoriaId=${tipoCatId}` 
+        : `${API_BASE}/api/productos`;
 
       fetch(urlPost, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: obtenerHeadersAdmin(true),
         body: JSON.stringify({
           codigoProducto: `PROD-${Date.now().toString().slice(-4)}`,
           nombreProducto: data.nombreProducto,
@@ -488,12 +563,12 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       if (!isNaN(numId) && numId > 0) {
         const tipoCatId = Number(producto.categoriaId) || (cat ? Number(cat.idCategoria) : 1);
         const urlPut = !isNaN(tipoCatId) && tipoCatId > 0 
-          ? `http://localhost:8080/api/productos/${numId}?categoriaId=${tipoCatId}` 
-          : `http://localhost:8080/api/productos/${numId}`;
+          ? `${API_BASE}/api/productos/${numId}?categoriaId=${tipoCatId}` 
+          : `${API_BASE}/api/productos/${numId}`;
 
         fetch(urlPut, {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers: obtenerHeadersAdmin(true),
           body: JSON.stringify({
             nombreProducto: producto.nombreProducto,
             precioProducto: producto.precioProducto,
@@ -529,8 +604,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     if (backendEnLinea) {
       const numId = Number(idProducto.replace(/\D/g, ''));
       if (!isNaN(numId) && numId > 0) {
-        fetch(`http://localhost:8080/api/productos/${numId}`, {
+        fetch(`${API_BASE}/api/productos/${numId}`, {
           method: 'DELETE',
+          headers: obtenerHeadersAdmin(false),
         })
           .then(() => sincronizarConBackend())
           .catch(() => {});
@@ -550,8 +626,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     if (backendEnLinea) {
       const numId = Number(idProducto.replace(/\D/g, ''));
       if (!isNaN(numId) && numId > 0) {
-        fetch(`http://localhost:8080/api/productos/${numId}/reactivar`, {
+        fetch(`${API_BASE}/api/productos/${numId}/reactivar`, {
           method: 'PATCH',
+          headers: obtenerHeadersAdmin(false),
         })
           .then(() => sincronizarConBackend())
           .catch(() => {});
@@ -577,9 +654,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     setPromociones((prev) => [nueva, ...prev]);
 
     if (backendEnLinea) {
-      fetch('http://localhost:8080/api/promociones', {
+      fetch(`${API_BASE}/api/promociones`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: obtenerHeadersAdmin(true),
         body: JSON.stringify({
           codPromocion: `PROMO-${Date.now().toString().slice(-4)}`,
           nombrePromocion: data.nombrePromocion,
@@ -621,9 +698,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     if (backendEnLinea) {
       const numId = Number(promocion.idPromocion.replace(/\D/g, ''));
       if (!isNaN(numId) && numId > 0) {
-        fetch(`http://localhost:8080/api/promociones/${numId}`, {
+        fetch(`${API_BASE}/api/promociones/${numId}`, {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers: obtenerHeadersAdmin(true),
           body: JSON.stringify({
             nombrePromocion: promocion.nombrePromocion,
             detallePromocion: promocion.detallePromocion,
@@ -656,8 +733,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     if (backendEnLinea) {
       const numId = Number(idPromocion.replace(/\D/g, ''));
       if (!isNaN(numId) && numId > 0) {
-        fetch(`http://localhost:8080/api/promociones/${numId}`, {
+        fetch(`${API_BASE}/api/promociones/${numId}`, {
           method: 'DELETE',
+          headers: obtenerHeadersAdmin(false),
         })
           .then(() => sincronizarConBackend())
           .catch(() => {});
@@ -677,8 +755,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     if (backendEnLinea) {
       const numId = Number(idPromocion.replace(/\D/g, ''));
       if (!isNaN(numId) && numId > 0) {
-        fetch(`http://localhost:8080/api/promociones/${numId}/reactivar`, {
+        fetch(`${API_BASE}/api/promociones/${numId}/reactivar`, {
           method: 'PATCH',
+          headers: obtenerHeadersAdmin(false),
         })
           .then(() => sincronizarConBackend())
           .catch(() => {});
@@ -698,9 +777,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     setHorarios((prev) => [...prev, nuevo]);
 
     if (backendEnLinea) {
-      fetch('http://localhost:8080/api/horarios', {
+      fetch(`${API_BASE}/api/horarios`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: obtenerHeadersAdmin(true),
         body: JSON.stringify({
           codHA: `HA-${Date.now().toString().slice(-4)}`,
           nombreTurnoHA: data.nombreTurnoHA,
@@ -730,9 +809,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     if (backendEnLinea) {
       const numId = Number(horario.idHorarioAtencion.replace(/\D/g, ''));
       if (!isNaN(numId) && numId > 0) {
-        fetch(`http://localhost:8080/api/horarios/${numId}`, {
+        fetch(`${API_BASE}/api/horarios/${numId}`, {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers: obtenerHeadersAdmin(true),
           body: JSON.stringify({
             nombreTurnoHA: horario.nombreTurnoHA,
             diasTextoHA: horario.diasTextoHA,
@@ -761,8 +840,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     if (backendEnLinea) {
       const numId = Number(idHorarioAtencion.replace(/\D/g, ''));
       if (!isNaN(numId) && numId > 0) {
-        fetch(`http://localhost:8080/api/horarios/${numId}`, {
+        fetch(`${API_BASE}/api/horarios/${numId}`, {
           method: 'DELETE',
+          headers: obtenerHeadersAdmin(false),
         })
           .then(() => sincronizarConBackend())
           .catch(() => {});
@@ -782,8 +862,9 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     if (backendEnLinea) {
       const numId = Number(idHorarioAtencion.replace(/\D/g, ''));
       if (!isNaN(numId) && numId > 0) {
-        fetch(`http://localhost:8080/api/horarios/${numId}/reactivar`, {
+        fetch(`${API_BASE}/api/horarios/${numId}/reactivar`, {
           method: 'PATCH',
+          headers: obtenerHeadersAdmin(false),
         })
           .then(() => sincronizarConBackend())
           .catch(() => {});
@@ -804,77 +885,76 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     } catch {}
   };
 
-  // Autenticación de Administrador (Conecta con Spring Boot o fallback seguro de contingencia)
+  // Autenticación de Administrador (exclusivamente contra el servidor, sin contraseñas en el navegador)
   const login = async (
     username: string,
     password: string
   ): Promise<{ success: boolean; error?: string }> => {
     try {
-      const res = await fetch('http://localhost:8080/api/admin/auth/login', {
+      const res = await fetch(`${API_BASE}/api/admin/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        if (data.autenticado) {
-          const userObj = {
-            username: data.username || username,
-            nombre: data.nombre || 'Administrador Librería Motivos',
-          };
-          const authToken = data.token || `token-${Date.now()}`;
+      const data = await res.json().catch(() => ({}));
 
-          setToken(authToken);
-          setAdminUser(userObj);
-          setIsAuthenticated(true);
-
-          sessionStorage.setItem('motivos_admin_token', authToken);
-          sessionStorage.setItem('motivos_admin_user', JSON.stringify(userObj));
-          return { success: true };
-        } else {
-          return {
-            success: false,
-            error: data.mensaje || 'Credenciales incorrectas.',
-          };
-        }
-      } else {
-        const data = await res.json().catch(() => ({}));
-        return {
-          success: false,
-          error: data.mensaje || 'Usuario o contraseña no válidos.',
-        };
-      }
-    } catch {
-      // Contingencia local si el backend Spring Boot no está levantado
-      if (
-        username.trim().toLowerCase() === 'admin' &&
-        password.trim() === 'motivosAdministrador2026!'
-      ) {
+      if (res.ok && data.autenticado && data.token) {
         const userObj = {
-          username: 'admin',
-          nombre: 'Administrador Librería Motivos',
+          username: data.username || username,
+          nombre: data.nombre || 'Administrador Librería Motivos',
         };
-        const fallbackToken = `token-local-${Date.now()}`;
+        const authToken = String(data.token);
 
-        setToken(fallbackToken);
+        setToken(authToken);
         setAdminUser(userObj);
         setIsAuthenticated(true);
 
-        sessionStorage.setItem('motivos_admin_token', fallbackToken);
+        sessionStorage.setItem('motivos_admin_token', authToken);
+        sessionStorage.setItem('motivos_admin_user', JSON.stringify(userObj));
+
+        // Recargar vista completa de administrador (incluye ocultos e inactivos)
+        sincronizarConBackend(authToken).catch(() => {});
+        return { success: true };
+      }
+
+      return {
+        success: false,
+        error:
+          data.mensaje ||
+          (res.status === 429
+            ? 'Demasiados intentos fallidos. Esperá 15 minutos antes de volver a intentar.'
+            : 'Usuario o contraseña incorrectos.'),
+      };
+    } catch {
+      // Solo disponible cuando se despliega explícitamente en modo demo estático sin backend
+      if (ES_MODO_DEMO && username.trim().toLowerCase() === 'demo' && password.trim() === 'demo') {
+        const userObj = {
+          username: 'demo',
+          nombre: 'Modo Demostración',
+        };
+        const demoToken = `demo-session-${Date.now()}`;
+
+        setToken(demoToken);
+        setAdminUser(userObj);
+        setIsAuthenticated(true);
+
+        sessionStorage.setItem('motivos_admin_token', demoToken);
         sessionStorage.setItem('motivos_admin_user', JSON.stringify(userObj));
         return { success: true };
       }
+
       return {
         success: false,
-        error: 'Credenciales inválidas. Compruebe el usuario y contraseña del sistema.',
+        error:
+          'No pudimos conectar con el servidor de autenticación. Verificá que el sistema esté en línea e intentá de nuevo.',
       };
     }
   };
 
   const logout = () => {
     if (token) {
-      fetch('http://localhost:8080/api/admin/auth/logout', {
+      fetch(`${API_BASE}/api/admin/auth/logout`, {
         method: 'POST',
         headers: { 'X-Admin-Token': token },
       }).catch(() => {});
@@ -884,6 +964,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     setIsAuthenticated(false);
     sessionStorage.removeItem('motivos_admin_token');
     sessionStorage.removeItem('motivos_admin_user');
+    sincronizarConBackend(null).catch(() => {});
   };
 
   return (
