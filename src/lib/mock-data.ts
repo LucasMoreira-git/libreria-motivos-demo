@@ -88,9 +88,9 @@ export const DATOS_LIBRERIA_MOTIVOS: DatosNegocio = {
   direccion: 'Juan Carlos Lucero M-D-C44, M5521 Guaymallén, Mendoza, Argentina',
   direccionCompleta: 'Juan Carlos Lucero M-D-C44, M5521 Guaymallén, Mendoza, Argentina',
   telefonoWhatsApp: '02615635813', // Mendoza: 0261 563-5813 -> Internacional: +54 9 261 563-5813
-  googleMapsUrl: 'https://www.google.com/maps/search/?api=1&query=-32.919722,-68.792417',
-  googleMapsEmbedUrl: 'https://maps.google.com/maps?q=-32.919722,-68.792417&ll=-32.919722,-68.792417&z=17&hl=es&output=embed',
-  googleReviewsUrl: 'https://maps.google.com/?q=Libreria+Motivos+Guaymallen+Mendoza#reviews',
+  googleMapsUrl: 'https://maps.app.goo.gl/2zK93jiRrQ9iUK3f6',
+  googleMapsEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3349.1845502107517!2d-68.792417!3d-32.91972200000001!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x967e0d37ec42f4e1%3A0xd725a9af62ef59ee!2sLibrer%C3%ADa%20Motivos!5e0!3m2!1ses!2sar!4v1795148038449!5m2!1ses!2sar',
+  googleReviewsUrl: 'https://maps.app.goo.gl/2zK93jiRrQ9iUK3f6',
   instagramUrl: 'https://www.instagram.com/motivos.regalos_/',
   mensajePredeterminadoWA:
     '¡Hola Librería Motivos! 👋 Visité su vitrina web y quisiera hacerles una consulta.',
