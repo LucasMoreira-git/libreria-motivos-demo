@@ -85,7 +85,7 @@ export default function ProductosAdminPage() {
   // Estados de filtrado
   const [busqueda, setBusqueda] = useState('');
   const [categoriaFiltro, setCategoriaFiltro] = useState('todas');
-  const [estadoFiltro, setEstadoFiltro] = useState<'todos' | 'visibles' | 'ocultos'>('todos');
+  const [estadoFiltro, setEstadoFiltro] = useState<'todos' | 'visibles' | 'mostrador' | 'ocultos'>('todos');
 
   // Estados del Formulario (Alta / Modificación)
   const [modalAbierto, setModalAbierto] = useState(false);
@@ -99,6 +99,7 @@ export default function ProductosAdminPage() {
   const [categoriaId, setCategoriaId] = useState('');
   const [fotoProducto, setFotoProducto] = useState('');
   const [mostrarUrlExterna, setMostrarUrlExterna] = useState(false);
+  const [visibleEnVitrina, setVisibleEnVitrina] = useState(true);
 
   // 4 Opciones Visuales de Vitrina
   const [destacadoProducto, setDestacadoProducto] = useState(false);
@@ -129,6 +130,7 @@ export default function ProductosAdminPage() {
     setCategoriaId(categorias[0]?.idCategoria || '1');
     setFotoProducto('');
     setMostrarUrlExterna(false);
+    setVisibleEnVitrina(true);
     setAvisoFormatoFoto(null);
     setDestacadoProducto(false);
     setEnOfertaProducto(false);
@@ -159,6 +161,7 @@ export default function ProductosAdminPage() {
           !prod.fotoProducto.startsWith('data:image')
       )
     );
+    setVisibleEnVitrina(prod.visibleEnVitrina !== false);
     setAvisoFormatoFoto(null);
     setDestacadoProducto(!!prod.destacadoProducto);
     setEnOfertaProducto(!!prod.enOfertaProducto);
@@ -294,12 +297,15 @@ export default function ProductosAdminPage() {
         nuevoIngresoProducto,
         iconoProducto: iconoProducto.trim() || null,
         badgeProducto: badgeProducto.trim() || null,
+        visibleEnVitrina,
         fechaHoraBajaProducto: prodOriginal?.fechaHoraBajaProducto || null,
       });
       notificar({
         tipo: 'exito',
         titulo: 'Producto actualizado',
-        mensaje: `Se guardaron los cambios de "${nombreProducto.trim()}".`,
+        mensaje: visibleEnVitrina
+          ? `Se guardaron los cambios de "${nombreProducto.trim()}".`
+          : `"${nombreProducto.trim()}" quedó guardado solo para cobrar en Caja (oculto en la web).`,
       });
     } else {
       crearProducto({
@@ -316,11 +322,14 @@ export default function ProductosAdminPage() {
         nuevoIngresoProducto,
         iconoProducto: iconoProducto.trim() || null,
         badgeProducto: badgeProducto.trim() || null,
+        visibleEnVitrina,
       });
       notificar({
         tipo: 'exito',
-        titulo: 'Producto publicado',
-        mensaje: `"${nombreProducto.trim()}" ya aparece en el catálogo de tu página.`,
+        titulo: visibleEnVitrina ? 'Producto publicado' : 'Producto cargado para Caja',
+        mensaje: visibleEnVitrina
+          ? `"${nombreProducto.trim()}" ya aparece en el catálogo de tu página.`
+          : `"${nombreProducto.trim()}" quedó listo para buscar en Caja (no se muestra en la vitrina web).`,
       });
     }
 
@@ -365,7 +374,8 @@ export default function ProductosAdminPage() {
 
   // Filtrado de la tabla
   const productosFiltrados = productos.filter((p) => {
-    if (estadoFiltro === 'visibles' && p.fechaHoraBajaProducto) return false;
+    if (estadoFiltro === 'visibles' && (p.fechaHoraBajaProducto || p.visibleEnVitrina === false)) return false;
+    if (estadoFiltro === 'mostrador' && (p.fechaHoraBajaProducto || p.visibleEnVitrina !== false)) return false;
     if (estadoFiltro === 'ocultos' && !p.fechaHoraBajaProducto) return false;
     if (categoriaFiltro !== 'todas' && p.categoriaId !== categoriaFiltro) return false;
 
@@ -463,7 +473,16 @@ export default function ProductosAdminPage() {
                 estadoFiltro === 'visibles' ? 'bg-white text-emerald-700 shadow-2xs' : 'text-slate-500 hover:text-slate-900'
               }`}
             >
-              Visibles
+              En web
+            </button>
+            <button
+              type="button"
+              onClick={() => setEstadoFiltro('mostrador')}
+              className={`px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
+                estadoFiltro === 'mostrador' ? 'bg-white text-amber-800 shadow-2xs' : 'text-slate-500 hover:text-slate-900'
+              }`}
+            >
+              Solo mostrador
             </button>
             <button
               type="button"
@@ -596,11 +615,15 @@ export default function ProductosAdminPage() {
                         </div>
                       </td>
 
-                      {/* Estado con Marca Temporal de Baja Lógica */}
+                      {/* Visibilidad (Web, Solo mostrador o Dado de baja) */}
                       <td className="py-3 px-4">
                         {estaDadoDeBaja ? (
                           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
-                            Oculto
+                            Oculto (baja)
+                          </span>
+                        ) : prod.visibleEnVitrina === false ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                            Solo mostrador (Caja)
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
@@ -772,6 +795,43 @@ export default function ProductosAdminPage() {
                     </select>
                   </div>
                 </div>
+
+                {/* Visibilidad en Vitrina Web vs Solo Mostrador (Caja) */}
+                <label
+                  className={`flex items-start gap-3 p-3.5 rounded-2xl border-2 cursor-pointer transition-all ${
+                    visibleEnVitrina
+                      ? 'bg-emerald-50/50 border-emerald-200 hover:border-emerald-300'
+                      : 'bg-amber-50/70 border-amber-300 hover:border-amber-400'
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={visibleEnVitrina}
+                    onChange={(e) => setVisibleEnVitrina(e.target.checked)}
+                    className="mt-0.5 rounded text-emerald-600 focus:ring-emerald-500 w-4.5 h-4.5 cursor-pointer shrink-0"
+                  />
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-bold text-xs sm:text-sm text-slate-900">
+                        Mostrar en la vitrina pública (página web)
+                      </span>
+                      <span
+                        className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full border ${
+                          visibleEnVitrina
+                            ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                            : 'bg-amber-100 text-amber-900 border-amber-300'
+                        }`}
+                      >
+                        {visibleEnVitrina ? 'Visible en web + Caja' : 'Solo mostrador (Caja)'}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-600 mt-0.5 leading-relaxed">
+                      {visibleEnVitrina
+                        ? 'Tus clientes verán este artículo en la página web y también podrás cobrarlo rápido en Caja.'
+                        : 'Desmarcado: NO aparece en la página web, pero queda guardado con su precio para cobrarlo rápido en Caja (ideal para artículos chicos como Minas 0.5, gomas o folios).'}
+                    </p>
+                  </div>
+                </label>
 
                 {/* Subida de Imagen Real (Foto desde Cámara / Archivo) */}
                 <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">

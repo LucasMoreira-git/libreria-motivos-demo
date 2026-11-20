@@ -906,9 +906,16 @@ export function CajaHoyPanel({
                             }`}
                           />
                           <div className="min-w-0 flex-1">
-                            <p className="font-heading text-xs font-bold text-slate-900 truncate">
-                              {prod.nombreProducto}
-                            </p>
+                            <div className="flex items-center gap-1.5">
+                              <p className="font-heading text-xs font-bold text-slate-900 truncate">
+                                {prod.nombreProducto}
+                              </p>
+                              {prod.visibleEnVitrina === false && (
+                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200 shrink-0">
+                                  Solo mostrador
+                                </span>
+                              )}
+                            </div>
                             <p className="text-[11px] text-slate-500 truncate">
                               {prod.categoriaNombre ? `${prod.categoriaNombre} • ` : ''}
                               {prod.detalleProducto}

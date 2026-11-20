@@ -27,10 +27,10 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
-  // Mapeo dinámico y reactivo del catálogo en vivo (excluyendo bajas lógicas)
+  // Mapeo dinámico y reactivo del catálogo en vivo (excluyendo bajas lógicas y productos «Solo mostrador»)
   const productosActivos: Producto[] = useMemo(() => {
     return productos
-      .filter((p) => !p.fechaHoraBajaProducto)
+      .filter((p) => !p.fechaHoraBajaProducto && p.visibleEnVitrina !== false)
       .map((p) => {
         // Verificar si el descuento sigue vigente por fecha
         const fechaFin = p.fechaFinDescuento ? new Date(p.fechaFinDescuento).getTime() : null;

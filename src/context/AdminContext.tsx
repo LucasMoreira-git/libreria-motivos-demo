@@ -33,6 +33,7 @@ const PRODUCTOS_INICIALES: ProductoAdmin[] = PRODUCTOS_MOCK.map((p) => ({
   destacadoProducto: !!p.destacado,
   enOfertaProducto: !!p.enOferta,
   badgeProducto: p.badge || null,
+  visibleEnVitrina: true,
   fechaHoraBajaProducto: null,
 }));
 
@@ -195,6 +196,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           nuevoIngresoProducto: !!p.nuevoIngresoProducto,
           iconoProducto: p.iconoProducto || null,
           badgeProducto: p.badgeProducto || null,
+          visibleEnVitrina: p.visibleEnVitrina !== false,
           fechaHoraBajaProducto: p.fechaHoraBajaProducto 
             ? formatearTimestampBaja(p.fechaHoraBajaProducto) 
             : (p.activo === false ? 'Baja lógica' : null),
@@ -419,6 +421,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     const nuevo: ProductoAdmin = {
       ...data,
       fotoProducto: fotoNormalizada,
+      visibleEnVitrina: data.visibleEnVitrina !== false,
       idProducto: nuevoId,
       codTC: data.codTC !== undefined ? data.codTC : data.categoriaId,
       categoriaNombre: cat ? cat.nombreCategoria : '',
@@ -452,6 +455,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           nuevoIngresoProducto: data.nuevoIngresoProducto ?? false,
           iconoProducto: data.iconoProducto || null,
           badgeProducto: data.badgeProducto,
+          visibleEnVitrina: data.visibleEnVitrina !== false,
         }),
       })
         .then(() => sincronizarConBackend())
@@ -469,6 +473,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           ? { 
               ...producto, 
               fotoProducto: fotoNormalizada,
+              visibleEnVitrina: producto.visibleEnVitrina !== false,
               codTC: producto.codTC !== undefined ? producto.codTC : producto.categoriaId,
               categoriaNombre: cat ? cat.nombreCategoria : p.categoriaNombre,
               tieneDescuentoVigente: tieneDesc,
@@ -502,6 +507,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
             nuevoIngresoProducto: producto.nuevoIngresoProducto ?? false,
             iconoProducto: producto.iconoProducto || null,
             badgeProducto: producto.badgeProducto,
+            visibleEnVitrina: producto.visibleEnVitrina !== false,
           }),
         })
           .then(() => sincronizarConBackend())
