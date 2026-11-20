@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { AdminProvider, useAdmin } from '@/context/AdminContext';
+import { usePathname } from 'next/navigation';
+import { useAdmin } from '@/context/AdminContext';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { AdminNavbar } from '@/components/admin/AdminNavbar';
 import { AdminLoginForm } from '@/components/admin/AdminLoginForm';
@@ -10,6 +11,7 @@ import { X } from 'lucide-react';
 
 function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAdmin();
+  const pathname = usePathname();
   const [sidebarMovilAbierta, setSidebarMovilAbierta] = useState(false);
 
   // Si no está autenticado, conecta directamente la vista de Login en /admin
@@ -58,7 +60,9 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
         <AdminNavbar onToggleSidebarMovil={() => setSidebarMovilAbierta(true)} />
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
-          {children}
+          <div key={pathname} className="animate-in fade-in duration-200">
+            {children}
+          </div>
         </main>
       </div>
 

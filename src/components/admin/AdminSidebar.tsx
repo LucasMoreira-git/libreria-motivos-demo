@@ -14,7 +14,8 @@ import {
   ExternalLink, 
   ShieldCheck,
   Store,
-  LogOut
+  LogOut,
+  Loader2
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { evaluarAlertasNegocio } from '@/lib/admin-alertas';
@@ -29,6 +30,12 @@ export function AdminSidebar({ onCerrarMovil }: AdminSidebarProps) {
   const { productos, categorias, promociones, horarios, logout, adminUser } = useAdmin();
   const [fechaHoy, setFechaHoy] = useState<Date | null>(null);
   const [ventasHoyCount, setVentasHoyCount] = useState<number>(0);
+  const [navegandoHacia, setNavegandoHacia] = useState<string | null>(null);
+
+  // Limpiar indicador de carga en cuanto cambia la ruta
+  useEffect(() => {
+    setNavegandoHacia(null);
+  }, [pathname]);
 
   useEffect(() => {
     setFechaHoy(new Date());
@@ -166,27 +173,38 @@ export function AdminSidebar({ onCerrarMovil }: AdminSidebarProps) {
 
         {NAV_ITEMS.map((item) => {
           const esActivo = pathname === item.href;
+          const estaCargandoEste = navegandoHacia === item.href && !esActivo;
           const Icono = item.icono;
 
           return (
             <Link
               key={item.href}
               href={item.href}
-              onClick={onCerrarMovil}
+              prefetch={true}
+              onClick={() => {
+                if (!esActivo) setNavegandoHacia(item.href);
+                if (onCerrarMovil) onCerrarMovil();
+              }}
               className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 group active:scale-98 ${
                 esActivo
                   ? 'bg-[#ede4f6] text-purple-950 font-bold shadow-2xs border-l-4 border-[#d97786]'
-                  : 'text-slate-600 hover:text-purple-950 hover:bg-[#fbf7fd]'
+                  : estaCargandoEste
+                    ? 'bg-[#f6effb] text-purple-950 font-bold border-l-4 border-[#d97786]/60'
+                    : 'text-slate-600 hover:text-purple-950 hover:bg-[#fbf7fd]'
               }`}
             >
               <div className="flex items-center gap-3">
-                <Icono className={`w-4 h-4 shrink-0 transition-colors ${
-                  esActivo
-                    ? 'text-[#d97786]'
-                    : item.esAlerta && (item.badge ?? 0) > 0
-                      ? 'text-amber-500'
-                      : 'text-slate-400 group-hover:text-purple-700'
-                }`} />
+                {estaCargandoEste ? (
+                  <Loader2 className="w-4 h-4 shrink-0 text-[#d97786] animate-spin" />
+                ) : (
+                  <Icono className={`w-4 h-4 shrink-0 transition-colors ${
+                    esActivo
+                      ? 'text-[#d97786]'
+                      : item.esAlerta && (item.badge ?? 0) > 0
+                        ? 'text-amber-500'
+                        : 'text-slate-400 group-hover:text-purple-700'
+                  }`} />
+                )}
                 <span>{item.titulo}</span>
               </div>
 
