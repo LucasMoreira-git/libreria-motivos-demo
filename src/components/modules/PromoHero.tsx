@@ -193,7 +193,7 @@ export function PromoHero({ promociones = PROMOCIONES_MOCK }: PromoHeroProps) {
           {/* COLUMNA DERECHA: Foto Representativa del Combo */}
           <div
             className={`relative w-full h-[220px] sm:h-[280px] md:h-[320px] lg:h-[350px] rounded-2xl lg:rounded-3xl overflow-hidden shadow-md border-2 border-white/80 group ${
-              esLogoPorDefecto ? 'bg-[#fdfbf7]' : ''
+              esLogoPorDefecto ? 'bg-[#fdfbf7]' : 'bg-white'
             }`}
           >
             <img
@@ -201,7 +201,9 @@ export function PromoHero({ promociones = PROMOCIONES_MOCK }: PromoHeroProps) {
               alt={promoActual.nombre}
               loading="lazy"
               className={`w-full h-full object-center group-hover:scale-105 transition-transform duration-500 ease-out ${
-                esLogoPorDefecto ? 'object-contain p-5' : 'object-cover'
+                esLogoPorDefecto || fotoCombo.startsWith('/images/productos/')
+                  ? 'object-contain p-4'
+                  : 'object-cover'
               }`}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent flex items-end p-4">

@@ -158,16 +158,14 @@ export function ProductModal({ producto, onCerrar }: ProductModalProps) {
       >
         {/* Columna Izquierda: Foto del Producto */}
         <div
-          className={`md:col-span-5 relative w-full h-56 sm:h-64 md:h-auto md:min-h-[380px] overflow-hidden flex items-center justify-center shrink-0 ${
-            esLogoPorDefecto ? 'bg-[#fdfbf7]' : 'bg-slate-100'
+          className={`md:col-span-5 relative w-full h-56 sm:h-64 md:h-auto md:min-h-[380px] overflow-hidden flex items-center justify-center shrink-0 border-b md:border-b-0 md:border-r border-slate-100 ${
+            esLogoPorDefecto ? 'bg-[#fdfbf7]' : 'bg-white'
           }`}
         >
           <img
             src={urlFoto}
             alt={producto.nombre}
-            className={`w-full h-full object-center ${
-              esLogoPorDefecto ? 'object-contain p-5' : 'object-cover'
-            }`}
+            className="w-full h-full object-contain object-center p-5"
           />
 
           {/* Botón Cerrar en Móvil */}

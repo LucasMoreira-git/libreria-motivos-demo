@@ -33,7 +33,7 @@ const PRODUCTOS_INICIALES: ProductoAdmin[] = PRODUCTOS_MOCK.map((p) => ({
   destacadoProducto: !!p.destacado,
   enOfertaProducto: !!p.enOferta,
   badgeProducto: p.badge || null,
-  visibleEnVitrina: true,
+  visibleEnVitrina: p.visibleEnVitrina !== false,
   fechaHoraBajaProducto: null,
 }));
 
@@ -343,18 +343,32 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           });
       }
 
-      // 2. Entidades desde caché local
-      const catGuardadas = localStorage.getItem('motivos_admin_categorias');
-      if (catGuardadas) setCategorias(JSON.parse(catGuardadas));
+      // 2. Verificar versión de reseteo final del catálogo (limpia datos de prueba viejos del navegador)
+      const CATALOG_SEED_VERSION = '2026-11-real-catalog-reset-v1';
+      const versionGuardada = localStorage.getItem('motivos_catalog_seed_version');
+      if (versionGuardada !== CATALOG_SEED_VERSION) {
+        localStorage.removeItem('motivos_admin_categorias');
+        localStorage.removeItem('motivos_admin_productos');
+        localStorage.removeItem('motivos_admin_promociones');
+        localStorage.removeItem('motivos_admin_horarios');
+        localStorage.removeItem('motivos_caja_abierta_v2');
+        localStorage.removeItem('motivos_caja_historial_v2');
+        localStorage.removeItem('motivos_caja_diaria_v1');
+        localStorage.setItem('motivos_catalog_seed_version', CATALOG_SEED_VERSION);
+      } else {
+        // Entidades desde caché local
+        const catGuardadas = localStorage.getItem('motivos_admin_categorias');
+        if (catGuardadas) setCategorias(JSON.parse(catGuardadas));
 
-      const prodGuardados = localStorage.getItem('motivos_admin_productos');
-      if (prodGuardados) setProductos(JSON.parse(prodGuardados));
+        const prodGuardados = localStorage.getItem('motivos_admin_productos');
+        if (prodGuardados) setProductos(JSON.parse(prodGuardados));
 
-      const promoGuardadas = localStorage.getItem('motivos_admin_promociones');
-      if (promoGuardadas) setPromociones(JSON.parse(promoGuardadas));
+        const promoGuardadas = localStorage.getItem('motivos_admin_promociones');
+        if (promoGuardadas) setPromociones(JSON.parse(promoGuardadas));
 
-      const horGuardados = localStorage.getItem('motivos_admin_horarios');
-      if (horGuardados) setHorarios(JSON.parse(horGuardados));
+        const horGuardados = localStorage.getItem('motivos_admin_horarios');
+        if (horGuardados) setHorarios(JSON.parse(horGuardados));
+      }
 
       // 3. Consultar backend Spring Boot si está activo
       sincronizarConBackend();

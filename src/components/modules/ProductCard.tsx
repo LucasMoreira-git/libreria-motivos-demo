@@ -188,17 +188,15 @@ export function ProductCard({
       >
         {/* Contenedor de Imagen */}
         <div
-          className={`relative w-full h-[200px] sm:h-[220px] lg:h-[245px] overflow-hidden shrink-0 ${
-            esLogoPorDefecto ? 'bg-[#fdfbf7]' : 'bg-slate-100'
+          className={`relative w-full h-[200px] sm:h-[220px] lg:h-[245px] overflow-hidden shrink-0 border-b border-slate-100 ${
+            esLogoPorDefecto ? 'bg-[#fdfbf7]' : 'bg-white'
           }`}
         >
           <img
             src={urlFoto}
             alt={producto.nombre}
             loading="lazy"
-            className={`w-full h-full object-center group-hover:scale-105 transition-transform duration-300 ease-out select-none ${
-              esLogoPorDefecto ? 'object-contain p-3' : 'object-cover'
-            }`}
+            className="w-full h-full object-contain object-center p-3 group-hover:scale-105 transition-transform duration-300 ease-out select-none"
           />
 
           {/* Única etiqueta destacada en esquina superior derecha */}

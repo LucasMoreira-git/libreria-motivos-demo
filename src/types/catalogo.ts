@@ -36,6 +36,7 @@ export interface Producto {
   precioAnterior?: number;
   badge?: string | null; // Badges absolutos superpuestos
   badgeProducto?: string | null;
+  visibleEnVitrina?: boolean;
 }
 
 export interface Promocion {
