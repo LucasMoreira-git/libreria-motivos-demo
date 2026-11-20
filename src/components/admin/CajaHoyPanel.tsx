@@ -1103,78 +1103,99 @@ export function CajaHoyPanel({
           )}
         </div>
 
-        {/* Forma de Pago (4 canales + Pago Mixto corregido + Recargo + Vuelto con solo "Exacto") */}
+        {/* Forma de Pago: 5 opciones claras y bien diferenciadas (4 canales + Pago Mixto destacado) */}
         <div className="space-y-3.5">
-          <div className="flex items-center justify-between gap-2">
-            <label className="text-xs font-bold text-slate-700">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+            <label className="text-xs sm:text-sm font-extrabold text-purple-950">
               ¿Cómo paga el cliente?
             </label>
+            <span className="text-[11px] text-slate-500">
+              Elegí un medio de pago o tocá <strong>Pago Mixto</strong> para dividir entre dos.
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
+            {CONFIG_MEDIOS.map((mp) => {
+              const Icono = mp.icono;
+              const activo = !esPagoMixto && medioPrincipal === mp.id;
+              return (
+                <button
+                  key={mp.id}
+                  type="button"
+                  onClick={() => {
+                    setEsPagoMixto(false);
+                    setMedioPrincipal(mp.id);
+                    setMontoPrincipalMixto('');
+                    if (mp.id !== 'credito') {
+                      setRecargoPorcentaje(0);
+                      setMontoFinalManual('');
+                    }
+                  }}
+                  className={`flex flex-col items-center justify-center gap-0.5 px-3 py-3 rounded-2xl border-2 text-center transition-all cursor-pointer min-h-[68px] ${
+                    activo
+                      ? `${mp.activa} scale-[1.01]`
+                      : 'bg-white text-slate-700 border-slate-200 hover:border-purple-300 hover:bg-slate-50/70'
+                  }`}
+                >
+                  <Icono className="w-4.5 h-4.5 shrink-0 mb-0.5" />
+                  <span className="text-xs font-extrabold leading-tight">{mp.nombre}</span>
+                  <span
+                    className={`text-[10px] leading-tight ${
+                      activo ? 'text-white/85' : 'text-slate-400'
+                    }`}
+                  >
+                    {mp.subtitulo}
+                  </span>
+                </button>
+              );
+            })}
+
+            {/* 5° Botón Protagonista: Pago Mixto */}
             <button
               type="button"
               onClick={() => {
-                const proximoMixto = !esPagoMixto;
-                setEsPagoMixto(proximoMixto);
-                setMontoPrincipalMixto('');
-                if (proximoMixto && medioPrincipal === medioSecundario) {
+                setEsPagoMixto(true);
+                setPagaConInput('');
+                if (medioPrincipal === medioSecundario) {
                   setMedioSecundario(
                     medioPrincipal === 'efectivo' ? 'transferencia' : 'efectivo'
                   );
                 }
               }}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold border transition-all cursor-pointer ${
+              className={`col-span-2 sm:col-span-1 flex flex-col items-center justify-center gap-0.5 px-3 py-3 rounded-2xl border-2 text-center transition-all cursor-pointer min-h-[68px] ${
                 esPagoMixto
-                  ? 'bg-purple-950 text-white border-purple-950'
-                  : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-purple-300'
+                  ? 'bg-purple-950 text-white border-purple-950 shadow-sm scale-[1.01]'
+                  : 'bg-[#fdf5f8] text-purple-950 border-[#e7b9c8] hover:border-[#d97786] hover:bg-[#fceaf0]'
               }`}
             >
-              <Split className="w-3 h-3" />
-              <span>{esPagoMixto ? 'Pago mixto activo' : 'Dividir en 2 medios (Mixto)'}</span>
+              <Split className={`w-4.5 h-4.5 shrink-0 mb-0.5 ${esPagoMixto ? 'text-rose-200' : 'text-[#d97786]'}`} />
+              <span className="text-xs font-extrabold leading-tight">Pago Mixto</span>
+              <span
+                className={`text-[10px] leading-tight ${
+                  esPagoMixto ? 'text-purple-200' : 'text-[#8b4f58]'
+                }`}
+              >
+                Combinar 2 medios
+              </span>
             </button>
           </div>
 
-          {!esPagoMixto ? (
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {CONFIG_MEDIOS.map((mp) => {
-                const Icono = mp.icono;
-                const activo = medioPrincipal === mp.id;
-                return (
-                  <button
-                    key={mp.id}
-                    type="button"
-                    onClick={() => {
-                      setMedioPrincipal(mp.id);
-                      if (mp.id !== 'credito') {
-                        setRecargoPorcentaje(0);
-                        setMontoFinalManual('');
-                      }
-                    }}
-                    className={`flex flex-col items-center justify-center gap-1 px-2.5 py-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer min-h-[54px] ${
-                      activo
-                        ? mp.activa
-                        : 'bg-white text-slate-700 border-slate-200 hover:border-purple-300'
-                    }`}
-                  >
-                    <Icono className="w-4 h-4 shrink-0" />
-                    <span>{mp.nombre}</span>
-                  </button>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="p-4 rounded-2xl bg-purple-50/60 border border-purple-200 space-y-3">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-bold text-purple-950">
-                  División del pago entre 2 medios
+          {esPagoMixto && (
+            <div className="p-4 rounded-2xl bg-purple-50/70 border-2 border-purple-200 space-y-3 animate-in fade-in duration-150">
+              <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+                <span className="font-extrabold text-purple-950 flex items-center gap-1.5">
+                  <Split className="w-4 h-4 text-[#d97786]" />
+                  <span>Pago dividido en 2 medios</span>
                 </span>
                 <span className="font-mono font-black text-purple-950 bg-white px-2.5 py-1 rounded-lg border border-purple-200">
-                  Total: $ {totalACobrar.toLocaleString('es-AR')}
+                  Total a cubrir: $ {totalACobrar.toLocaleString('es-AR')}
                 </span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <label className="block text-[11px] font-bold text-purple-950">
-                    1° Medio — ¿Cuánto entrega con {nombreMedioPrincipal}?
+                    1° Medio — ¿Cuánto paga con {nombreMedioPrincipal}?
                   </label>
                   <select
                     value={medioPrincipal}
@@ -1196,7 +1217,7 @@ export function CajaHoyPanel({
                       inputMode="numeric"
                       value={montoPrincipalMixto}
                       onChange={(e) => setMontoPrincipalMixto(e.target.value)}
-                      placeholder="Ej: 1000"
+                      placeholder="Ej: 6000"
                       className="w-full pl-7 pr-3 py-2 rounded-xl bg-white border border-purple-300 font-mono text-sm font-bold text-slate-900 focus:outline-hidden focus:border-purple-700"
                     />
                   </div>
@@ -1298,40 +1319,86 @@ export function CajaHoyPanel({
             </div>
           )}
 
-          {/* Calculadora de vuelto (SOLO botón Exacto, sin $10 mil / $20 mil) */}
+          {/* Calculadora de Efectivo: siempre responde (Vuelto, Pago Exacto o Faltante con paso rápido a Pago Mixto) */}
           {montoEnEfectivoDelTicket > 0 && itemsTicket.length > 0 && (
-            <div className="p-3.5 rounded-2xl bg-emerald-50/60 border border-emerald-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200/90 flex flex-col md:flex-row md:items-center justify-between gap-3">
               <div className="space-y-1.5 flex-1">
-                <label className="block text-[11px] font-bold text-emerald-950">
-                  ¿Con cuánto paga en efectivo? (opcional, para calcular vuelto)
+                <label className="block text-xs font-bold text-emerald-950">
+                  ¿Con cuánto efectivo paga el cliente?
+                  <span className="font-normal text-emerald-800/80 ml-1">
+                    (para calcular vuelto o detectar si falta plata)
+                  </span>
                 </label>
                 <div className="flex flex-wrap items-center gap-2">
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    value={pagaConInput}
-                    onChange={(e) => setPagaConInput(e.target.value)}
-                    placeholder={`Ej: ${montoEnEfectivoDelTicket}`}
-                    className="w-32 px-3 py-1.5 rounded-xl bg-white border border-emerald-300 font-mono text-xs font-bold text-slate-900 focus:outline-hidden focus:border-emerald-600"
-                  />
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">
+                      $
+                    </span>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={pagaConInput}
+                      onChange={(e) => setPagaConInput(e.target.value)}
+                      placeholder={`Ej: ${montoEnEfectivoDelTicket}`}
+                      className="w-36 pl-7 pr-3 py-2 rounded-xl bg-white border border-emerald-300 font-mono text-sm font-bold text-slate-900 focus:outline-hidden focus:border-emerald-600"
+                    />
+                  </div>
                   <button
                     type="button"
                     onClick={() => setPagaConInput(String(montoEnEfectivoDelTicket))}
-                    className="px-3 py-1.5 rounded-lg bg-white hover:bg-emerald-100 border border-emerald-200 text-xs font-bold text-emerald-900 cursor-pointer"
+                    className="px-3.5 py-2 rounded-xl bg-white hover:bg-emerald-100 border border-emerald-300 text-xs font-bold text-emerald-900 cursor-pointer transition-colors"
                   >
                     Pago exacto ($ {montoEnEfectivoDelTicket.toLocaleString('es-AR')})
                   </button>
                 </div>
               </div>
 
-              {vueltoCalculado !== null && (
-                <div className="px-3.5 py-2 rounded-xl bg-white border border-emerald-300 text-right shrink-0">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 block">
-                    Vuelto a entregar
-                  </span>
-                  <span className="font-heading text-lg font-black text-emerald-800">
-                    $ {vueltoCalculado.toLocaleString('es-AR')}
-                  </span>
+              {/* Respuesta visual inmediata según el monto escrito */}
+              {pagaConInput.trim() !== '' && pagaConNum > 0 ? (
+                pagaConNum >= montoEnEfectivoDelTicket ? (
+                  <div className="px-4 py-2.5 rounded-xl bg-white border-2 border-emerald-300 text-right shrink-0">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700 block">
+                      {pagaConNum === montoEnEfectivoDelTicket
+                        ? 'Pago exacto'
+                        : 'Vuelto a entregar'}
+                    </span>
+                    <span className="font-heading text-lg font-black text-emerald-800">
+                      $ {(pagaConNum - montoEnEfectivoDelTicket).toLocaleString('es-AR')}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="px-4 py-2.5 rounded-xl bg-amber-50 border-2 border-amber-300 flex flex-col items-start md:items-end gap-1.5 shrink-0">
+                    <div className="text-left md:text-right">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-800 block">
+                        Falta para completar
+                      </span>
+                      <span className="font-heading text-lg font-black text-amber-950">
+                        $ {(montoEnEfectivoDelTicket - pagaConNum).toLocaleString('es-AR')}
+                      </span>
+                    </div>
+                    {!esPagoMixto && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEsPagoMixto(true);
+                          setMedioPrincipal('efectivo');
+                          setMedioSecundario('transferencia');
+                          setMontoPrincipalMixto(String(pagaConNum));
+                          setPagaConInput('');
+                        }}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-950 hover:bg-purple-900 text-white text-[11px] font-bold transition-colors cursor-pointer"
+                      >
+                        <Split className="w-3 h-3" />
+                        <span>
+                          Pagar los $ {(montoEnEfectivoDelTicket - pagaConNum).toLocaleString('es-AR')} con otro medio
+                        </span>
+                      </button>
+                    )}
+                  </div>
+                )
+              ) : (
+                <div className="px-3.5 py-2 rounded-xl bg-white/70 border border-dashed border-emerald-300 text-[11px] text-emerald-800/80 shrink-0">
+                  Escribí el billete recibido para ver el vuelto al instante
                 </div>
               )}
             </div>
