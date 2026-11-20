@@ -5,11 +5,9 @@ import { usePathname } from 'next/navigation';
 import { 
   Menu, 
   ShieldCheck, 
-  RotateCcw,
   LogOut
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
-import { useAdminFeedback } from '@/context/AdminFeedbackContext';
 
 interface AdminNavbarProps {
   onToggleSidebarMovil: () => void;
@@ -17,13 +15,14 @@ interface AdminNavbarProps {
 
 export function AdminNavbar({ onToggleSidebarMovil }: AdminNavbarProps) {
   const pathname = usePathname();
-  const { restablecerDatos, logout, adminUser } = useAdmin();
-  const { confirmar, notificar } = useAdminFeedback();
+  const { logout, adminUser } = useAdmin();
 
   const obtenerTituloModulo = () => {
     switch (pathname) {
       case '/admin':
-        return 'Panel Principal';
+        return 'Inicio del Panel';
+      case '/admin/caja':
+        return 'Caja y Ventas';
       case '/admin/productos':
         return 'Productos del Catálogo';
       case '/admin/categorias':
@@ -36,23 +35,6 @@ export function AdminNavbar({ onToggleSidebarMovil }: AdminNavbarProps) {
         return 'Avisos del Local';
       default:
         return 'Administración de la Librería';
-    }
-  };
-
-  const handleRestablecer = async () => {
-    const ok = await confirmar({
-      titulo: '¿Restablecer los datos de prueba?',
-      mensaje: 'Se restaurarán los productos, categorías, promociones y horarios iniciales de ejemplo.',
-      textoConfirmar: 'Sí, restablecer',
-      variante: 'advertencia',
-    });
-    if (ok) {
-      restablecerDatos();
-      notificar({
-        tipo: 'info',
-        titulo: 'Datos restablecidos',
-        mensaje: 'Se restauró el catálogo inicial de ejemplo.',
-      });
     }
   };
 
@@ -72,7 +54,7 @@ export function AdminNavbar({ onToggleSidebarMovil }: AdminNavbarProps) {
 
         <div>
           <span className="text-[10px] font-bold uppercase tracking-wider text-purple-900/70 hidden sm:block">
-            Módulo Administrativo
+            Librería Motivos
           </span>
           <h1 className="font-heading text-base sm:text-lg lg:text-xl font-black text-purple-950 tracking-tight leading-none">
             {obtenerTituloModulo()}
@@ -80,26 +62,13 @@ export function AdminNavbar({ onToggleSidebarMovil }: AdminNavbarProps) {
         </div>
       </div>
 
-      {/* 2. Acciones Rápidas del Navbar */}
+      {/* 2. Identidad y Cierre de Sesión */}
       <div className="flex items-center gap-2 sm:gap-3">
-        {/* Botón Restablecer Datos de Prueba */}
-        <button
-          type="button"
-          onClick={handleRestablecer}
-          title="Restablecer datos de prueba a su estado original"
-          className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-purple-200/80 hover:border-purple-300 bg-white/80 hover:bg-white text-purple-950 text-xs font-semibold transition-all active:scale-95 cursor-pointer"
-        >
-          <RotateCcw className="w-3.5 h-3.5 text-[#d97786]" />
-          <span>Restablecer Datos</span>
-        </button>
-
-        {/* Badge de Rol Exclusivo */}
         <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/90 border border-purple-200 text-purple-950 text-xs font-bold shadow-2xs">
           <ShieldCheck className="w-4 h-4 text-[#d97786]" />
           <span>{adminUser?.nombre || 'Administrador'}</span>
         </div>
 
-        {/* Botón de Logout Rápido */}
         <button
           type="button"
           onClick={logout}

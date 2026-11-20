@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
   LayoutDashboard, 
+  Calculator,
   Package, 
   FolderTree, 
   Tag, 
@@ -17,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { evaluarAlertasNegocio } from '@/lib/admin-alertas';
+import { cargarCajaAbierta } from '@/lib/caja-diaria';
 
 interface AdminSidebarProps {
   onCerrarMovil?: () => void;
@@ -26,9 +28,22 @@ export function AdminSidebar({ onCerrarMovil }: AdminSidebarProps) {
   const pathname = usePathname();
   const { productos, categorias, promociones, horarios, logout, adminUser } = useAdmin();
   const [fechaHoy, setFechaHoy] = useState<Date | null>(null);
+  const [ventasHoyCount, setVentasHoyCount] = useState<number>(0);
 
   useEffect(() => {
     setFechaHoy(new Date());
+
+    const actualizarConteoCaja = () => {
+      const caja = cargarCajaAbierta();
+      setVentasHoyCount(caja.ventas.filter((v) => !v.anulada).length);
+    };
+    actualizarConteoCaja();
+    window.addEventListener('motivos-caja-updated', actualizarConteoCaja);
+    window.addEventListener('storage', actualizarConteoCaja);
+    return () => {
+      window.removeEventListener('motivos-caja-updated', actualizarConteoCaja);
+      window.removeEventListener('storage', actualizarConteoCaja);
+    };
   }, []);
 
   // Contadores activos para badges en el menú
@@ -54,6 +69,13 @@ export function AdminSidebar({ onCerrarMovil }: AdminSidebarProps) {
       href: '/admin',
       icono: LayoutDashboard,
       badge: null as number | null,
+      esAlerta: false,
+    },
+    {
+      titulo: 'Caja y Ventas',
+      href: '/admin/caja',
+      icono: Calculator,
+      badge: ventasHoyCount > 0 ? ventasHoyCount : null,
       esAlerta: false,
     },
     {
