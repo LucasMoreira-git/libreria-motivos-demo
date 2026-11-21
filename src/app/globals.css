@@ -433,15 +433,19 @@
   background-color: rgba(217, 119, 134, 0.16) !important;
 }
 
-/* Fondos lila / violeta / púrpura (ej: Transferencia, íconos de categoría, menú activo) */
+/* Fondos lila / violeta / púrpura (ej: Transferencia, íconos de categoría, precios en buscador, menú activo) */
 .admin-shell[data-admin-theme="oscuro"] [class*="bg-[#ed"],
+.admin-shell[data-admin-theme="oscuro"] [class*="bg-[#f5"],
 .admin-shell[data-admin-theme="oscuro"] [class*="bg-[#f6"],
+.admin-shell[data-admin-theme="oscuro"] [class*="bg-[#f7"],
+.admin-shell[data-admin-theme="oscuro"] [class*="bg-[#f8"],
+.admin-shell[data-admin-theme="oscuro"] [class*="bg-[#f9"],
 .admin-shell[data-admin-theme="oscuro"] [class*="bg-purple-50"],
 .admin-shell[data-admin-theme="oscuro"] [class*="bg-purple-100"],
 .admin-shell[data-admin-theme="oscuro"] [class*="bg-violet-50"],
 .admin-shell[data-admin-theme="oscuro"] [class*="bg-violet-100"],
 .admin-shell[data-admin-theme="oscuro"] [class*="bg-fuchsia-50"] {
-  background-color: rgba(139, 92, 246, 0.16) !important;
+  background-color: rgba(139, 92, 246, 0.18) !important;
 }
 
 /* Fondos celeste / azul / índigo (ej: Débito, Nuevo Ingreso) */
@@ -496,17 +500,21 @@
   --tw-gradient-to: #261f38 !important;
 }
 
-/* Bordes oscuros limpios */
+/* Bordes y divisores oscuros limpios */
 .admin-shell[data-admin-theme="oscuro"] [class*="border-slate-"],
-.admin-shell[data-admin-theme="oscuro"] [class*="border-[#de"],
-.admin-shell[data-admin-theme="oscuro"] [class*="border-[#f2"],
-.admin-shell[data-admin-theme="oscuro"] [class*="border-[#f3"],
-.admin-shell[data-admin-theme="oscuro"] [class*="border-[#f4"],
+.admin-shell[data-admin-theme="oscuro"] [class*="border-[#d"],
+.admin-shell[data-admin-theme="oscuro"] [class*="border-[#e"],
+.admin-shell[data-admin-theme="oscuro"] [class*="border-[#f"],
 .admin-shell[data-admin-theme="oscuro"] [class*="border-purple-"],
 .admin-shell[data-admin-theme="oscuro"] [class*="border-violet-"],
 .admin-shell[data-admin-theme="oscuro"] [class*="border-rose-"],
 .admin-shell[data-admin-theme="oscuro"] [class*="border-pink-"] {
   border-color: #2e344b !important;
+}
+
+.admin-shell[data-admin-theme="oscuro"] [class*="divide-slate-"] > * + *,
+.admin-shell[data-admin-theme="oscuro"] [class*="divide-purple-"] > * + * {
+  border-color: #262c40 !important;
 }
 
 .admin-shell[data-admin-theme="oscuro"] [class*="border-emerald-"],
@@ -571,13 +579,17 @@
   color: #fdba74 !important;
 }
 
+.admin-shell[data-admin-theme="oscuro"] .text-sky-900,
 .admin-shell[data-admin-theme="oscuro"] .text-sky-800,
 .admin-shell[data-admin-theme="oscuro"] .text-sky-700,
+.admin-shell[data-admin-theme="oscuro"] .text-blue-900,
 .admin-shell[data-admin-theme="oscuro"] .text-blue-800,
 .admin-shell[data-admin-theme="oscuro"] .text-blue-700,
+.admin-shell[data-admin-theme="oscuro"] .text-indigo-900,
 .admin-shell[data-admin-theme="oscuro"] .text-indigo-800,
-.admin-shell[data-admin-theme="oscuro"] .text-indigo-700 {
-  color: #7dd3fc !important;
+.admin-shell[data-admin-theme="oscuro"] .text-indigo-700,
+.admin-shell[data-admin-theme="oscuro"] .text-indigo-600 {
+  color: #a5b4fc !important;
 }
 
 .admin-shell[data-admin-theme="oscuro"] .text-rose-700,
