@@ -7,10 +7,12 @@ import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { AdminNavbar } from '@/components/admin/AdminNavbar';
 import { AdminLoginForm } from '@/components/admin/AdminLoginForm';
 import { AdminFeedbackProvider } from '@/context/AdminFeedbackContext';
+import { AdminThemeProvider, useAdminTheme } from '@/context/AdminThemeContext';
 import { X } from 'lucide-react';
 
 function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAdmin();
+  const { theme, cambiando } = useAdminTheme();
   const pathname = usePathname();
   const [sidebarMovilAbierta, setSidebarMovilAbierta] = useState(false);
 
@@ -20,7 +22,12 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#fcf8f9] flex text-slate-800 font-sans selection:bg-[#fbecee] selection:text-[#6e2e38]">
+    <div
+      data-admin-theme={theme}
+      className={`admin-shell min-h-screen bg-[#fcf8f9] flex text-slate-800 font-sans selection:bg-[#fbecee] selection:text-[#6e2e38] transition-colors duration-300 ${
+        cambiando ? 'admin-theme-animating' : ''
+      }`}
+    >
       
       {/* 1. Barra Lateral de Navegación (Desktop) */}
       <div className="hidden lg:block shrink-0 sticky top-0 h-screen z-20">
@@ -76,8 +83,10 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AdminFeedbackProvider>
-      <AdminLayoutContent>{children}</AdminLayoutContent>
-    </AdminFeedbackProvider>
+    <AdminThemeProvider>
+      <AdminFeedbackProvider>
+        <AdminLayoutContent>{children}</AdminLayoutContent>
+      </AdminFeedbackProvider>
+    </AdminThemeProvider>
   );
 }

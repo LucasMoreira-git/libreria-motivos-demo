@@ -5,17 +5,28 @@ import { usePathname } from 'next/navigation';
 import { 
   Menu, 
   ShieldCheck, 
-  LogOut
+  LogOut,
+  Sun,
+  Moon,
+  Sparkles
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
+import { useAdminTheme, type AdminTheme } from '@/context/AdminThemeContext';
 
 interface AdminNavbarProps {
   onToggleSidebarMovil: () => void;
 }
 
+const OPCIONES_TEMA: { id: AdminTheme; label: string; titulo: string; icono: React.ComponentType<{ className?: string }> }[] = [
+  { id: 'claro', label: 'Claro', titulo: 'Tema Blanco (Claro)', icono: Sun },
+  { id: 'calido', label: 'Crema', titulo: 'Tema Crema Suave', icono: Sparkles },
+  { id: 'oscuro', label: 'Oscuro', titulo: 'Tema Oscuro (Noche)', icono: Moon },
+];
+
 export function AdminNavbar({ onToggleSidebarMovil }: AdminNavbarProps) {
   const pathname = usePathname();
   const { logout, adminUser } = useAdmin();
+  const { theme, setTheme } = useAdminTheme();
 
   const obtenerTituloModulo = () => {
     switch (pathname) {
@@ -62,8 +73,41 @@ export function AdminNavbar({ onToggleSidebarMovil }: AdminNavbarProps) {
         </div>
       </div>
 
-      {/* 2. Identidad y Cierre de Sesión */}
+      {/* 2. Selector de Tema (discreto, tonos claros pastel), Identidad y Cierre de Sesión */}
       <div className="flex items-center gap-2 sm:gap-3">
+        <div
+          role="group"
+          aria-label="Cambiar tema del panel"
+          className="admin-theme-switcher inline-flex items-center p-1 rounded-full border shadow-2xs gap-0.5"
+        >
+          {OPCIONES_TEMA.map((op) => {
+            const Icono = op.icono;
+            const activo = theme === op.id;
+            return (
+              <button
+                key={op.id}
+                type="button"
+                onClick={(e) => setTheme(op.id, e)}
+                title={op.titulo}
+                aria-label={op.titulo}
+                aria-pressed={activo}
+                className={`inline-flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-full text-[11px] font-bold transition-all duration-300 ease-out cursor-pointer active:scale-95 ${
+                  activo
+                    ? 'admin-theme-btn-active shadow-2xs scale-100'
+                    : 'admin-theme-btn hover:bg-[#fbecee] opacity-80 hover:opacity-100'
+                }`}
+              >
+                <Icono
+                  className={`w-3.5 h-3.5 shrink-0 transition-transform duration-300 ${
+                    activo ? 'rotate-12 scale-110' : 'rotate-0 scale-100'
+                  }`}
+                />
+                <span className="hidden xl:inline">{op.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
         <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/90 border border-purple-200 text-purple-950 text-xs font-bold shadow-2xs">
           <ShieldCheck className="w-4 h-4 text-[#d97786]" />
           <span>{adminUser?.nombre || 'Administrador'}</span>

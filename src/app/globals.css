@@ -356,3 +356,225 @@
 .animate-added-pop {
   animation: addedPop 1.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* =====================================================================
+   Temas del Panel Administrativo (Claro / Crema Suave / Oscuro)
+   Aislados estrictamente a .admin-shell para no afectar la vitrina pública.
+   ===================================================================== */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+.admin-shell,
+.admin-shell header,
+.admin-shell aside,
+.admin-shell section,
+.admin-shell main,
+.admin-shell input,
+.admin-shell select,
+.admin-shell textarea {
+  transition: background-color 320ms ease, border-color 300ms ease, color 260ms ease;
+}
+
+@keyframes adminThemePulse {
+  0% { opacity: 0.94; }
+  100% { opacity: 1; }
+}
+
+.admin-theme-animating main {
+  animation: adminThemePulse 320ms ease-out;
+}
+
+/* --- TEMA CREMA SUAVE (Cálido y luminoso) --- */
+.admin-shell[data-admin-theme="calido"] {
+  background-color: #faf5ec !important;
+  color: #3f342c !important;
+}
+
+.admin-shell[data-admin-theme="calido"] header {
+  background-color: rgba(246, 237, 224, 0.92) !important;
+  border-color: #e9d9c4 !important;
+}
+
+.admin-shell[data-admin-theme="calido"] aside {
+  background-color: #fffdf9 !important;
+  border-color: #e9d9c4 !important;
+}
+
+.admin-shell[data-admin-theme="calido"] .bg-white,
+.admin-shell[data-admin-theme="calido"] .bg-white\/95,
+.admin-shell[data-admin-theme="calido"] .bg-white\/90 {
+  background-color: #fffdf9 !important;
+}
+
+.admin-shell[data-admin-theme="calido"] .bg-\[\#fdf8f9\],
+.admin-shell[data-admin-theme="calido"] .bg-\[\#fcf8f9\] {
+  background-color: #f8f1e6 !important;
+}
+
+.admin-shell[data-admin-theme="calido"] .border-\[\#ded0f2\],
+.admin-shell[data-admin-theme="calido"] .border-slate-200,
+.admin-shell[data-admin-theme="calido"] .border-slate-200\/90 {
+  border-color: #eadcc9 !important;
+}
+
+/* --- TEMA OSCURO (Negro / Grafito elegante con alto contraste) --- */
+.admin-shell[data-admin-theme="oscuro"] {
+  background-color: #0e1017 !important;
+  color: #f1f5f9 !important;
+}
+
+.admin-shell[data-admin-theme="oscuro"] header {
+  background-color: rgba(20, 23, 34, 0.92) !important;
+  border-color: #272c3f !important;
+}
+
+.admin-shell[data-admin-theme="oscuro"] aside {
+  background-color: #141722 !important;
+  border-color: #272c3f !important;
+  color: #e2e8f0 !important;
+}
+
+.admin-shell[data-admin-theme="oscuro"] .bg-white,
+.admin-shell[data-admin-theme="oscuro"] .bg-white\/95,
+.admin-shell[data-admin-theme="oscuro"] .bg-white\/90,
+.admin-shell[data-admin-theme="oscuro"] .bg-white\/80 {
+  background-color: #181c29 !important;
+}
+
+.admin-shell[data-admin-theme="oscuro"] .bg-slate-50,
+.admin-shell[data-admin-theme="oscuro"] .bg-slate-50\/80,
+.admin-shell[data-admin-theme="oscuro"] .bg-slate-100,
+.admin-shell[data-admin-theme="oscuro"] .bg-\[\#fdf8f9\],
+.admin-shell[data-admin-theme="oscuro"] .bg-\[\#fcf8f9\],
+.admin-shell[data-admin-theme="oscuro"] .bg-\[\#fef5f6\],
+.admin-shell[data-admin-theme="oscuro"] .bg-\[\#fdf8fc\],
+.admin-shell[data-admin-theme="oscuro"] .bg-\[\#fbf7fd\] {
+  background-color: #1f2436 !important;
+}
+
+.admin-shell[data-admin-theme="oscuro"] .bg-\[\#ede4f6\],
+.admin-shell[data-admin-theme="oscuro"] .bg-\[\#ede4f6\]\/80,
+.admin-shell[data-admin-theme="oscuro"] .bg-\[\#f6effb\],
+.admin-shell[data-admin-theme="oscuro"] .bg-purple-50,
+.admin-shell[data-admin-theme="oscuro"] .bg-purple-50\/60 {
+  background-color: #28223d !important;
+}
+
+.admin-shell[data-admin-theme="oscuro"] .bg-emerald-50,
+.admin-shell[data-admin-theme="oscuro"] .bg-emerald-50\/80,
+.admin-shell[data-admin-theme="oscuro"] .bg-emerald-50\/70 {
+  background-color: rgba(16, 185, 129, 0.14) !important;
+}
+
+.admin-shell[data-admin-theme="oscuro"] .bg-amber-50,
+.admin-shell[data-admin-theme="oscuro"] .bg-amber-50\/70,
+.admin-shell[data-admin-theme="oscuro"] .bg-amber-50\/80 {
+  background-color: rgba(245, 158, 11, 0.14) !important;
+}
+
+.admin-shell[data-admin-theme="oscuro"] .bg-sky-50,
+.admin-shell[data-admin-theme="oscuro"] .bg-blue-50,
+.admin-shell[data-admin-theme="oscuro"] .bg-rose-50 {
+  background-color: rgba(148, 163, 184, 0.14) !important;
+}
+
+.admin-shell[data-admin-theme="oscuro"] .from-\[\#fef5f6\] {
+  --tw-gradient-from: #221d33 !important;
+  --tw-gradient-via: #1b1f30 !important;
+  --tw-gradient-to: #261f38 !important;
+}
+
+.admin-shell[data-admin-theme="oscuro"] .border-slate-200,
+.admin-shell[data-admin-theme="oscuro"] .border-slate-200\/90,
+.admin-shell[data-admin-theme="oscuro"] .border-slate-100,
+.admin-shell[data-admin-theme="oscuro"] .border-\[\#ded0f2\],
+.admin-shell[data-admin-theme="oscuro"] .border-\[\#ded0f2\]\/80,
+.admin-shell[data-admin-theme="oscuro"] .border-\[\#f2d3d8\],
+.admin-shell[data-admin-theme="oscuro"] .border-\[\#f4d0d6\],
+.admin-shell[data-admin-theme="oscuro"] .border-purple-200,
+.admin-shell[data-admin-theme="oscuro"] .border-purple-200\/70 {
+  border-color: #2e344b !important;
+}
+
+.admin-shell[data-admin-theme="oscuro"] .border-emerald-200,
+.admin-shell[data-admin-theme="oscuro"] .border-emerald-200\/90 {
+  border-color: rgba(16, 185, 129, 0.35) !important;
+}
+
+.admin-shell[data-admin-theme="oscuro"] .border-amber-200,
+.admin-shell[data-admin-theme="oscuro"] .border-amber-200\/80 {
+  border-color: rgba(245, 158, 11, 0.35) !important;
+}
+
+.admin-shell[data-admin-theme="oscuro"] .text-purple-950,
+.admin-shell[data-admin-theme="oscuro"] .text-slate-900,
+.admin-shell[data-admin-theme="oscuro"] .text-slate-800,
+.admin-shell[data-admin-theme="oscuro"] .text-emerald-950,
+.admin-shell[data-admin-theme="oscuro"] .text-amber-950,
+.admin-shell[data-admin-theme="oscuro"] .text-sky-950,
+.admin-shell[data-admin-theme="oscuro"] .text-\[\#6e2e38\] {
+  color: #f8fafc !important;
+}
+
+.admin-shell[data-admin-theme="oscuro"] .text-purple-900,
+.admin-shell[data-admin-theme="oscuro"] .text-purple-900\/80,
+.admin-shell[data-admin-theme="oscuro"] .text-purple-900\/70,
+.admin-shell[data-admin-theme="oscuro"] .text-purple-900\/60,
+.admin-shell[data-admin-theme="oscuro"] .text-purple-800,
+.admin-shell[data-admin-theme="oscuro"] .text-slate-700,
+.admin-shell[data-admin-theme="oscuro"] .text-slate-600 {
+  color: #cbd5e1 !important;
+}
+
+.admin-shell[data-admin-theme="oscuro"] .text-slate-500,
+.admin-shell[data-admin-theme="oscuro"] .text-slate-400 {
+  color: #94a3b8 !important;
+}
+
+.admin-shell[data-admin-theme="oscuro"] .text-emerald-800,
+.admin-shell[data-admin-theme="oscuro"] .text-emerald-700 {
+  color: #6ee7b7 !important;
+}
+
+.admin-shell[data-admin-theme="oscuro"] .text-amber-800,
+.admin-shell[data-admin-theme="oscuro"] .text-amber-700 {
+  color: #fcd34d !important;
+}
+
+.admin-shell[data-admin-theme="oscuro"] input,
+.admin-shell[data-admin-theme="oscuro"] select,
+.admin-shell[data-admin-theme="oscuro"] textarea {
+  background-color: #131622 !important;
+  color: #f8fafc !important;
+  border-color: #343b54 !important;
+}
+
+.admin-shell[data-admin-theme="oscuro"] input::placeholder,
+.admin-shell[data-admin-theme="oscuro"] textarea::placeholder {
+  color: #64748b !important;
+}
+
+.admin-shell[data-admin-theme="oscuro"] .hover\:bg-\[\#fbf7fd\]:hover,
+.admin-shell[data-admin-theme="oscuro"] .hover\:bg-\[\#fdf8fc\]:hover,
+.admin-shell[data-admin-theme="oscuro"] .hover\:bg-slate-50:hover,
+.admin-shell[data-admin-theme="oscuro"] .hover\:bg-purple-50:hover {
+  background-color: #252b40 !important;
+}
+
+/* Mantener el selector de tema con sus tonos claros pastel suaves incluso en modo oscuro */
+.admin-shell .admin-theme-switcher {
+  background-color: rgba(254, 245, 246, 0.95) !important;
+  border-color: #f2d3d8 !important;
+}
+
+.admin-shell .admin-theme-btn {
+  color: #6e2e38 !important;
+}
+
+.admin-shell .admin-theme-btn-active {
+  background-color: #d97786 !important;
+  color: #ffffff !important;
+}
