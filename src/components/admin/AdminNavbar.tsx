@@ -7,8 +7,7 @@ import {
   ShieldCheck, 
   LogOut,
   Sun,
-  Moon,
-  Sparkles
+  Moon
 } from 'lucide-react';
 import { useAdmin } from '@/context/AdminContext';
 import { useAdminTheme, type AdminTheme } from '@/context/AdminThemeContext';
@@ -19,8 +18,7 @@ interface AdminNavbarProps {
 
 const OPCIONES_TEMA: { id: AdminTheme; label: string; titulo: string; icono: React.ComponentType<{ className?: string }> }[] = [
   { id: 'claro', label: 'Claro', titulo: 'Tema Blanco (Claro)', icono: Sun },
-  { id: 'calido', label: 'Crema', titulo: 'Tema Crema Suave', icono: Sparkles },
-  { id: 'oscuro', label: 'Oscuro', titulo: 'Tema Oscuro (Noche)', icono: Moon },
+  { id: 'oscuro', label: 'Oscuro', titulo: 'Tema Oscuro (Negro)', icono: Moon },
 ];
 
 export function AdminNavbar({ onToggleSidebarMovil }: AdminNavbarProps) {

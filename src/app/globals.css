@@ -358,7 +358,7 @@
 }
 
 /* =====================================================================
-   Temas del Panel Administrativo (Claro / Crema Suave / Oscuro)
+   Temas del Panel Administrativo (Claro / Oscuro)
    Aislados estrictamente a .admin-shell para no afectar la vitrina pública.
    ===================================================================== */
 ::view-transition-old(root),
@@ -387,47 +387,14 @@
   animation: adminThemePulse 320ms ease-out;
 }
 
-/* --- TEMA CREMA SUAVE (Cálido y luminoso) --- */
-.admin-shell[data-admin-theme="calido"] {
-  background-color: #faf5ec !important;
-  color: #3f342c !important;
-}
-
-.admin-shell[data-admin-theme="calido"] header {
-  background-color: rgba(246, 237, 224, 0.92) !important;
-  border-color: #e9d9c4 !important;
-}
-
-.admin-shell[data-admin-theme="calido"] aside {
-  background-color: #fffdf9 !important;
-  border-color: #e9d9c4 !important;
-}
-
-.admin-shell[data-admin-theme="calido"] .bg-white,
-.admin-shell[data-admin-theme="calido"] .bg-white\/95,
-.admin-shell[data-admin-theme="calido"] .bg-white\/90 {
-  background-color: #fffdf9 !important;
-}
-
-.admin-shell[data-admin-theme="calido"] .bg-\[\#fdf8f9\],
-.admin-shell[data-admin-theme="calido"] .bg-\[\#fcf8f9\] {
-  background-color: #f8f1e6 !important;
-}
-
-.admin-shell[data-admin-theme="calido"] .border-\[\#ded0f2\],
-.admin-shell[data-admin-theme="calido"] .border-slate-200,
-.admin-shell[data-admin-theme="calido"] .border-slate-200\/90 {
-  border-color: #eadcc9 !important;
-}
-
-/* --- TEMA OSCURO (Negro / Grafito elegante con alto contraste) --- */
+/* --- TEMA OSCURO (Negro / Grafito de alto contraste, sin parches blancos) --- */
 .admin-shell[data-admin-theme="oscuro"] {
   background-color: #0e1017 !important;
   color: #f1f5f9 !important;
 }
 
 .admin-shell[data-admin-theme="oscuro"] header {
-  background-color: rgba(20, 23, 34, 0.92) !important;
+  background-color: rgba(20, 23, 34, 0.94) !important;
   border-color: #272c3f !important;
 }
 
@@ -437,84 +404,137 @@
   color: #e2e8f0 !important;
 }
 
-.admin-shell[data-admin-theme="oscuro"] .bg-white,
-.admin-shell[data-admin-theme="oscuro"] .bg-white\/95,
-.admin-shell[data-admin-theme="oscuro"] .bg-white\/90,
-.admin-shell[data-admin-theme="oscuro"] .bg-white\/80 {
+/* Superficies blancas y tonos claros genéricos -> tarjetas oscuras */
+.admin-shell[data-admin-theme="oscuro"] [class*="bg-white"] {
   background-color: #181c29 !important;
 }
 
-.admin-shell[data-admin-theme="oscuro"] .bg-slate-50,
-.admin-shell[data-admin-theme="oscuro"] .bg-slate-50\/80,
-.admin-shell[data-admin-theme="oscuro"] .bg-slate-100,
-.admin-shell[data-admin-theme="oscuro"] .bg-\[\#fdf8f9\],
-.admin-shell[data-admin-theme="oscuro"] .bg-\[\#fcf8f9\],
-.admin-shell[data-admin-theme="oscuro"] .bg-\[\#fef5f6\],
-.admin-shell[data-admin-theme="oscuro"] .bg-\[\#fdf8fc\],
-.admin-shell[data-admin-theme="oscuro"] .bg-\[\#fbf7fd\] {
+.admin-shell[data-admin-theme="oscuro"] [class*="bg-slate-50"],
+.admin-shell[data-admin-theme="oscuro"] [class*="bg-slate-100"],
+.admin-shell[data-admin-theme="oscuro"] [class*="bg-[#fc"],
+.admin-shell[data-admin-theme="oscuro"] [class*="bg-[#fd"],
+.admin-shell[data-admin-theme="oscuro"] [class*="bg-[#fb"],
+.admin-shell[data-admin-theme="oscuro"] [class*="bg-[#fa"] {
+  background-color: #1e2334 !important;
+}
+
+/* Botones deshabilitados o superficies gris claro (slate-200) */
+.admin-shell[data-admin-theme="oscuro"] [class*="bg-slate-200"] {
+  background-color: #272d42 !important;
+  color: #94a3b8 !important;
+}
+
+/* Fondos rosados/blush suaves (ej: Pago Mixto, badges, alertas) */
+.admin-shell[data-admin-theme="oscuro"] [class*="bg-[#fe"],
+.admin-shell[data-admin-theme="oscuro"] [class*="bg-rose-50"],
+.admin-shell[data-admin-theme="oscuro"] [class*="bg-rose-100"],
+.admin-shell[data-admin-theme="oscuro"] [class*="bg-pink-50"],
+.admin-shell[data-admin-theme="oscuro"] [class*="bg-pink-100"] {
+  background-color: rgba(217, 119, 134, 0.16) !important;
+}
+
+/* Fondos lila / violeta / púrpura (ej: Transferencia, íconos de categoría, menú activo) */
+.admin-shell[data-admin-theme="oscuro"] [class*="bg-[#ed"],
+.admin-shell[data-admin-theme="oscuro"] [class*="bg-[#f6"],
+.admin-shell[data-admin-theme="oscuro"] [class*="bg-purple-50"],
+.admin-shell[data-admin-theme="oscuro"] [class*="bg-purple-100"],
+.admin-shell[data-admin-theme="oscuro"] [class*="bg-violet-50"],
+.admin-shell[data-admin-theme="oscuro"] [class*="bg-violet-100"],
+.admin-shell[data-admin-theme="oscuro"] [class*="bg-fuchsia-50"] {
+  background-color: rgba(139, 92, 246, 0.16) !important;
+}
+
+/* Fondos celeste / azul / índigo (ej: Débito, Nuevo Ingreso) */
+.admin-shell[data-admin-theme="oscuro"] [class*="bg-sky-50"],
+.admin-shell[data-admin-theme="oscuro"] [class*="bg-sky-100"],
+.admin-shell[data-admin-theme="oscuro"] [class*="bg-blue-50"],
+.admin-shell[data-admin-theme="oscuro"] [class*="bg-blue-100"],
+.admin-shell[data-admin-theme="oscuro"] [class*="bg-indigo-50"],
+.admin-shell[data-admin-theme="oscuro"] [class*="bg-indigo-100"] {
+  background-color: rgba(56, 189, 248, 0.15) !important;
+}
+
+/* Fondos verde / esmeralda (ej: Efectivo en cajón, Visible en web, Todo al día, Avisos OK) */
+.admin-shell[data-admin-theme="oscuro"] [class*="bg-emerald-50"],
+.admin-shell[data-admin-theme="oscuro"] [class*="bg-emerald-100"],
+.admin-shell[data-admin-theme="oscuro"] [class*="bg-green-50"],
+.admin-shell[data-admin-theme="oscuro"] [class*="bg-green-100"] {
+  background-color: rgba(16, 185, 129, 0.16) !important;
+}
+
+/* Fondos ámbar / naranja / amarillo (ej: Crédito, Temporada, Destacado) */
+.admin-shell[data-admin-theme="oscuro"] [class*="bg-amber-50"],
+.admin-shell[data-admin-theme="oscuro"] [class*="bg-amber-100"],
+.admin-shell[data-admin-theme="oscuro"] [class*="bg-orange-50"],
+.admin-shell[data-admin-theme="oscuro"] [class*="bg-orange-100"],
+.admin-shell[data-admin-theme="oscuro"] [class*="bg-yellow-50"] {
+  background-color: rgba(245, 158, 11, 0.16) !important;
+}
+
+/* Cabeceras y filas de tablas (Categorías, Promociones, Productos, Horarios) */
+.admin-shell[data-admin-theme="oscuro"] thead,
+.admin-shell[data-admin-theme="oscuro"] thead tr,
+.admin-shell[data-admin-theme="oscuro"] thead th {
   background-color: #1f2436 !important;
+  color: #94a3b8 !important;
+  border-color: #2e344b !important;
 }
 
-.admin-shell[data-admin-theme="oscuro"] .bg-\[\#ede4f6\],
-.admin-shell[data-admin-theme="oscuro"] .bg-\[\#ede4f6\]\/80,
-.admin-shell[data-admin-theme="oscuro"] .bg-\[\#f6effb\],
-.admin-shell[data-admin-theme="oscuro"] .bg-purple-50,
-.admin-shell[data-admin-theme="oscuro"] .bg-purple-50\/60 {
-  background-color: #28223d !important;
+.admin-shell[data-admin-theme="oscuro"] tbody tr {
+  background-color: #181c29 !important;
+  border-color: #262c40 !important;
 }
 
-.admin-shell[data-admin-theme="oscuro"] .bg-emerald-50,
-.admin-shell[data-admin-theme="oscuro"] .bg-emerald-50\/80,
-.admin-shell[data-admin-theme="oscuro"] .bg-emerald-50\/70 {
-  background-color: rgba(16, 185, 129, 0.14) !important;
+.admin-shell[data-admin-theme="oscuro"] tbody tr:hover {
+  background-color: #22283d !important;
 }
 
-.admin-shell[data-admin-theme="oscuro"] .bg-amber-50,
-.admin-shell[data-admin-theme="oscuro"] .bg-amber-50\/70,
-.admin-shell[data-admin-theme="oscuro"] .bg-amber-50\/80 {
-  background-color: rgba(245, 158, 11, 0.14) !important;
-}
-
-.admin-shell[data-admin-theme="oscuro"] .bg-sky-50,
-.admin-shell[data-admin-theme="oscuro"] .bg-blue-50,
-.admin-shell[data-admin-theme="oscuro"] .bg-rose-50 {
-  background-color: rgba(148, 163, 184, 0.14) !important;
-}
-
+/* Gradientes claros de bienvenida */
 .admin-shell[data-admin-theme="oscuro"] .from-\[\#fef5f6\] {
   --tw-gradient-from: #221d33 !important;
   --tw-gradient-via: #1b1f30 !important;
   --tw-gradient-to: #261f38 !important;
 }
 
-.admin-shell[data-admin-theme="oscuro"] .border-slate-200,
-.admin-shell[data-admin-theme="oscuro"] .border-slate-200\/90,
-.admin-shell[data-admin-theme="oscuro"] .border-slate-100,
-.admin-shell[data-admin-theme="oscuro"] .border-\[\#ded0f2\],
-.admin-shell[data-admin-theme="oscuro"] .border-\[\#ded0f2\]\/80,
-.admin-shell[data-admin-theme="oscuro"] .border-\[\#f2d3d8\],
-.admin-shell[data-admin-theme="oscuro"] .border-\[\#f4d0d6\],
-.admin-shell[data-admin-theme="oscuro"] .border-purple-200,
-.admin-shell[data-admin-theme="oscuro"] .border-purple-200\/70 {
+/* Bordes oscuros limpios */
+.admin-shell[data-admin-theme="oscuro"] [class*="border-slate-"],
+.admin-shell[data-admin-theme="oscuro"] [class*="border-[#de"],
+.admin-shell[data-admin-theme="oscuro"] [class*="border-[#f2"],
+.admin-shell[data-admin-theme="oscuro"] [class*="border-[#f3"],
+.admin-shell[data-admin-theme="oscuro"] [class*="border-[#f4"],
+.admin-shell[data-admin-theme="oscuro"] [class*="border-purple-"],
+.admin-shell[data-admin-theme="oscuro"] [class*="border-violet-"],
+.admin-shell[data-admin-theme="oscuro"] [class*="border-rose-"],
+.admin-shell[data-admin-theme="oscuro"] [class*="border-pink-"] {
   border-color: #2e344b !important;
 }
 
-.admin-shell[data-admin-theme="oscuro"] .border-emerald-200,
-.admin-shell[data-admin-theme="oscuro"] .border-emerald-200\/90 {
+.admin-shell[data-admin-theme="oscuro"] [class*="border-emerald-"],
+.admin-shell[data-admin-theme="oscuro"] [class*="border-green-"] {
   border-color: rgba(16, 185, 129, 0.35) !important;
 }
 
-.admin-shell[data-admin-theme="oscuro"] .border-amber-200,
-.admin-shell[data-admin-theme="oscuro"] .border-amber-200\/80 {
+.admin-shell[data-admin-theme="oscuro"] [class*="border-amber-"],
+.admin-shell[data-admin-theme="oscuro"] [class*="border-orange-"] {
   border-color: rgba(245, 158, 11, 0.35) !important;
 }
 
+.admin-shell[data-admin-theme="oscuro"] [class*="border-sky-"],
+.admin-shell[data-admin-theme="oscuro"] [class*="border-blue-"],
+.admin-shell[data-admin-theme="oscuro"] [class*="border-indigo-"] {
+  border-color: rgba(56, 189, 248, 0.32) !important;
+}
+
+/* Tipografía de alto contraste en modo oscuro */
 .admin-shell[data-admin-theme="oscuro"] .text-purple-950,
+.admin-shell[data-admin-theme="oscuro"] .text-violet-950,
 .admin-shell[data-admin-theme="oscuro"] .text-slate-900,
 .admin-shell[data-admin-theme="oscuro"] .text-slate-800,
 .admin-shell[data-admin-theme="oscuro"] .text-emerald-950,
 .admin-shell[data-admin-theme="oscuro"] .text-amber-950,
 .admin-shell[data-admin-theme="oscuro"] .text-sky-950,
+.admin-shell[data-admin-theme="oscuro"] .text-blue-950,
+.admin-shell[data-admin-theme="oscuro"] .text-indigo-950,
 .admin-shell[data-admin-theme="oscuro"] .text-\[\#6e2e38\] {
   color: #f8fafc !important;
 }
@@ -524,6 +544,9 @@
 .admin-shell[data-admin-theme="oscuro"] .text-purple-900\/70,
 .admin-shell[data-admin-theme="oscuro"] .text-purple-900\/60,
 .admin-shell[data-admin-theme="oscuro"] .text-purple-800,
+.admin-shell[data-admin-theme="oscuro"] .text-purple-700,
+.admin-shell[data-admin-theme="oscuro"] .text-violet-800,
+.admin-shell[data-admin-theme="oscuro"] .text-violet-700,
 .admin-shell[data-admin-theme="oscuro"] .text-slate-700,
 .admin-shell[data-admin-theme="oscuro"] .text-slate-600 {
   color: #cbd5e1 !important;
@@ -535,15 +558,34 @@
 }
 
 .admin-shell[data-admin-theme="oscuro"] .text-emerald-800,
-.admin-shell[data-admin-theme="oscuro"] .text-emerald-700 {
+.admin-shell[data-admin-theme="oscuro"] .text-emerald-700,
+.admin-shell[data-admin-theme="oscuro"] .text-green-800,
+.admin-shell[data-admin-theme="oscuro"] .text-green-700 {
   color: #6ee7b7 !important;
 }
 
 .admin-shell[data-admin-theme="oscuro"] .text-amber-800,
-.admin-shell[data-admin-theme="oscuro"] .text-amber-700 {
-  color: #fcd34d !important;
+.admin-shell[data-admin-theme="oscuro"] .text-amber-700,
+.admin-shell[data-admin-theme="oscuro"] .text-orange-800,
+.admin-shell[data-admin-theme="oscuro"] .text-orange-700 {
+  color: #fdba74 !important;
 }
 
+.admin-shell[data-admin-theme="oscuro"] .text-sky-800,
+.admin-shell[data-admin-theme="oscuro"] .text-sky-700,
+.admin-shell[data-admin-theme="oscuro"] .text-blue-800,
+.admin-shell[data-admin-theme="oscuro"] .text-blue-700,
+.admin-shell[data-admin-theme="oscuro"] .text-indigo-800,
+.admin-shell[data-admin-theme="oscuro"] .text-indigo-700 {
+  color: #7dd3fc !important;
+}
+
+.admin-shell[data-admin-theme="oscuro"] .text-rose-700,
+.admin-shell[data-admin-theme="oscuro"] .text-rose-600 {
+  color: #fda4af !important;
+}
+
+/* Inputs, selects y textareas en modo oscuro */
 .admin-shell[data-admin-theme="oscuro"] input,
 .admin-shell[data-admin-theme="oscuro"] select,
 .admin-shell[data-admin-theme="oscuro"] textarea {
@@ -557,24 +599,41 @@
   color: #64748b !important;
 }
 
-.admin-shell[data-admin-theme="oscuro"] .hover\:bg-\[\#fbf7fd\]:hover,
-.admin-shell[data-admin-theme="oscuro"] .hover\:bg-\[\#fdf8fc\]:hover,
-.admin-shell[data-admin-theme="oscuro"] .hover\:bg-slate-50:hover,
-.admin-shell[data-admin-theme="oscuro"] .hover\:bg-purple-50:hover {
+/* Hovers de superficies claras en modo oscuro (sin alterar botones de color primario) */
+.admin-shell[data-admin-theme="oscuro"] [class*="hover:bg-slate-"]:hover,
+.admin-shell[data-admin-theme="oscuro"] [class*="hover:bg-white"]:hover,
+.admin-shell[data-admin-theme="oscuro"] [class*="hover:bg-purple-50"]:hover,
+.admin-shell[data-admin-theme="oscuro"] [class*="hover:bg-rose-50"]:hover,
+.admin-shell[data-admin-theme="oscuro"] [class*="hover:bg-[#f"]:hover {
   background-color: #252b40 !important;
+}
+
+/* Preservar imágenes de productos sobre fondo blanco limpio en tablas de Productos/Promos */
+.admin-shell[data-admin-theme="oscuro"] td img,
+.admin-shell[data-admin-theme="oscuro"] .product-thumb-bg {
+  background-color: #ffffff !important;
 }
 
 /* Mantener el selector de tema con sus tonos claros pastel suaves incluso en modo oscuro */
 .admin-shell .admin-theme-switcher {
-  background-color: rgba(254, 245, 246, 0.95) !important;
+  background-color: rgba(254, 245, 246, 0.96) !important;
   border-color: #f2d3d8 !important;
 }
 
 .admin-shell .admin-theme-btn {
   color: #6e2e38 !important;
+  background-color: transparent !important;
+}
+
+.admin-shell .admin-theme-btn:hover {
+  background-color: #fbecee !important;
 }
 
 .admin-shell .admin-theme-btn-active {
   background-color: #d97786 !important;
   color: #ffffff !important;
+}
+
+.admin-shell .admin-theme-btn-active:hover {
+  background-color: #c46372 !important;
 }

@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-export type AdminTheme = 'claro' | 'calido' | 'oscuro';
+export type AdminTheme = 'claro' | 'oscuro';
 
 const STORAGE_KEY_ADMIN_THEME = 'motivos_admin_theme_v1';
 
@@ -21,8 +21,10 @@ export function AdminThemeProvider({ children }: { children: React.ReactNode }) 
   useEffect(() => {
     try {
       const guardado = localStorage.getItem(STORAGE_KEY_ADMIN_THEME);
-      if (guardado === 'claro' || guardado === 'calido' || guardado === 'oscuro') {
+      if (guardado === 'claro' || guardado === 'oscuro') {
         setThemeState(guardado);
+      } else if (guardado) {
+        localStorage.setItem(STORAGE_KEY_ADMIN_THEME, 'claro');
       }
     } catch {
       // Ignorar si storage no está disponible
