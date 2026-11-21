@@ -20,7 +20,7 @@ interface AdminLoginFormProps {
 
 export function AdminLoginForm({ onSuccess }: AdminLoginFormProps) {
   const { login } = useAdmin();
-  const [username, setUsername] = useState('admin');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [honeypot, setHoneypot] = useState('');
   const [mostrarPassword, setMostrarPassword] = useState(false);
@@ -154,7 +154,7 @@ export function AdminLoginForm({ onSuccess }: AdminLoginFormProps) {
                   required
                   value={username}
                   onChange={(e) => handleInputChange(setUsername, e.target.value)}
-                  placeholder="admin"
+                  placeholder="Ingresá tu usuario"
                   autoComplete="username"
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-hidden focus:border-[#d97786] focus:ring-2 focus:ring-[#d97786]/20 transition-all"
                 />
