@@ -377,6 +377,61 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Latido silencioso de sesión activa (Keep-Alive cada 10 min mientras el admin esté conectado):
+  // 1) Renueva automáticamente la sesión deslizante de 12 hs en Spring Boot (0 consultas a BD).
+  // 2) Evita que el servidor gratuito de Render se duerma durante el horario laboral del local.
+  useEffect(() => {
+    if (!isAuthenticated || !token || ES_MODO_DEMO) return;
+
+    const INTERVALO_KEEP_ALIVE_MS = 10 * 60 * 1000; // 10 minutos
+    const UMBRAL_REANUDACION_MS = 4 * 60 * 1000;    // 4 minutos al volver a la pestaña
+    let ultimoLatidoMs = Date.now();
+    let enCurso = false;
+
+    const enviarLatido = async () => {
+      if (enCurso) return;
+      enCurso = true;
+      try {
+        const res = await fetch(`${API_BASE}/api/admin/auth/validate`, {
+          method: 'POST',
+          headers: { 'X-Admin-Token': token },
+        });
+        ultimoLatidoMs = Date.now();
+        if (res.status === 401) {
+          // El servidor confirmó que el token expiró o se reinició
+          sessionStorage.removeItem('motivos_admin_token');
+          sessionStorage.removeItem('motivos_admin_user');
+          setToken(null);
+          setAdminUser(null);
+          setIsAuthenticated(false);
+        } else if (res.ok) {
+          setBackendEnLinea(true);
+        }
+      } catch {
+        // Corte breve de Wi-Fi o red: no cerramos la sesión para no interrumpir al operador
+      } finally {
+        enCurso = false;
+      }
+    };
+
+    const intervalId = window.setInterval(enviarLatido, INTERVALO_KEEP_ALIVE_MS);
+
+    const handleVisibilityChange = () => {
+      if (
+        document.visibilityState === 'visible' &&
+        Date.now() - ultimoLatidoMs >= UMBRAL_REANUDACION_MS
+      ) {
+        enviarLatido();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      window.clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [isAuthenticated, token]);
+
   // Sincronización a localStorage
   useEffect(() => {
     try {
